@@ -87,9 +87,136 @@
         .btn-salir { background: linear-gradient(135deg, #e74c3c, #c0392b); border-bottom: 4px solid #962d22; }
         .btn-accion:disabled, .deshabilitada { background: #7f8c8d !important; opacity: 0.5; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; border: none !important; }
 
-        .selector-modo { margin: 15px 0; }
-        .selector-modo label { font-weight: bold; }
-        .selector-modo select { padding: 5px; border-radius: 5px; }
+        /* SELECTOR DE MODO MEJORADO */
+        .selector-modo {
+            margin: 20px 0 15px 0;
+        }
+        .selector-modo-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #bdc3c7;
+            margin-bottom: 12px;
+        }
+        .modo-grid {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .modo-card {
+            flex: 1;
+            min-width: 140px;
+            max-width: 180px;
+            padding: 12px 8px;
+            border-radius: 10px;
+            border: 2px solid #34495e;
+            background: linear-gradient(145deg, #2c3e50, #1a252f);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .modo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        .modo-card:hover::before {
+            left: 100%;
+        }
+        .modo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.6);
+        }
+        .modo-card .modo-icono {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .modo-card .modo-nombre {
+            font-size: 0.95rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .modo-card .modo-detalle {
+            font-size: 0.75rem;
+            color: #bdc3c7;
+            line-height: 1.3;
+        }
+        .modo-card .modo-multi {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: rgba(0,0,0,0.4);
+        }
+
+        /* Modo Normal - Azul/Verde */
+        .modo-normal {
+            border-color: #27ae60;
+        }
+        .modo-normal .modo-nombre { color: #2ecc71; }
+        .modo-normal .modo-multi { color: #2ecc71; border: 1px solid #27ae60; }
+        .modo-normal.activo {
+            background: linear-gradient(145deg, #27ae60, #1e8449);
+            border-color: #2ecc71;
+            box-shadow: 0px 0px 20px rgba(46, 204, 113, 0.6);
+        }
+        .modo-normal.activo .modo-nombre,
+        .modo-normal.activo .modo-detalle,
+        .modo-normal.activo .modo-multi { color: white; }
+        .modo-normal.activo .modo-multi { background: rgba(0,0,0,0.3); }
+
+        /* Modo Extremo - Naranja */
+        .modo-extremo {
+            border-color: #e67e22;
+        }
+        .modo-extremo .modo-nombre { color: #f39c12; }
+        .modo-extremo .modo-multi { color: #f39c12; border: 1px solid #e67e22; }
+        .modo-extremo.activo {
+            background: linear-gradient(145deg, #e67e22, #d35400);
+            border-color: #f39c12;
+            box-shadow: 0px 0px 20px rgba(243, 156, 18, 0.6);
+        }
+        .modo-extremo.activo .modo-nombre,
+        .modo-extremo.activo .modo-detalle,
+        .modo-extremo.activo .modo-multi { color: white; }
+        .modo-extremo.activo .modo-multi { background: rgba(0,0,0,0.3); }
+
+        /* Modo Extinción - Rojo */
+        .modo-extincion {
+            border-color: #c0392b;
+        }
+        .modo-extincion .modo-nombre { color: #e74c3c; }
+        .modo-extincion .modo-multi { color: #e74c3c; border: 1px solid #c0392b; }
+        .modo-extincion.activo {
+            background: linear-gradient(145deg, #e74c3c, #962d22);
+            border-color: #e74c3c;
+            box-shadow: 0px 0px 20px rgba(231, 76, 60, 0.7);
+            animation: pulsoExtincion 2s infinite;
+        }
+        .modo-extincion.activo .modo-nombre,
+        .modo-extincion.activo .modo-detalle,
+        .modo-extincion.activo .modo-multi { color: white; }
+        .modo-extincion.activo .modo-multi { background: rgba(0,0,0,0.3); }
+
+        @keyframes pulsoExtincion {
+            0%, 100% { box-shadow: 0px 0px 20px rgba(231, 76, 60, 0.7); }
+            50% { box-shadow: 0px 0px 30px rgba(231, 76, 60, 1); }
+        }
 
         .refugios-container { display: grid; grid-template-columns: repeat(3, 130px); grid-gap: 15px; justify-content: center; margin: 30px auto; }
         .refugio { 
@@ -207,14 +334,31 @@
                     <div id="chip-100" class="ficha-casino ficha-100" onclick="agregarFichas(100)">+100</div>
                     <div id="chip-500" class="ficha-casino ficha-500" onclick="agregarFichas(500)">+500</div>
                 </div>
+                
                 <div class="selector-modo">
-                    <label>Modo de Juego:</label>
-                    <select id="modo-juego">
-                        <option value="normal">☄️ Normal (1 Meteorito - 1.10x)</option>
-                        <option value="extremo">🔥 Extremo (2 Meteoritos - 1.30x)</option>
-                        <option value="extincion">💀 Extinción (3 Meteoritos - 2.0x)</option>
-                    </select>
+                    <span class="selector-modo-label">⚙️ Modo de Juego</span>
+                    <div class="modo-grid">
+                        <div class="modo-card modo-normal activo" data-modo="normal" onclick="seleccionarModo('normal')">
+                            <span class="modo-icono">☄️</span>
+                            <div class="modo-nombre">Normal</div>
+                            <div class="modo-detalle">1 Meteorito</div>
+                            <span class="modo-multi">x1.10</span>
+                        </div>
+                        <div class="modo-card modo-extremo" data-modo="extremo" onclick="seleccionarModo('extremo')">
+                            <span class="modo-icono">🔥</span>
+                            <div class="modo-nombre">Extremo</div>
+                            <div class="modo-detalle">2 Meteoritos</div>
+                            <span class="modo-multi">x1.30</span>
+                        </div>
+                        <div class="modo-card modo-extincion" data-modo="extincion" onclick="seleccionarModo('extincion')">
+                            <span class="modo-icono">💀</span>
+                            <div class="modo-nombre">Extinción</div>
+                            <div class="modo-detalle">3 Meteoritos</div>
+                            <span class="modo-multi">x2.00</span>
+                        </div>
+                    </div>
                 </div>
+
                 <div>
                     <button id="btn-clear" class="btn-utilidad" onclick="limpiarApuesta()">Limpiar</button>
                     <button id="btn-allin" class="btn-utilidad btn-allin" onclick="apostarTodo()">All-In</button>
@@ -259,6 +403,7 @@
         let apuestaPreparada = 0; 
         let juegoActivo = false; 
         let esperandoResultado = false; 
+        let modoActual = "normal";
 
         // -- FUNCIONES DE SEGURIDAD --
         function codificarPassword(cadena) {
@@ -283,6 +428,16 @@
             document.getElementById('panel-ranking').classList.add('oculto');
             document.getElementById('seccion-juego').classList.remove('oculto'); 
             apuestaPreparada = 0; actualizarPantalla(); crearRefugios();
+        }
+
+        // -- SELECTOR DE MODO --
+        function seleccionarModo(modo) {
+            if (juegoActivo) return; // No cambiar modo durante partida activa
+            modoActual = modo;
+            document.querySelectorAll('.modo-card').forEach(card => {
+                card.classList.remove('activo');
+            });
+            document.querySelector(`.modo-card[data-modo="${modo}"]`).classList.add('activo');
         }
 
         // -- AUTENTICACIÓN Y SINCRONIZACIÓN --
@@ -386,7 +541,6 @@
             esperandoResultado = false;
             actualizarPantalla();
             
-            // Reiniciar texturas al iniciar nueva ronda
             document.querySelectorAll('.refugio').forEach(r => {
                 r.className = 'refugio activo';
             });
@@ -400,7 +554,6 @@
             if (!juegoActivo || esperandoResultado) return;
             esperandoResultado = true;
             
-            const modo = document.getElementById('modo-juego').value;
             const refugios = document.querySelectorAll('.refugio');
             refugios[id - 1].classList.add('seleccionado');
             
@@ -408,19 +561,18 @@
             let numMeteoritos = 1;
             let multiplicador = 1.10;
             
-            if (modo === 'normal') {
+            if (modoActual === 'normal') {
                 numMeteoritos = 1;
                 multiplicador = 1.10;
-            } else if (modo === 'extremo') {
+            } else if (modoActual === 'extremo') {
                 numMeteoritos = 2;
                 multiplicador = 1.30;
-            } else if (modo === 'extincion') {
+            } else if (modoActual === 'extincion') {
                 numMeteoritos = 3;
                 multiplicador = 2.0;
             }
             
             setTimeout(() => {
-                // Generar destinos de meteoritos
                 let destinos = [];
                 while(destinos.length < numMeteoritos) {
                     let r = Math.floor(Math.random() * 9);
@@ -429,7 +581,6 @@
                 
                 const golpeado = destinos.includes(id - 1);
                 
-                // Mostrar todos los meteoritos que cayeron
                 destinos.forEach(idx => {
                     refugios[idx].classList.remove('activo', 'seleccionado');
                     refugios[idx].classList.add('destruido');
@@ -460,7 +611,6 @@
             document.getElementById('btn-iniciar').disabled = false;
             document.getElementById('mensaje').innerText = "✅ ¡Cobrado! Tus fichas: " + saldoFichas;
             
-            // Resetear refugios
             document.querySelectorAll('.refugio').forEach(r => {
                 r.className = 'refugio';
             });
