@@ -29,7 +29,7 @@
             box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7);
             display: inline-block;
             margin-top: 40px;
-            max-width: 420px;
+            max-width: 460px;
             width: 90%;
             border: 2px solid #f1c40f;
             overflow: hidden;
@@ -43,16 +43,14 @@
 
         .tab-btn {
             flex: 1;
-            padding: 15px;
+            padding: 12px 5px;
             background: none;
             border: none;
             color: #7f8c8d;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             transition: 0.3s;
-            border-radius: 0;
-            margin: 0;
         }
 
         .tab-btn:hover {
@@ -67,16 +65,16 @@
         }
 
         .auth-form {
-            padding: 30px;
+            padding: 25px;
         }
 
         .auth-form h2 {
             margin-top: 0;
             color: #f1c40f;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
         }
 
-        .auth-form input {
+        .auth-form input, .auth-form textarea {
             padding: 12px;
             width: 85%;
             font-size: 1rem;
@@ -87,6 +85,13 @@
             background-color: #ecf0f1;
             color: #2c3e50;
             font-weight: bold;
+        }
+
+        .auth-form textarea {
+            font-family: monospace;
+            font-size: 0.85rem;
+            resize: none;
+            height: 60px;
         }
 
         /* INTERFAZ DEL JUEGO */
@@ -128,12 +133,6 @@
             line-height: 1.6;
         }
 
-        .rules-sidebar li {
-            margin-bottom: 12px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            font-size: 1.05rem;
-        }
-
         .user-greeting {
             font-size: 1.4rem;
             font-weight: bold;
@@ -158,9 +157,7 @@
         .fichas { color: #f1c40f; font-weight: bold; }
         .acumulado { color: #2ecc71; font-weight: bold; }
 
-        /* ----------------------------------------------------------- */
-        /* NUEVO APARTADO VISUAL DE APUESTAS (ESTILO CASINO/VIDEOJUEGO) */
-        /* ----------------------------------------------------------- */
+        /* SECCIÓN DE APUESTAS */
         .seccion-apuesta-moderna {
             background-color: rgba(44, 62, 80, 0.9);
             border: 2px solid #34495e;
@@ -180,7 +177,6 @@
             font-weight: bold;
         }
 
-        /* Pantalla digital que muestra la apuesta actual */
         .pantalla-monto-apuesta {
             background-color: #111;
             border: 2px solid #f1c40f;
@@ -192,11 +188,8 @@
             padding: 10px;
             width: 200px;
             margin: 0 auto 15px auto;
-            box-shadow: inset 0px 0px 10px rgba(241, 196, 15, 0.3);
-            text-shadow: 0 0 5px rgba(241, 196, 15, 0.6);
         }
 
-        /* Contenedor de fichas clickeables */
         .contenedor-fichas-casino {
             display: flex;
             justify-content: center;
@@ -205,7 +198,6 @@
             flex-wrap: wrap;
         }
 
-        /* Fichas redondas individuales */
         .ficha-casino {
             width: 65px;
             height: 65px;
@@ -221,25 +213,14 @@
             box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
             transition: 0.2s;
             user-select: none;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
         }
 
-        .ficha-casino:hover:not(.deshabilitada) {
-            transform: scale(1.1) rotate(15deg);
-            filter: brightness(1.2);
-        }
-
-        .ficha-casino:active:not(.deshabilitada) {
-            transform: scale(0.95);
-        }
-
-        /* Colores temáticos para cada ficha */
+        .ficha-casino:hover:not(.deshabilitada) { transform: scale(1.1) rotate(15deg); filter: brightness(1.2); }
         .ficha-10  { background-color: #2980b9; border-color: #1f618d; }
         .ficha-50  { background-color: #27ae60; border-color: #1e8449; }
         .ficha-100 { background-color: #9b59b6; border-color: #76448a; }
         .ficha-500 { background-color: #e67e22; border-color: #b9651b; }
 
-        /* Controles de utilidad (Borrar y All-in) */
         .btn-utilidad {
             padding: 6px 14px;
             font-size: 0.9rem;
@@ -250,29 +231,10 @@
             color: #ecf0f1;
             cursor: pointer;
             margin: 0 5px;
-            transition: 0.2s;
         }
 
-        .btn-utilidad:hover:not(:disabled) {
-            background: #bdc3c7;
-            color: #2c3e50;
-        }
-
-        .btn-allin {
-            border-color: #e74c3c;
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
-        }
-
-        .btn-allin:hover:not(:disabled) {
-            background: #e74c3c !important;
-            color: white !important;
-        }
-
-        /* Botones de acción del juego modernizados */
-        .acciones-juego {
-            margin-top: 20px;
-        }
+        .btn-allin { border-color: #e74c3c; background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .btn-allin:hover:not(:disabled) { background: #e74c3c !important; color: white !important; }
 
         .btn-accion {
             padding: 14px 30px;
@@ -284,46 +246,15 @@
             margin: 8px;
             transition: 0.2s;
             color: white;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
         }
 
-        .btn-jugar {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            border-bottom: 4px solid #1e8449;
-        }
-
-        .btn-cobrar {
-            background: linear-gradient(135deg, #f1c40f, #f39c12);
-            border-bottom: 4px solid #d35400;
-        }
-
-        .btn-salir {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            border-bottom: 4px solid #962d22;
-        }
-
-        .btn-accion:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0px 6px 15px rgba(0,0,0,0.4);
-            filter: brightness(1.1);
-        }
-
-        .btn-accion:active:not(:disabled) {
-            transform: translateY(1px);
-            border-bottom-width: 1px;
-        }
+        .btn-jugar { background: linear-gradient(135deg, #2ecc71, #27ae60); border-bottom: 4px solid #1e8449; }
+        .btn-cobrar { background: linear-gradient(135deg, #f1c40f, #f39c12); border-bottom: 4px solid #d35400; }
+        .btn-salir { background: linear-gradient(135deg, #e74c3c, #c0392b); border-bottom: 4px solid #962d22; }
 
         .btn-accion:disabled, .deshabilitada {
-            background: #7f8c8d !important;
-            border-color: #95a5a6 !important;
-            border-bottom: none !important;
-            cursor: not-allowed !important;
-            opacity: 0.5;
-            transform: none !important;
-            box-shadow: none !important;
+            background: #7f8c8d !important; opacity: 0.5; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; border: none !important;
         }
-        /* ----------------------------------------------------------- */
 
         .refugios-container {
             display: grid;
@@ -331,66 +262,23 @@
             grid-gap: 15px;                          
             justify-content: center;                 
             margin: 30px auto;
-            width: max-content;                      
         }
 
         .refugio {
-            width: 130px;         
-            height: 155px;        
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.2rem;    
-            cursor: pointer;
-            user-select: none;
-            transition: 0.3s;
-            border-radius: 12px;  
-            border: 3px solid #555;
-            background-image: url('imagenes/refugio_normal.jpg');
-            background-size: cover;
-            background-position: center;
+            width: 130px; height: 155px; display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; cursor: pointer; user-select: none; border-radius: 12px; border: 3px solid #555;
+            background-image: url('imagenes/refugio_normal.jpg'); background-size: cover; background-position: center;
         }
 
-        .refugio.activo:hover {
-            transform: scale(1.08);
-            box-shadow: 0px 0px 15px #f1c40f; 
-        }
+        .refugio.activo:hover { transform: scale(1.08); box-shadow: 0px 0px 15px #f1c40f; }
+        .refugio.seleccionado { background-color: #f39c12; border-color: #d35400; background-image: none; }
+        .refugio.salvado { background-image: url('imagenes/refugio_salvado.jpg'); border-color: #2ecc71; }
+        .refugio.destruido { background-image: url('imagenes/refugio_crack.jpg'); border-color: #e74c3c; animation: shake 0.5s ease-in-out; }
 
-        .refugio.seleccionado {
-            background-color: #f39c12;
-            border-color: #d35400;
-            background-image: none; 
-        }
-
-        .refugio.salvado {
-            background-image: url('imagenes/refugio_salvado.jpg');
-            border-color: #2ecc71;
-        }
-
-        .refugio.destruido {
-            background-image: url('imagenes/refugio_crack.jpg');
-            border-color: #e74c3c;
-            animation: shake 0.5s ease-in-out; 
-        }
-
-        #mensaje {
-            font-size: 1.6rem; 
-            height: auto;      
-            margin-top: 25px;
-            font-weight: bold;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95); 
-        }
-
-        .error-msg {
-            color: #e74c3c; 
-            font-weight: bold; 
-            margin-top: 10px; 
-            text-shadow: 1px 1px 2px #000;
-        }
-
-        .oculto {
-            display: none !important;
-        }
+        #mensaje { font-size: 1.6rem; margin-top: 25px; font-weight: bold; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95); }
+        .error-msg { color: #e74c3c; font-weight: bold; margin-top: 10px; }
+        .success-msg { color: #2ecc71; font-weight: bold; margin-top: 10px; }
+        .oculto { display: none !important; }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
@@ -403,13 +291,15 @@
 
     <h1>🦕 Dino Refugio: ¡Esquiva el Meteorito! ☄️</h1>
 
-    <!-- AUTENTICACIÓN -->
+    <!-- AUTENTICACIÓN Y SINCRONIZACIÓN -->
     <div id="pantalla-autenticacion" class="auth-container">
         <div class="auth-tabs">
             <button id="pestana-login" class="tab-btn active" onclick="alternarFormularios('login')">Iniciar Sesión</button>
             <button id="pestana-registro" class="tab-btn" onclick="alternarFormularios('registro')">Crear Cuenta</button>
+            <button id="pestana-sync" class="tab-btn" onclick="alternarFormularios('sync')">📲 Sincronizar</button>
         </div>
 
+        <!-- Iniciar Sesión -->
         <div id="bloque-login" class="auth-form">
             <h2>Ingresar al Refugio</h2>
             <input type="text" id="usr-login-input" placeholder="Nombre de usuario" maxlength="15">
@@ -419,6 +309,7 @@
             <div id="err-login-txt" class="error-msg"></div>
         </div>
 
+        <!-- Crear Cuenta -->
         <div id="bloque-registro" class="auth-form oculto">
             <h2>Registro de Nuevo Explorador</h2>
             <input type="text" id="usr-reg-input" placeholder="Elige un usuario" maxlength="15">
@@ -428,11 +319,23 @@
             <button class="btn-accion btn-jugar" style="font-size:1.1rem; padding:10px 20px;" onclick="ejecutarRegistro()">Registrar Cuenta</button>
             <div id="err-reg-txt" class="error-msg"></div>
         </div>
+
+        <!-- Sincronizar Dispositivos (Celular <-> PC) -->
+        <div id="bloque-sync" class="auth-form oculto">
+            <h2>Sincronizar Celular y PC</h2>
+            <p style="font-size:0.9rem; color:#bdc3c7; margin: 0 0 15px 0;">Copia este código de tu dispositivo actual y pégalo en el nuevo para pasar tus cuentas y fichas:</p>
+            
+            <button class="btn-utilidad" onclick="generarCodigoSincronizacion()">Generar Código Actual</button>
+            <br><br>
+            <textarea id="txt-codigo-sync" placeholder="El código generado aparecerá aquí, o pega aquí el código de tu otro dispositivo..."></textarea>
+            <br>
+            <button class="btn-accion btn-cobrar" style="font-size:1rem; padding:8px 15px;" onclick="procesarCodigoImportado()">Importar Cuentas al Dispositivo</button>
+            <div id="msg-sync" class="error-msg"></div>
+        </div>
     </div>
 
     <!-- JUEGO PRINCIPAL -->
     <div id="seccion-juego" class="main-layout oculto">
-        
         <div class="game-area">
             <div id="saludo-usuario" class="user-greeting"></div>
 
@@ -441,7 +344,6 @@
                 <div>Pozo Acumulado: <span id="txt-acumulado" class="acumulado">0</span></div>
             </div>
 
-            <!-- NUEVA ZONA DE APUESTAS REFORMADA -->
             <div class="seccion-apuesta-moderna">
                 <div class="titulo-apuesta">Monto a apostar</div>
                 <div id="pantalla-apuesta" class="pantalla-monto-apuesta">0</div>
@@ -473,20 +375,19 @@
         <div class="rules-sidebar">
             <h3>📜 Reglas del Juego</h3>
             <ul>
-                <li><strong>Paso 1:</strong> Usa las fichas de colores ($+10, +50, etc.) o el botón <em>All-In</em> para fijar tu monto.</li>
-                <li><strong>Paso 2:</strong> Pulsa <em>Iniciar Partida</em> y escoge una de las 9 zonas del mapa.</li>
-                <li><strong>Paso 3:</strong> Espera el impacto. Si el meteorito no golpea tu zona, tu pozo de juego se <strong>duplicará</strong>.</li>
-                <li><strong>Retirada:</strong> Al salvarte, puedes cobrar inmediatamente tus ganancias acumuladas o arriesgar el nuevo monto total otra vez.</li>
+                <li><strong>Multi-dispositivo:</strong> Ve a la pestaña "Sincronizar" para llevarte tu saldo y tus cuentas al PC, tablet o celular de forma inmediata.</li>
+                <li><strong>Paso 1:</strong> Fija tu apuesta usando las fichas y presiona <em>Iniciar Partida</em>.</li>
+                <li><strong>Paso 2:</strong> Elige tu refugio de dinosaurios.</li>
+                <li><strong>Paso 3:</strong> Si esquivas el meteorito, ¡duplicas el pozo!</li>
             </ul>
         </div>
-
     </div>
 
     <script>
         let usuarioActual = "";
         let saldoFichas = 1000;
         let pozoAcumulado = 0;
-        let apuestaPreparada = 0; // Almacena el valor acumulado por los clicks en fichas
+        let apuestaPreparada = 0; 
         let juegoActivo = false; 
         let esperandoResultado = false; 
 
@@ -515,7 +416,30 @@
             return "dino_secure_" + hash;
         }
 
+        // CONTROL DE CARGA INICIAL Y COMPROBACIÓN DE SINCRONIZACIÓN POR URL
         window.onload = function() {
+            // Revisar si viene un código de sincronización en la URL (ej: ?sync=TEXTO)
+            const urlParams = new URLSearchParams(window.location.search);
+            const syncCodigo = urlParams.get('sync');
+            
+            if (syncCodigo) {
+                try {
+                    const datosDecodificados = atob(syncCodigo);
+                    const bdImportada = JSON.parse(datosDecodificados);
+                    let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+                    
+                    // Fusionar las cuentas importadas con las que ya existan localmente
+                    Object.assign(bdActual, bdImportada);
+                    localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
+                    
+                    // Limpiar la URL para que quede estática de nuevo
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    alert("Sync: ¡Cuentas sincronizadas exitosamente mediante el enlace!");
+                } catch(e) {
+                    console.error("Error leyendo código de la URL");
+                }
+            }
+
             const sesionActiva = localStorage.getItem('usuario_actual_sesion');
             if (sesionActiva) {
                 usuarioActual = sesionActiva;
@@ -529,20 +453,79 @@
             }
         };
 
+        // --- SISTEMA DE SINCRONIZACIÓN ENTRE DISPOSITIVOS ---
+        function generarCodigoSincronizacion() {
+            let bd = localStorage.getItem('dino_usuarios_secure_v2');
+            const msgBox = document.getElementById('msg-sync');
+            
+            if (!bd || bd === "{}") {
+                msgBox.className = "error-msg";
+                msgBox.innerText = "❌ No hay cuentas registradas en este dispositivo para sincronizar.";
+                return;
+            }
+            
+            // Codificamos la BD local en Base64 para generar una clave limpia
+            const codigoUnico = btoa(bd);
+            document.getElementById('txt-codigo-sync').value = codigoUnico;
+            
+            // También creamos un enlace automático que se puede enviar por chat
+            const enlaceCompleto = window.location.origin + window.location.pathname + "?sync=" + codigoUnico;
+            
+            msgBox.className = "success-msg";
+            msgBox.innerText = "✅ ¡Código generado! También puedes copiar este enlace directo para compartirlo contigo mismo: " + enlaceCompleto;
+        }
+
+        function procesarCodigoImportado() {
+            const codigo = document.getElementById('txt-codigo-sync').value.trim();
+            const msgBox = document.getElementById('msg-sync');
+            msgBox.innerText = "";
+
+            if (codigo === "") {
+                msgBox.className = "error-msg";
+                msgBox.innerText = "❌ Por favor, pega un código válido.";
+                return;
+            }
+
+            try {
+                const datosDecodificados = atob(codigo);
+                const bdImportada = JSON.parse(datosDecodificados);
+                let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+
+                // Combinamos las bases de datos de usuarios
+                Object.assign(bdActual, bdImportada);
+                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
+
+                msgBox.className = "success-msg";
+                msgBox.innerText = "🎉 ¡Sincronización completa! Ahora puedes ir a 'Iniciar Sesión' con tus mismas credenciales y fichas.";
+                document.getElementById('txt-codigo-sync').value = "";
+            } catch (e) {
+                msgBox.className = "error-msg";
+                msgBox.innerText = "❌ Código inválido o corrupto. Verifica haberlo copiado bien.";
+            }
+        }
+
         function alternarFormularios(formulario) {
             document.getElementById('err-login-txt').innerText = "";
             document.getElementById('err-reg-txt').innerText = "";
+            document.getElementById('msg-sync').innerText = "";
+            
+            document.getElementById('pestana-login').classList.remove('active');
+            document.getElementById('pestana-registro').classList.remove('active');
+            document.getElementById('pestana-sync').classList.remove('active');
+            
+            document.getElementById('bloque-login').classList.add('oculto');
+            document.getElementById('bloque-registro').classList.add('oculto');
+            document.getElementById('bloque-sync').classList.add('oculto');
             
             if (formulario === 'login') {
                 document.getElementById('pestana-login').classList.add('active');
-                document.getElementById('pestana-registro').classList.remove('active');
                 document.getElementById('bloque-login').classList.remove('oculto');
-                document.getElementById('bloque-registro').classList.add('oculto');
-            } else {
+            } else if (formulario === 'registro') {
                 document.getElementById('pestana-registro').classList.add('active');
-                document.getElementById('pestana-login').classList.remove('active');
                 document.getElementById('bloque-registro').classList.remove('oculto');
-                document.getElementById('bloque-login').classList.add('oculto');
+            } else {
+                document.getElementById('pestana-sync').classList.add('active');
+                document.getElementById('bloque-sync').classList.remove('oculto');
             }
         }
 
@@ -655,15 +638,12 @@
             alternarFormularios('login');
         }
 
-        // --- SISTEMA INTERACTIVO DE FICHAS DE CASINO ---
         function agregarFichas(valor) {
             if (juegoActivo || esperandoResultado) return;
-
             if (apuestaPreparada + valor > saldoFichas) {
                 divMensaje.innerText = "❌ No puedes apostar más fichas de las que posees.";
                 return;
             }
-
             apuestaPreparada += valor;
             actualizarPantalla();
         }
@@ -684,17 +664,13 @@
             const chips = ['chip-10', 'chip-50', 'chip-100', 'chip-500'];
             chips.forEach(id => {
                 const el = document.getElementById(id);
-                if (activar) {
-                    el.classList.remove('deshabilitada');
-                } else {
-                    el.classList.add('deshabilitada');
-                }
+                if (activar) el.classList.remove('deshabilitada');
+                else el.classList.add('deshabilitada');
             });
             btnClear.disabled = !activar;
             btnAllIn.disabled = !activar;
         }
 
-        // --- MECÁNICAS DE CONTROL DEL JUEGO ---
         function crearRefugios() {
             contenedorRefugios.innerHTML = '';
             for (let i = 1; i <= 9; i++) {
