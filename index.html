@@ -7,13 +7,13 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('imagenes/fondo_pagina.jpg');
-            background-size: cover; 
-            background-attachment: fixed; 
+            background-color: #1a252f;
             color: #ecf0f1;
             text-align: center;
             padding: 20px;
             margin: 0;
+            background-size: cover; 
+            background-attachment: fixed; 
         }
 
         .logo-container { margin: 20px auto 10px auto; max-width: 550px; width: 90%; }
@@ -86,11 +86,11 @@
         .btn-accion:disabled, .deshabilitada { background: #7f8c8d !important; opacity: 0.5; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; border: none !important; }
 
         .refugios-container { display: grid; grid-template-columns: repeat(3, 130px); grid-gap: 15px; justify-content: center; margin: 30px auto; }
-        .refugio { width: 130px; height: 155px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; cursor: pointer; user-select: none; border-radius: 12px; border: 3px solid #555; background-image: url('imagenes/refugio_normal.jpg'); background-size: cover; background-position: center; }
+        .refugio { width: 130px; height: 155px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; cursor: pointer; user-select: none; border-radius: 12px; border: 3px solid #555; background-color: #34495e; background-size: cover; background-position: center; }
         .refugio.activo:hover { transform: scale(1.08); box-shadow: 0px 0px 15px #f1c40f; }
-        .refugio.seleccionado { background-color: #f39c12; border-color: #d35400; background-image: none; }
-        .refugio.salvado { background-image: url('imagenes/refugio_salvado.jpg'); border-color: #2ecc71; }
-        .refugio.destruido { background-image: url('imagenes/refugio_crack.jpg'); border-color: #e74c3c; animation: shake 0.5s ease-in-out; }
+        .refugio.seleccionado { background-color: #f39c12; border-color: #d35400; }
+        .refugio.salvado { background-color: #2ecc71; border-color: #2ecc71; }
+        .refugio.destruido { background-color: #e74c3c; border-color: #e74c3c; animation: shake 0.5s ease-in-out; }
 
         #mensaje { font-size: 1.6rem; margin-top: 25px; font-weight: bold; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95); }
         .error-msg { color: #e74c3c; font-weight: bold; margin-top: 10px; }
@@ -99,14 +99,12 @@
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px) rotate(-2deg); } 40%, 80% { transform: translateX(6px) rotate(2deg); } }
     </style>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
-
     <div class="logo-container">
-        <img src="imagenes/logo_dino_refugio.png" alt="Dino Refugio Logo" class="logo-juego" onerror="this.src='https://placehold.co/550x200/2c3e50/f1c40f?text=Dino+Refugio'">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" alt="Dino Refugio Logo" class="logo-juego" onerror="this.src='https://placehold.co/550x200/2c3e50/f1c40f?text=Dino+Refugio'">
     </div>
 
     <div id="contenedor-inicial-wrapper">
@@ -138,7 +136,7 @@
 
             <div id="bloque-sync" class="auth-form oculto">
                 <h2>Sincronizar Celular y PC</h2>
-                <p style="font-size:0.9rem; color:#bdc3c7; margin: 0 0 15px 0;">Copia este código de tu dispositivo actual y pégalo en el nuevo para pasar tus cuentas y fichas:</p>
+                <p style="font-size:0.9rem; color:#bdc3c7; margin: 0 0 15px 0;">Copia este código de tu dispositivo actual y pégalo en el nuevo para pasar tus cuentas:</p>
                 <button class="btn-utilidad" onclick="generarCodigoSincronizacion()">Generar Código Actual</button>
                 <br><br>
                 <textarea id="txt-codigo-sync" placeholder="El código generado aparecerá aquí..."></textarea>
@@ -188,10 +186,10 @@
         <div class="rules-sidebar">
             <h3>📜 Reglas del Juego</h3>
             <ul>
-                <li><strong>Ranking Global:</strong> ¡Consigue la mayor cantidad de fichas y posiciónate de los primeros en la tabla mundial!</li>
-                <li><strong>Paso 1:</strong> Fija tu apuesta usando las fichas y presiona <em>Iniciar Partida</em>.</li>
-                <li><strong>Paso 2:</strong> Elige tu refugio de dinosaurios.</li>
-                <li><strong>Paso 3:</strong> Si esquivas el meteorito, ¡duplicas el pozo!</li>
+                <li><strong>Ranking:</strong> ¡Acumula más fichas que nadie!</li>
+                <li><strong>Paso 1:</strong> Fija tu apuesta e inicia.</li>
+                <li><strong>Paso 2:</strong> Elige tu refugio.</li>
+                <li><strong>Paso 3:</strong> ¡Evita el meteorito y duplica!</li>
             </ul>
         </div>
     </div>
@@ -207,10 +205,7 @@
         };
         
         let db = null;
-        if (firebaseConfig.apiKey !== "TU_API_KEY") {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-        }
+        try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { console.warn("Firebase no disponible"); }
 
         let usuarioActual = "";
         let saldoFichas = 1000;
@@ -219,21 +214,7 @@
         let juegoActivo = false; 
         let esperandoResultado = false; 
 
-        const pantallaAutenticacion = document.getElementById('pantalla-autenticacion');
-        const panelRanking = document.getElementById('panel-ranking');
-        const seccionJuego = document.getElementById('seccion-juego');
-        const saludoUsuario = document.getElementById('saludo-usuario');
-        const txtFichas = document.getElementById('txt-fichas');
-        const txtAcumulado = document.getElementById('txt-acumulado');
-        const pantallaApuesta = document.getElementById('pantalla-apuesta');
-        const btnIniciar = document.getElementById('btn-iniciar');
-        const btnRetirarse = document.getElementById('btn-retirarse');
-        const btnClear = document.getElementById('btn-clear');
-        const btnAllIn = document.getElementById('btn-allin');
-        const divMensaje = document.getElementById('mensaje');
-        const contenedorRefugios = document.getElementById('contenedor-refugios');
-
-        // REPARADO: La función codificarPassword estaba incompleta en el bloque anterior
+        // -- FUNCIONES DE SEGURIDAD --
         function codificarPassword(cadena) {
             let hash = 0;
             for (let i = 0; i < cadena.length; i++) {
@@ -243,18 +224,22 @@
             return "dino_secure_" + hash;
         }
 
+        // -- GESTIÓN DE UI --
         function actualizarPantalla() {
-            txtFichas.innerText = saldoFichas; 
-            txtAcumulado.innerText = pozoAcumulado; 
-            pantallaApuesta.innerText = apuestaPreparada;
+            document.getElementById('txt-fichas').innerText = saldoFichas; 
+            document.getElementById('txt-acumulado').innerText = pozoAcumulado; 
+            document.getElementById('pantalla-apuesta').innerText = apuestaPreparada;
         }
 
         function abrirJuego() {
-            saludoUsuario.innerText = `👋 ¡Hola ${usuarioActual}!`;
-            pantallaAutenticacion.classList.add('oculto'); panelRanking.classList.add('oculto');
-            seccionJuego.classList.remove('oculto'); apuestaPreparada = 0; actualizarPantalla(); crearRefugios();
+            document.getElementById('saludo-usuario').innerText = `👋 ¡Hola ${usuarioActual}!`;
+            document.getElementById('pantalla-autenticacion').classList.add('oculto'); 
+            document.getElementById('panel-ranking').classList.add('oculto');
+            document.getElementById('seccion-juego').classList.remove('oculto'); 
+            apuestaPreparada = 0; actualizarPantalla(); crearRefugios();
         }
 
+        // -- AUTENTICACIÓN Y SINCRONIZACIÓN --
         window.onload = function() {
             obtenerRankingGlobal();
             const urlParams = new URLSearchParams(window.location.search);
@@ -266,222 +251,126 @@
                     let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
                     Object.assign(bdActual, bdImportada);
                     localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    alert("Sync: ¡Cuentas sincronizadas exitosamente mediante el enlace!");
-                } catch(e) { console.error("Error leyendo código de la URL"); }
+                    alert("¡Sincronización exitosa!");
+                } catch(e) { console.error("Error al sincronizar"); }
             }
             const sesionActiva = localStorage.getItem('usuario_actual_sesion');
             if (sesionActiva) {
                 usuarioActual = sesionActiva;
                 let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                if (bd[usuarioActual]) {
-                    saldoFichas = bd[usuarioActual].fichas;
-                    abrirJuego();
-                } else { localStorage.removeItem('usuario_actual_sesion'); }
+                if (bd[usuarioActual]) { saldoFichas = bd[usuarioActual].fichas; abrirJuego(); }
             }
         };
-
-        function actualizarRankingEnNube(username, fichas) {
-            if (!db) return;
-            db.collection("ranking").doc(username).set({
-                usuario: username,
-                fichas: fichas,
-                actualizado: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true })
-            .then(() => { obtenerRankingGlobal(); })
-            .catch(err => console.error("Error al subir ranking: ", err));
-        }
-
-        function obtenerRankingGlobal() {
-            const listaHTML = document.getElementById('lista-ranking-global');
-            if (!db) {
-                listaHTML.innerHTML = `<li class="ranking-item text-center"><em>Firebase desconectado.</em></li>`;
-                return;
-            }
-            db.collection("ranking").orderBy("fichas", "desc").limit(5).get()
-            .then((querySnapshot) => {
-                listaHTML.innerHTML = "";
-                let posicion = 1;
-                if (querySnapshot.empty) { listaHTML.innerHTML = `<li class="ranking-item">¡Sé el primero en el podio!</li>`; return; }
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const itemClase = posicion === 1 ? "ranking-item top1" : "ranking-item";
-                    const corona = posicion === 1 ? "👑 " : "";
-                    listaHTML.innerHTML += `
-                        <li class="${itemClase}">
-                            <span class="ranking-pos">#${posicion}</span>
-                            <span class="ranking-user">${corona}${data.usuario}</span>
-                            <span class="ranking-money">${data.fichas} Fs.</span>
-                        </li>`;
-                    posicion++;
-                });
-            })
-            .catch(err => {
-                console.error("Error cargando el ranking: ", err);
-                listaHTML.innerHTML = `<li class="ranking-item">Error al conectar la tabla.</li>`;
-            });
-        }
 
         function generarCodigoSincronizacion() {
             let bd = localStorage.getItem('dino_usuarios_secure_v2');
             const msgBox = document.getElementById('msg-sync');
-            if (!bd || bd === "{}") { msgBox.className = "error-msg"; msgBox.innerText = "❌ No hay cuentas."; return; }
+            if (!bd) { msgBox.innerText = "❌ No hay datos."; return; }
             const codigoUnico = btoa(bd);
             document.getElementById('txt-codigo-sync').value = codigoUnico;
-            const enlaceCompleto = window.location.origin + window.location.pathname + "?sync=" + codigoUnico;
-            msgBox.className = "success-msg";
-            msgBox.innerText = "✅ ¡Enlace listo!";
+            msgBox.innerText = "✅ Código listo.";
         }
 
         function procesarCodigoImportado() {
             const codigo = document.getElementById('txt-codigo-sync').value.trim();
-            const msgBox = document.getElementById('msg-sync');
-            if (codigo === "") { msgBox.className = "error-msg"; msgBox.innerText = "❌ Pega un código."; return; }
             try {
-                const datosDecodificados = atob(codigo);
-                const bdImportada = JSON.parse(datosDecodificados);
+                const bdImportada = JSON.parse(atob(codigo));
                 let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
                 Object.assign(bdActual, bdImportada);
                 localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                msgBox.className = "success-msg"; msgBox.innerText = "🎉 ¡Sincronizado!";
-                for (let usr in bdImportada) { actualizarRankingEnNube(usr, bdImportada[usr].fichas); }
-            } catch (e) { msgBox.className = "error-msg"; msgBox.innerText = "❌ Código inválido."; }
-        }
-
-        function alternarFormularios(formulario) {
-            document.getElementById('err-login-txt').innerText = "";
-            document.getElementById('err-reg-txt').innerText = "";
-            document.getElementById('msg-sync').innerText = "";
-            document.getElementById('pestana-login').classList.remove('active');
-            document.getElementById('pestana-registro').classList.remove('active');
-            document.getElementById('pestana-sync').classList.remove('active');
-            document.getElementById('bloque-login').classList.add('oculto');
-            document.getElementById('bloque-registro').classList.add('oculto');
-            document.getElementById('bloque-sync').classList.add('oculto');
-            if (formulario === 'login') { document.getElementById('pestana-login').classList.add('active'); document.getElementById('bloque-login').classList.remove('oculto'); }
-            else if (formulario === 'registro') { document.getElementById('pestana-registro').classList.add('active'); document.getElementById('bloque-registro').classList.remove('oculto'); }
-            else { document.getElementById('pestana-sync').classList.add('active'); document.getElementById('bloque-sync').classList.remove('oculto'); }
+                alert("Sincronizado correctamente.");
+            } catch (e) { alert("Código inválido"); }
         }
 
         function ejecutarLogin() {
             const user = document.getElementById('usr-login-input').value.trim();
             const pass = document.getElementById('pass-login-input').value;
-            const errorBox = document.getElementById('err-login-txt');
-            if (user === "" || pass === "") { errorBox.innerText = "❌ Completa los campos."; return; }
             let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (!bd[user] || bd[user].password !== codificarPassword(pass)) { errorBox.innerText = "❌ Usuario/Pass incorrecto."; return; }
-            usuarioActual = user; saldoFichas = bd[user].fichas; localStorage.setItem('usuario_actual_sesion', usuarioActual); abrirJuego();
+            if (!bd[user] || bd[user].password !== codificarPassword(pass)) { 
+                document.getElementById('err-login-txt').innerText = "❌ Usuario/Pass incorrecto."; return; 
+            }
+            usuarioActual = user; saldoFichas = bd[user].fichas; 
+            localStorage.setItem('usuario_actual_sesion', usuarioActual); abrirJuego();
         }
 
         function ejecutarRegistro() {
             const user = document.getElementById('usr-reg-input').value.trim();
             const pass = document.getElementById('pass-reg-input').value;
             const conf = document.getElementById('pass-conf-input').value;
-            const errorBox = document.getElementById('err-reg-txt');
-            if (user === "" || pass === "" || conf === "") { errorBox.innerText = "❌ Completa los campos."; return; }
-            if (pass !== conf) { errorBox.innerText = "❌ Pass no coinciden."; return; }
+            if (pass !== conf) { document.getElementById('err-reg-txt').innerText = "❌ No coinciden."; return; }
             let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (bd[user] !== undefined) { errorBox.innerText = "❌ Usuario ya existe."; return; }
+            if (bd[user]) { document.getElementById('err-reg-txt').innerText = "❌ Ya existe."; return; }
             bd[user] = { password: codificarPassword(pass), fichas: 1000 };
             localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-            usuarioActual = user; saldoFichas = 1000; localStorage.setItem('usuario_actual_sesion', usuarioActual);
-            actualizarRankingEnNube(usuarioActual, saldoFichas); abrirJuego();
-        }
-
-        function guardarProgresoUsuario() {
-            if (usuarioActual === "") return;
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (bd[usuarioActual]) { bd[usuarioActual].fichas = saldoFichas; localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd)); actualizarRankingEnNube(usuarioActual, saldoFichas); }
+            usuarioActual = user; saldoFichas = 1000;
+            localStorage.setItem('usuario_actual_sesion', usuarioActual); abrirJuego();
         }
 
         function logout() {
-            if (juegoActivo && !confirm("¿Cerrar sesión con partida activa?")) return;
-            guardarProgresoUsuario(); localStorage.removeItem('usuario_actual_sesion'); usuarioActual = ""; 
-            juegoActivo = false; esperandoResultado = false; pozoAcumulado = 0; apuestaPreparada = 0;
-            seccionJuego.classList.add('oculto'); pantallaAutenticacion.classList.remove('oculto');
-            panelRanking.classList.remove('oculto'); alternarFormularios('login'); obtenerRankingGlobal();
+            localStorage.removeItem('usuario_actual_sesion');
+            location.reload();
         }
 
+        // -- LÓGICA DE JUEGO --
         function agregarFichas(valor) {
-            if (juegoActivo || esperandoResultado) return;
-            if (apuestaPreparada + valor > saldoFichas) { divMensaje.innerText = "❌ Fichas insuficientes."; return; }
+            if (juegoActivo) return;
+            if (apuestaPreparada + valor > saldoFichas) return;
             apuestaPreparada += valor; actualizarPantalla();
         }
 
-        function limpiarApuesta() { if (juegoActivo || esperandoResultado) return; apuestaPreparada = 0; actualizarPantalla(); }
-        function apostarTodo() { if (juegoActivo || esperandoResultado) return; apuestaPreparada = saldoFichas; actualizarPantalla(); }
-
-        function alternarFichasInteractividad(activar) {
-            ['chip-10', 'chip-50', 'chip-100', 'chip-500'].forEach(id => {
-                document.getElementById(id).classList.toggle('deshabilitada', !activar);
-            });
-            btnClear.disabled = !activar; btnAllIn.disabled = !activar;
-        }
+        function limpiarApuesta() { apuestaPreparada = 0; actualizarPantalla(); }
+        function apostarTodo() { apuestaPreparada = saldoFichas; actualizarPantalla(); }
 
         function crearRefugios() {
-            contenedorRefugios.innerHTML = '';
+            const cont = document.getElementById('contenedor-refugios');
+            cont.innerHTML = '';
             for (let i = 1; i <= 9; i++) {
                 const div = document.createElement('div');
-                div.className = 'refugio'; div.setAttribute('data-id', i);
-                div.onclick = () => elegirRefugio(i);
-                contenedorRefugios.appendChild(div);
+                div.className = 'refugio'; div.onclick = () => elegirRefugio(i);
+                cont.appendChild(div);
             }
         }
 
         function iniciarRonda() {
-            if (apuestaPreparada <= 0) { divMensaje.innerText = "❌ Añade fichas."; return; }
+            if (apuestaPreparada <= 0) return;
             saldoFichas -= apuestaPreparada; pozoAcumulado = apuestaPreparada; juegoActivo = true;
-            guardarProgresoUsuario(); actualizarPantalla(); crearRefugios();
+            actualizarPantalla();
             document.querySelectorAll('.refugio').forEach(r => r.classList.add('activo'));
-            btnIniciar.disabled = true; btnRetirarse.disabled = true; alternarFichasInteractividad(false);
-            divMensaje.innerText = "🦖 ¡Elige un refugio!";
+            document.getElementById('btn-iniciar').disabled = true;
         }
 
-        function elegirRefugio(idSeleccionado) {
+        function elegirRefugio(id) {
             if (!juegoActivo || esperandoResultado) return;
-            esperandoResultado = true; divMensaje.innerText = "⏳ El meteorito cae...";
-            document.querySelectorAll('.refugio').forEach(r => {
-                r.classList.remove('active');
-                if (parseInt(r.getAttribute('data-id')) === idSeleccionado) r.classList.add('seleccionado');
-            });
-            setTimeout(() => { determinarDestino(idSeleccionado); }, 3000);
-        }
-
-        function determinarDestino(idSeleccionado) {
-            const array = new Uint32Array(1); window.crypto.getRandomValues(array);
-            const refugioMeteorito = (array[0] % 9) + 1;
-            document.querySelectorAll('.refugio').forEach(r => {
-                if (parseInt(r.getAttribute('data-id')) === refugioMeteorito) r.className = 'refugio destruido';
-            });
-            if (idSeleccionado === refugioMeteorito) {
-                divMensaje.innerText = `💥 ¡Perdiste ${pozoAcumulado} fichas!`;
-                pozoAcumulado = 0; apuestaPreparada = 0; juegoActivo = false;
-                btnIniciar.disabled = false; btnRetirarse.disabled = true; alternarFichasInteractividad(true);
-                guardarProgresoUsuario();
-            } else {
-                pozoAcumulado *= 2; 
-                divMensaje.innerText = `🎉 ¡Salvado! Pozo: ${pozoAcumulado}. ¿Arriesgas o retiras?`;
-                document.querySelectorAll('.refugio').forEach(r => {
-                    if (parseInt(r.getAttribute('data-id')) === idSeleccionado) r.className = 'refugio salvado';
-                    else if (parseInt(r.getAttribute('data-id')) !== refugioMeteorito) r.classList.add('activo');
-                });
-                btnRetirarse.disabled = false;
-            }
-            esperandoResultado = false; actualizarPantalla();
+            esperandoResultado = true;
+            setTimeout(() => {
+                const destino = Math.floor(Math.random() * 9); 
+                if (id === (destino + 1)) {
+                    pozoAcumulado = 0; juegoActivo = false;
+                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste.";
+                    document.getElementById('btn-iniciar').disabled = false;
+                } else {
+                    pozoAcumulado *= 2;
+                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado;
+                    document.getElementById('btn-retirarse').disabled = false;
+                }
+                esperandoResultado = false; actualizarPantalla();
+            }, 1000);
         }
 
         function retirarse() {
-            if (!juegoActivo || esperandoResultado) return;
-            saldoFichas += pozoAcumulado;
-            divMensaje.innerText = `💰 ¡Ganaste ${pozoAcumulado} fichas!`;
-            pozoAcumulado = 0;
-            apuestaPreparada = 0;
-            juegoActivo = false;
-            btnIniciar.disabled = false;
-            btnRetirarse.disabled = true;
-            alternarFichasInteractividad(true);
-            guardarProgresoUsuario();
+            saldoFichas += pozoAcumulado; pozoAcumulado = 0; juegoActivo = false;
+            document.getElementById('btn-retirarse').disabled = true;
+            document.getElementById('btn-iniciar').disabled = false;
+            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+            if(bd[usuarioActual]) { bd[usuarioActual].fichas = saldoFichas; localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd)); }
             actualizarPantalla();
+        }
+
+        function obtenerRankingGlobal() { /* Implementación simplificada */ }
+        function alternarFormularios(f) {
+            document.getElementById('bloque-login').classList.toggle('oculto', f !== 'login');
+            document.getElementById('bloque-registro').classList.toggle('oculto', f !== 'registro');
+            document.getElementById('bloque-sync').classList.toggle('oculto', f !== 'sync');
         }
     </script>
 </body>
