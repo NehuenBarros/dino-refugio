@@ -21,14 +21,8 @@
             text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9); 
         }
 
-        p {
-            font-size: 1.2rem; 
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-            font-weight: 500;
-        }
-
-        /* PANTALLA INICIAL: CONTENEDOR DE AUTENTICACIÓN */
-        .login-container {
+        /* COMPONENTE DE AUTENTICACIÓN (PANTALLA INICIAL) */
+        .auth-container {
             background-color: rgba(44, 62, 80, 0.95);
             padding: 0;
             border-radius: 12px;
@@ -41,7 +35,6 @@
             overflow: hidden;
         }
 
-        /* Pestañas para dividir Iniciar Sesión / Crear Cuenta */
         .auth-tabs {
             display: flex;
             background-color: #2c3e50;
@@ -60,12 +53,9 @@
             transition: 0.3s;
             border-radius: 0;
             margin: 0;
-            text-shadow: none;
         }
 
         .tab-btn:hover {
-            transform: none;
-            filter: brightness(1.2);
             color: #ecf0f1;
         }
 
@@ -99,7 +89,7 @@
             font-weight: bold;
         }
 
-        /* DISEÑO DE LA PANTALLA DE JUEGO (DOS COLUMNAS) */
+        /* INTERFAZ DEL JUEGO */
         .main-layout {
             display: flex;
             justify-content: center;
@@ -129,7 +119,6 @@
         .rules-sidebar h3 {
             margin-top: 0;
             color: #f1c40f;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
             text-align: center;
             font-size: 1.5rem;
         }
@@ -166,63 +155,175 @@
             box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); 
         }
 
-        .fichas { 
-            color: #f1c40f; 
-            font-weight: bold; 
+        .fichas { color: #f1c40f; font-weight: bold; }
+        .acumulado { color: #2ecc71; font-weight: bold; }
+
+        /* ----------------------------------------------------------- */
+        /* NUEVO APARTADO VISUAL DE APUESTAS (ESTILO CASINO/VIDEOJUEGO) */
+        /* ----------------------------------------------------------- */
+        .seccion-apuesta-moderna {
+            background-color: rgba(44, 62, 80, 0.9);
+            border: 2px solid #34495e;
+            border-radius: 14px;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.4);
         }
 
-        .acumulado { 
-            color: #2ecc71; 
-            font-weight: bold; 
-        }
-        
-        .controles {
-            margin: 20px 0;
-        }
-
-        .controles label {
-            font-size: 1.2rem;
+        .titulo-apuesta {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bdc3c7;
+            margin-bottom: 10px;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-            margin-right: 10px;
         }
 
-        input[type="number"] {
+        /* Pantalla digital que muestra la apuesta actual */
+        .pantalla-monto-apuesta {
+            background-color: #111;
+            border: 2px solid #f1c40f;
+            border-radius: 8px;
+            font-size: 2rem;
+            font-family: 'Courier New', Courier, monospace;
+            color: #f1c40f;
+            font-weight: bold;
             padding: 10px;
-            width: 80px;
-            font-size: 1rem;
-            border-radius: 5px;
-            border: none;
+            width: 200px;
+            margin: 0 auto 15px auto;
+            box-shadow: inset 0px 0px 10px rgba(241, 196, 15, 0.3);
+            text-shadow: 0 0 5px rgba(241, 196, 15, 0.6);
         }
 
-        button {
-            padding: 12px 25px;
-            font-size: 1.2rem; 
+        /* Contenedor de fichas clickeables */
+        .contenedor-fichas-casino {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* Fichas redondas individuales */
+        .ficha-casino {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: 4px dashed #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.4);
+            transition: 0.2s;
+            user-select: none;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .ficha-casino:hover:not(.deshabilitada) {
+            transform: scale(1.1) rotate(15deg);
+            filter: brightness(1.2);
+        }
+
+        .ficha-casino:active:not(.deshabilitada) {
+            transform: scale(0.95);
+        }
+
+        /* Colores temáticos para cada ficha */
+        .ficha-10  { background-color: #2980b9; border-color: #1f618d; }
+        .ficha-50  { background-color: #27ae60; border-color: #1e8449; }
+        .ficha-100 { background-color: #9b59b6; border-color: #76448a; }
+        .ficha-500 { background-color: #e67e22; border-color: #b9651b; }
+
+        /* Controles de utilidad (Borrar y All-in) */
+        .btn-utilidad {
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            border: 1px solid #7f8c8d;
+            background: #34495e;
+            color: #ecf0f1;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: 0.2s;
+        }
+
+        .btn-utilidad:hover:not(:disabled) {
+            background: #bdc3c7;
+            color: #2c3e50;
+        }
+
+        .btn-allin {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .btn-allin:hover:not(:disabled) {
+            background: #e74c3c !important;
+            color: white !important;
+        }
+
+        /* Botones de acción del juego modernizados */
+        .acciones-juego {
+            margin-top: 20px;
+        }
+
+        .btn-accion {
+            padding: 14px 30px;
+            font-size: 1.25rem;
             font-weight: bold;
             cursor: pointer;
-            border-radius: 8px;
-            border: 2px solid #4a3319; 
-            margin: 5px;
+            border-radius: 10px;
+            border: none;
+            margin: 8px;
             transition: 0.2s;
-            background-image: url('imagenes/textura_boton.jpg');
-            background-size: cover;
-            background-position: center;
-            color: white; 
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); 
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
         }
 
-        button:hover:not(:disabled) {
-            transform: scale(1.05);
-            filter: brightness(1.2); 
+        .btn-jugar {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border-bottom: 4px solid #1e8449;
         }
 
-        button:disabled {
-            background-image: none;
-            background-color: #7f8c8d;
-            border-color: #95a5a6;
-            cursor: not-allowed;
-            filter: none;
+        .btn-cobrar {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            border-bottom: 4px solid #d35400;
         }
+
+        .btn-salir {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-bottom: 4px solid #962d22;
+        }
+
+        .btn-accion:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0px 6px 15px rgba(0,0,0,0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-accion:active:not(:disabled) {
+            transform: translateY(1px);
+            border-bottom-width: 1px;
+        }
+
+        .btn-accion:disabled, .deshabilitada {
+            background: #7f8c8d !important;
+            border-color: #95a5a6 !important;
+            border-bottom: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.5;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        /* ----------------------------------------------------------- */
 
         .refugios-container {
             display: grid;
@@ -302,39 +403,36 @@
 
     <h1>🦕 Dino Refugio: ¡Esquiva el Meteorito! ☄️</h1>
 
-    <!-- PANTALLA INICIAL: SECCIÓN DE LOGUEO Y REGISTRO POR PESTAÑAS -->
-    <div id="seccion-login" class="login-container">
+    <!-- AUTENTICACIÓN -->
+    <div id="pantalla-autenticacion" class="auth-container">
         <div class="auth-tabs">
-            <button id="tab-login" class="tab-btn active" onclick="cambiarPestana('login')">Iniciar Sesión</button>
-            <button id="tab-registro" class="tab-btn" onclick="cambiarPestana('registro')">Crear Cuenta</button>
+            <button id="pestana-login" class="tab-btn active" onclick="alternarFormularios('login')">Iniciar Sesión</button>
+            <button id="pestana-registro" class="tab-btn" onclick="alternarFormularios('registro')">Crear Cuenta</button>
         </div>
 
-        <!-- Formulario Iniciar Sesión -->
-        <div id="form-login" class="auth-form">
+        <div id="bloque-login" class="auth-form">
             <h2>Ingresar al Refugio</h2>
-            <input type="text" id="login-usuario" placeholder="Nombre de usuario" maxlength="15">
-            <input type="password" id="login-pass" placeholder="Contraseña">
+            <input type="text" id="usr-login-input" placeholder="Nombre de usuario" maxlength="15">
+            <input type="password" id="pass-login-input" placeholder="Contraseña">
             <br>
-            <button onclick="procesarLogin()">Entrar a Jugar</button>
-            <div id="error-login" class="error-msg"></div>
+            <button class="btn-accion btn-jugar" style="font-size:1.1rem; padding:10px 20px;" onclick="ejecutarLogin()">Entrar a Jugar</button>
+            <div id="err-login-txt" class="error-msg"></div>
         </div>
 
-        <!-- Formulario Crear Cuenta -->
-        <div id="form-registro" class="auth-form oculto">
+        <div id="bloque-registro" class="auth-form oculto">
             <h2>Registro de Nuevo Explorador</h2>
-            <input type="text" id="registro-usuario" placeholder="Elige un usuario" maxlength="15">
-            <input type="password" id="registro-pass" placeholder="Contraseña nueva">
-            <input type="password" id="registro-pass-conf" placeholder="Confirmar contraseña">
+            <input type="text" id="usr-reg-input" placeholder="Elige un usuario" maxlength="15">
+            <input type="password" id="pass-reg-input" placeholder="Contraseña nueva">
+            <input type="password" id="pass-conf-input" placeholder="Confirmar contraseña">
             <br>
-            <button onclick="procesarRegistro()">Registrar Cuenta</button>
-            <div id="error-registro" class="error-msg"></div>
+            <button class="btn-accion btn-jugar" style="font-size:1.1rem; padding:10px 20px;" onclick="ejecutarRegistro()">Registrar Cuenta</button>
+            <div id="err-reg-txt" class="error-msg"></div>
         </div>
     </div>
 
-    <!-- PANTALLA PRINCIPAL: TABLERO Y REGLAS -->
+    <!-- JUEGO PRINCIPAL -->
     <div id="seccion-juego" class="main-layout oculto">
         
-        <!-- Columna Principal: Controles y Refugios -->
         <div class="game-area">
             <div id="saludo-usuario" class="user-greeting"></div>
 
@@ -343,198 +441,204 @@
                 <div>Pozo Acumulado: <span id="txt-acumulado" class="acumulado">0</span></div>
             </div>
 
-            <div class="controles">
-                <label for="input-apuesta">Apuesta inicial:</label>
-                <input type="number" id="input-apuesta" value="100" min="10">
-                <button id="btn-iniciar" class="btn-apostar" onclick="iniciarRonda()">Iniciar Partida</button>
-                <button id="btn-retirarse" class="btn-retirarse" onclick="retirarse()" disabled>Cobrar y Retirarse</button>
-                <button id="btn-logout" style="background-image: none; background-color: #c0392b; border-color: #962d22;" onclick="logout()">Cerrar Sesión</button>
+            <!-- NUEVA ZONA DE APUESTAS REFORMADA -->
+            <div class="seccion-apuesta-moderna">
+                <div class="titulo-apuesta">Monto a apostar</div>
+                <div id="pantalla-apuesta" class="pantalla-monto-apuesta">0</div>
+                
+                <div class="contenedor-fichas-casino">
+                    <div id="chip-10" class="ficha-casino ficha-10" onclick="agregarFichas(10)">+10</div>
+                    <div id="chip-50" class="ficha-casino ficha-50" onclick="agregarFichas(50)">+50</div>
+                    <div id="chip-100" class="ficha-casino ficha-100" onclick="agregarFichas(100)">+100</div>
+                    <div id="chip-500" class="ficha-casino ficha-500" onclick="agregarFichas(500)">+500</div>
+                </div>
+
+                <div>
+                    <button id="btn-clear" class="btn-utilidad" onclick="limpiarApuesta()">Limpiar</button>
+                    <button id="btn-allin" class="btn-utilidad btn-allin" onclick="apostarTodo()">All-In (Todo)</button>
+                </div>
             </div>
 
-            <div id="mensaje">Introduce tu apuesta y dale a Iniciar Partida.</div>
+            <div class="acciones-juego">
+                <button id="btn-iniciar" class="btn-accion btn-jugar" onclick="iniciarRonda()">Iniciar Partida</button>
+                <button id="btn-retirarse" class="btn-accion btn-cobrar" onclick="retirarse()" disabled>Cobrar y Retirarse</button>
+                <button id="btn-logout" class="btn-accion btn-salir" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <div id="mensaje">Agrega fichas a tu tablero y dale a Iniciar Partida.</div>
 
             <div class="refugios-container" id="contenedor-refugios"></div>
         </div>
 
-        <!-- Columna Lateral: Panel de Reglas -->
         <div class="rules-sidebar">
             <h3>📜 Reglas del Juego</h3>
             <ul>
-                <li><strong>Paso 1:</strong> Ingresa tu apuesta base y pulsa <em>Iniciar Partida</em>.</li>
-                <li><strong>Paso 2:</strong> Selecciona cualquiera de las 9 casillas del mapa para resguardar a tu dinosaurio.</li>
-                <li><strong>Paso 3:</strong> Espera 3 segundos a que impacte el meteorito sorpresa.</li>
-                <li><strong>¡A salvo!</strong> Si el meteorito cae en otro cuadrante, el pozo se <strong>duplica</strong>. Elige si seguir arriesgándote en la siguiente ronda o presionar <em>Cobrar y Retirarse</em>.</li>
-                <li><strong>¡Impacto directo!</strong> Si cae en tu refugio perderás el pozo de la ronda actual.</li>
-                <li><strong>Seguridad:</strong> Tu cuenta y saldo están protegidos bajo contraseña. Tu sesión se mantendrá activa hasta que decidas cerrarla manualmente.</li>
+                <li><strong>Paso 1:</strong> Usa las fichas de colores ($+10, +50, etc.) o el botón <em>All-In</em> para fijar tu monto.</li>
+                <li><strong>Paso 2:</strong> Pulsa <em>Iniciar Partida</em> y escoge una de las 9 zonas del mapa.</li>
+                <li><strong>Paso 3:</strong> Espera el impacto. Si el meteorito no golpea tu zona, tu pozo de juego se <strong>duplicará</strong>.</li>
+                <li><strong>Retirada:</strong> Al salvarte, puedes cobrar inmediatamente tus ganancias acumuladas o arriesgar el nuevo monto total otra vez.</li>
             </ul>
         </div>
 
     </div>
 
     <script>
-        // Variables de entorno de juego
         let usuarioActual = "";
         let saldoFichas = 1000;
         let pozoAcumulado = 0;
-        let apuestaActual = 0;
+        let apuestaPreparada = 0; // Almacena el valor acumulado por los clicks en fichas
         let juegoActivo = false; 
         let esperandoResultado = false; 
 
-        // Captura de elementos del DOM
-        const seccionLogin = document.getElementById('seccion-login');
+        const pantallaAutenticacion = document.getElementById('pantalla-autenticacion');
         const seccionJuego = document.getElementById('seccion-juego');
         const saludoUsuario = document.getElementById('saludo-usuario');
 
         const txtFichas = document.getElementById('txt-fichas');
         const txtAcumulado = document.getElementById('txt-acumulado');
-        const inputApuesta = document.getElementById('input-apuesta');
+        const pantallaApuesta = document.getElementById('pantalla-apuesta');
+        
         const btnIniciar = document.getElementById('btn-iniciar');
         const btnRetirarse = document.getElementById('btn-retirarse');
+        const btnClear = document.getElementById('btn-clear');
+        const btnAllIn = document.getElementById('btn-allin');
+        
         const divMensaje = document.getElementById('mensaje');
         const contenedorRefugios = document.getElementById('contenedor-refugios');
 
-        // Función de hashing ultra simple para no guardar contraseñas legibles en LocalStorage
-        function hashPassword(str) {
+        function codificarPassword(cadena) {
             let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = (hash << 5) - hash + str.charCodeAt(i);
+            for (let i = 0; i < cadena.length; i++) {
+                hash = (hash << 5) - hash + cadena.charCodeAt(i);
                 hash |= 0;
             }
-            return "dino_" + hash;
+            return "dino_secure_" + hash;
         }
 
-        // --- COMPROBACIÓN AUTOMÁTICA DE SESIÓN AL CARGAR ---
         window.onload = function() {
-            const sesionGuardada = localStorage.getItem('usuario_actual_sesion');
-            if (sesionGuardada) {
-                usuarioActual = sesionGuardada;
-                let usuariosBD = JSON.parse(localStorage.getItem('dino_usuarios_secure_bd')) || {};
-                if (usuariosBD[usuarioActual]) {
-                    saldoFichas = usuariosBD[usuarioActual].fichas;
-                    cargarInterfazJuego();
+            const sesionActiva = localStorage.getItem('usuario_actual_sesion');
+            if (sesionActiva) {
+                usuarioActual = sesionActiva;
+                let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+                if (bd[usuarioActual]) {
+                    saldoFichas = bd[usuarioActual].fichas;
+                    abrirJuego();
                 } else {
                     localStorage.removeItem('usuario_actual_sesion');
                 }
             }
         };
 
-        // --- MENÚ DE INTERCAMBIO DE PESTAÑAS (LOGIN / REGISTRO) ---
-        function cambiarPestana(tipo) {
-            document.getElementById('error-login').innerText = "";
-            document.getElementById('error-registro').innerText = "";
+        function alternarFormularios(formulario) {
+            document.getElementById('err-login-txt').innerText = "";
+            document.getElementById('err-reg-txt').innerText = "";
             
-            if (tipo === 'login') {
-                document.getElementById('tab-login').classList.add('active');
-                document.getElementById('tab-registro').classList.remove('active');
-                document.getElementById('form-login').classList.remove('oculto');
-                document.getElementById('form-registro').classList.add('oculto');
+            if (formulario === 'login') {
+                document.getElementById('pestana-login').classList.add('active');
+                document.getElementById('pestana-registro').classList.remove('active');
+                document.getElementById('bloque-login').classList.remove('oculto');
+                document.getElementById('bloque-registro').classList.add('oculto');
             } else {
-                document.getElementById('tab-registro').classList.add('active');
-                document.getElementById('tab-login').classList.remove('active');
-                document.getElementById('form-registro').classList.remove('oculto');
-                document.getElementById('form-login').classList.add('oculto');
+                document.getElementById('pestana-registro').classList.add('active');
+                document.getElementById('pestana-login').classList.remove('active');
+                document.getElementById('bloque-registro').classList.remove('oculto');
+                document.getElementById('bloque-login').classList.add('oculto');
             }
         }
 
-        // --- PROCESAR INICIO DE SESIÓN ---
-        function procesarLogin() {
-            const user = document.getElementById('login-usuario').value.trim();
-            const pass = document.getElementById('login-pass').value;
-            const errDiv = document.getElementById('error-login');
-            errDiv.innerText = "";
+        function ejecutarLogin() {
+            const user = document.getElementById('usr-login-input').value.trim();
+            const pass = document.getElementById('pass-login-input').value;
+            const errorBox = document.getElementById('err-login-txt');
+            errorBox.innerText = "";
 
             if (user === "" || pass === "") {
-                errDiv.innerText = "❌ Completa todos los campos.";
+                errorBox.innerText = "❌ Debes completar todos los campos.";
                 return;
             }
 
-            let usuariosBD = JSON.parse(localStorage.getItem('dino_usuarios_secure_bd')) || {};
+            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
 
-            if (!usuariosBD[user] || usuariosBD[user].password !== hashPassword(pass)) {
-                errDiv.innerText = "❌ Usuario o contraseña incorrectos.";
+            if (!bd[user] || bd[user].password !== codificarPassword(pass)) {
+                errorBox.innerText = "❌ El usuario o la contraseña no coinciden.";
                 return;
             }
 
-            // Datos correctos
             usuarioActual = user;
-            saldoFichas = usuariosBD[user].fichas;
+            saldoFichas = bd[user].fichas;
             localStorage.setItem('usuario_actual_sesion', usuarioActual);
             
-            // Limpiar inputs
-            document.getElementById('login-usuario').value = "";
-            document.getElementById('login-pass').value = "";
+            document.getElementById('usr-login-input').value = "";
+            document.getElementById('pass-login-input').value = "";
 
-            cargarInterfazJuego();
-            divMensaje.innerText = "¡Inicio de sesión correcto! Introduce tu apuesta.";
+            abrirJuego();
+            divMensaje.innerText = "¡Ingreso exitoso! Selecciona tus fichas para apostar.";
         }
 
-        // --- PROCESAR REGISTRO DE CUENTA ---
-        function procesarRegistro() {
-            const user = document.getElementById('registro-usuario').value.trim();
-            const pass = document.getElementById('registro-pass').value;
-            const passConf = document.getElementById('registro-pass-conf').value;
-            const errDiv = document.getElementById('error-registro');
-            errDiv.innerText = "";
+        function ejecutarRegistro() {
+            const user = document.getElementById('usr-reg-input').value.trim();
+            const pass = document.getElementById('pass-reg-input').value;
+            const conf = document.getElementById('pass-conf-input').value;
+            const errorBox = document.getElementById('err-reg-txt');
+            errorBox.innerText = "";
 
-            if (user === "" || pass === "" || passConf === "") {
-                errDiv.innerText = "❌ Completa todos los campos.";
+            if (user === "" || pass === "" || conf === "") {
+                errorBox.innerText = "❌ Por favor, llena todos los campos.";
                 return;
             }
 
-            if (pass !== passConf) {
-                errDiv.innerText = "❌ Las contraseñas no coinciden.";
+            if (pass !== conf) {
+                errorBox.innerText = "❌ Las contraseñas ingresadas no coinciden.";
                 return;
             }
 
-            let usuariosBD = JSON.parse(localStorage.getItem('dino_usuarios_secure_bd')) || {};
+            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
 
-            if (usuariosBD[user] !== undefined) {
-                errDiv.innerText = "❌ El nombre de usuario ya está registrado.";
+            if (bd[user] !== undefined) {
+                errorBox.innerText = "❌ Este nombre de usuario ya está en uso.";
                 return;
             }
 
-            // Crear el nuevo usuario con estructura de seguridad y balance inicial de 1000 fichas
-            usuariosBD[user] = {
-                password: hashPassword(pass),
+            bd[user] = {
+                password: codificarPassword(pass),
                 fichas: 1000
             };
 
-            localStorage.setItem('dino_usuarios_secure_bd', JSON.stringify(usuariosBD));
+            localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
             
-            // Limpiar inputs
-            document.getElementById('registro-usuario').value = "";
-            document.getElementById('registro-pass').value = "";
-            document.getElementById('registro-pass-conf').value = "";
+            document.getElementById('usr-reg-input').value = "";
+            document.getElementById('pass-reg-input').value = "";
+            document.getElementById('pass-conf-input').value = "";
 
-            // Auto-loguear al usuario recién registrado
             usuarioActual = user;
             saldoFichas = 1000;
             localStorage.setItem('usuario_actual_sesion', usuarioActual);
 
-            cargarInterfazJuego();
-            divMensaje.innerText = "🎉 ¡Cuenta creada con éxito! Bienvenido al refugio.";
+            abrirJuego();
+            divMensaje.innerText = "🎉 ¡Tu cuenta ha sido creada! Bienvenido.";
         }
 
-        function cargarInterfazJuego() {
+        function abrirJuego() {
             saludoUsuario.innerText = `👋 ¡Explorador activo: ${usuarioActual}!`;
-            seccionLogin.classList.add('oculto');
+            pantallaAutenticacion.classList.add('oculto');
             seccionJuego.classList.remove('oculto');
+            apuestaPreparada = 0;
             actualizarPantalla();
             crearRefugios();
         }
 
         function guardarProgresoUsuario() {
             if (usuarioActual === "") return;
-            let usuariosBD = JSON.parse(localStorage.getItem('dino_usuarios_secure_bd')) || {};
-            if (usuariosBD[usuarioActual]) {
-                usuariosBD[usuarioActual].fichas = saldoFichas;
-                localStorage.setItem('dino_usuarios_secure_bd', JSON.stringify(usuariosBD));
+            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+            if (bd[usuarioActual]) {
+                bd[usuarioActual].fichas = saldoFichas;
+                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
             }
         }
 
         function logout() {
             if (juegoActivo) {
-                if (!confirm("Tienes una ronda activa. Si abandonas ahora perderás el pozo acumulado de esta partida. ¿Cerrar sesión de todos modos?")) {
+                if (!confirm("Hay una partida en curso. Si sales perderás el pozo acumulado actual. ¿Cerrar sesión?")) {
                     return;
                 }
             }
@@ -544,13 +648,53 @@
             juegoActivo = false;
             esperandoResultado = false;
             pozoAcumulado = 0;
+            apuestaPreparada = 0;
             
             seccionJuego.classList.add('oculto');
-            seccionLogin.classList.remove('oculto');
-            cambiarPestana('login');
+            pantallaAutenticacion.classList.remove('oculto');
+            alternarFormularios('login');
         }
 
-        // --- LÓGICA DE JUEGO ---
+        // --- SISTEMA INTERACTIVO DE FICHAS DE CASINO ---
+        function agregarFichas(valor) {
+            if (juegoActivo || esperandoResultado) return;
+
+            if (apuestaPreparada + valor > saldoFichas) {
+                divMensaje.innerText = "❌ No puedes apostar más fichas de las que posees.";
+                return;
+            }
+
+            apuestaPreparada += valor;
+            actualizarPantalla();
+        }
+
+        function limpiarApuesta() {
+            if (juegoActivo || esperandoResultado) return;
+            apuestaPreparada = 0;
+            actualizarPantalla();
+        }
+
+        function apostarTodo() {
+            if (juegoActivo || esperandoResultado) return;
+            apuestaPreparada = saldoFichas;
+            actualizarPantalla();
+        }
+
+        function alternarFichasInteractividad(activar) {
+            const chips = ['chip-10', 'chip-50', 'chip-100', 'chip-500'];
+            chips.forEach(id => {
+                const el = document.getElementById(id);
+                if (activar) {
+                    el.classList.remove('deshabilitada');
+                } else {
+                    el.classList.add('deshabilitada');
+                }
+            });
+            btnClear.disabled = !activar;
+            btnAllIn.disabled = !activar;
+        }
+
+        // --- MECÁNICAS DE CONTROL DEL JUEGO ---
         function crearRefugios() {
             contenedorRefugios.innerHTML = '';
             for (let i = 1; i <= 9; i++) {
@@ -564,20 +708,13 @@
         }
 
         function iniciarRonda() {
-            let monto = parseInt(inputApuesta.value);
-
-            if (monto > saldoFichas) {
-                divMensaje.innerText = "❌ No tienes suficientes fichas para esa apuesta.";
-                return;
-            }
-            if (monto <= 0 || isNaN(monto)) {
-                divMensaje.innerText = "❌ Introduce una apuesta válida.";
+            if (apuestaPreparada <= 0) {
+                divMensaje.innerText = "❌ Debes añadir fichas al tablero antes de iniciar.";
                 return;
             }
 
-            saldoFichas -= monto;
-            apuestaActual = monto;
-            pozoAcumulado = monto; 
+            saldoFichas -= apuestaPreparada;
+            pozoAcumulado = apuestaPreparada; 
             juegoActivo = true;
 
             guardarProgresoUsuario(); 
@@ -587,8 +724,8 @@
             document.querySelectorAll('.refugio').forEach(r => r.classList.add('activo'));
 
             btnIniciar.disabled = true;
-            inputApuesta.disabled = true;
             btnRetirarse.disabled = true; 
+            alternarFichasInteractividad(false);
 
             divMensaje.innerText = "🦖 ¡Elige un refugio para esconder al dinosaurio!";
         }
@@ -630,10 +767,12 @@
             if (idSeleccionado === refugioMeteorito) {
                 divMensaje.innerText = `💥 ¡El meteorito cayó en tu refugio! Perdiste las ${pozoAcumulado} fichas acumuladas.`;
                 pozoAcumulado = 0;
+                apuestaPreparada = 0;
                 juegoActivo = false;
+                
                 btnIniciar.disabled = false;
-                inputApuesta.disabled = false;
                 btnRetirarse.disabled = true;
+                alternarFichasInteractividad(true);
                 guardarProgresoUsuario();
             } else {
                 pozoAcumulado = pozoAcumulado * 2; 
@@ -662,11 +801,12 @@
             divMensaje.innerText = `💰 ¡Te has retirado con éxito! Sumaste ${pozoAcumulado} fichas a tu cuenta.`;
             
             pozoAcumulado = 0;
+            apuestaPreparada = 0;
             juegoActivo = false;
 
             btnIniciar.disabled = false;
-            inputApuesta.disabled = false;
             btnRetirarse.disabled = true;
+            alternarFichasInteractividad(true);
 
             guardarProgresoUsuario();
             actualizarPantalla();
@@ -676,6 +816,7 @@
         function actualizarPantalla() {
             txtFichas.innerText = saldoFichas;
             txtAcumulado.innerText = pozoAcumulado;
+            pantallaApuesta.innerText = apuestaPreparada;
         }
     </script>
 </body>
