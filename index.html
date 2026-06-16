@@ -1,10 +1,36 @@
-<!DOCTYPE html>
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body {
+                  background-color: white; /* Ensure the iframe has a white background */
+                }
+
+                .refugio { 
+    background-image: url('tu-imagen-refugio.jpg');
+}
+.refugio.salvado { 
+    background-image: url('tu-imagen-salvado.jpg');
+}
+.refugio.destruido { 
+    background-image: url('tu-imagen-destruido.jpg');
+}
+
+
+              </style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dino Refugio - Juego de Azar</title>
-    <link rel="icon" type="image/png" href="https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/13d43e763-b52e-4819-9aef-7e37d88366bc.png">
+    <!-- Cambia 'favicon.png' por la ruta de tu favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -101,7 +127,6 @@
             background-color: #34495e; 
             background-size: cover; 
             background-position: center;
-            background-image: url('https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/1b4c710c6-4c53-49b5-811c-31393e460fef.png');
             transition: transform 0.2s;
         }
         .refugio.activo:hover { transform: scale(1.08); box-shadow: 0px 0px 15px #f1c40f; }
@@ -111,13 +136,11 @@
             box-shadow: 0px 0px 20px #f39c12;
         }
         .refugio.salvado { 
-            background-image: url('https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/128a186cb-d2d8-4176-86c8-313971264717.png');
             border-color: #2ecc71; 
             border-width: 4px;
             box-shadow: 0px 0px 20px #2ecc71;
         }
         .refugio.destruido { 
-            background-image: url('https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/1e6e5641a-2fb2-4936-a6ae-ce204bda4a53.png');
             border-color: #e74c3c; 
             border-width: 4px;
             box-shadow: 0px 0px 20px #e74c3c;
@@ -136,7 +159,8 @@
 </head>
 <body>
     <div class="logo-container">
-        <img src="https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/10052c78b-85fd-4a13-ad51-af5670f71f4a.png" alt="Dino Refugio Logo" class="logo-juego">
+        <!-- Cambia 'logo.png' por la ruta de tu logo -->
+        <img src="logo.png" alt="Dino Refugio Logo" class="logo-juego" onerror="this.src='https://placehold.co/550x200/2c3e50/f1c40f?text=Dino+Refugio'">
     </div>
 
     <div id="contenedor-inicial-wrapper">
@@ -144,7 +168,7 @@
             <div class="auth-tabs">
                 <button id="pestana-login" class="tab-btn active" onclick="alternarFormularios('login')">Iniciar Sesión</button>
                 <button id="pestana-registro" class="tab-btn" onclick="alternarFormularios('registro')">Crear Cuenta</button>
-                <button id="pestana-sync" class="tab-btn" onclick="alternarFormularios('sync')">📲 Sincronizar</button>
+                <button id="pestana-sync" class="tab-btn" onclick="alternarFormularios('sync')"> Sincronizar</button>
             </div>
 
             <div id="bloque-login" class="auth-form">
@@ -405,7 +429,7 @@
                     pozoAcumulado *= 2;
                     refugios[id - 1].classList.remove('seleccionado');
                     refugios[id - 1].classList.add('salvado');
-                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " fichas";
+                    document.getElementById('mensaje').innerText = " ¡Salvado! Pozo: " + pozoAcumulado + " fichas";
                     document.getElementById('btn-retirarse').disabled = false;
                 }
                 esperandoResultado = false; 
@@ -466,3 +490,12 @@
     </script>
 </body>
 </html>
+
+
+
+              <script>
+                              
+              </script>
+                        </body>
+                        </html>
+                    
