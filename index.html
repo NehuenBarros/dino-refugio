@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dino Refugio - Juego de Azar</title>
+    <link rel="icon" type="image/png" href="https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/13d43e763-b52e-4819-9aef-7e37d88366bc.png">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -86,11 +87,42 @@
         .btn-accion:disabled, .deshabilitada { background: #7f8c8d !important; opacity: 0.5; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; border: none !important; }
 
         .refugios-container { display: grid; grid-template-columns: repeat(3, 130px); grid-gap: 15px; justify-content: center; margin: 30px auto; }
-        .refugio { width: 130px; height: 155px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; cursor: pointer; user-select: none; border-radius: 12px; border: 3px solid #555; background-color: #34495e; background-size: cover; background-position: center; }
+        .refugio { 
+            width: 130px; 
+            height: 155px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 2.2rem; 
+            cursor: pointer; 
+            user-select: none; 
+            border-radius: 12px; 
+            border: 3px solid #555; 
+            background-color: #34495e; 
+            background-size: cover; 
+            background-position: center;
+            background-image: url('https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/1b4c710c6-4c53-49b5-811c-31393e460fef.png');
+            transition: transform 0.2s;
+        }
         .refugio.activo:hover { transform: scale(1.08); box-shadow: 0px 0px 15px #f1c40f; }
-        .refugio.seleccionado { background-color: #f39c12; border-color: #d35400; }
-        .refugio.salvado { background-color: #2ecc71; border-color: #2ecc71; }
-        .refugio.destruido { background-color: #e74c3c; border-color: #e74c3c; animation: shake 0.5s ease-in-out; }
+        .refugio.seleccionado { 
+            border-color: #f39c12; 
+            border-width: 4px;
+            box-shadow: 0px 0px 20px #f39c12;
+        }
+        .refugio.salvado { 
+            background-image: url('https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/128a186cb-d2d8-4176-86c8-313971264717.png');
+            border-color: #2ecc71; 
+            border-width: 4px;
+            box-shadow: 0px 0px 20px #2ecc71;
+        }
+        .refugio.destruido { 
+            background-image: url('https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/1e6e5641a-2fb2-4936-a6ae-ce204bda4a53.png');
+            border-color: #e74c3c; 
+            border-width: 4px;
+            box-shadow: 0px 0px 20px #e74c3c;
+            animation: shake 0.5s ease-in-out; 
+        }
 
         #mensaje { font-size: 1.6rem; margin-top: 25px; font-weight: bold; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95); }
         .error-msg { color: #e74c3c; font-weight: bold; margin-top: 10px; }
@@ -104,7 +136,7 @@
 </head>
 <body>
     <div class="logo-container">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" alt="Dino Refugio Logo" class="logo-juego" onerror="this.src='https://placehold.co/550x200/2c3e50/f1c40f?text=Dino+Refugio'">
+        <img src="https://image.qwenlm.ai/public_source/69dbd0f8-1151-47ee-b885-453b4ae38eae/10052c78b-85fd-4a13-ad51-af5670f71f4a.png" alt="Dino Refugio Logo" class="logo-juego">
     </div>
 
     <div id="contenedor-inicial-wrapper">
@@ -265,7 +297,7 @@
         function generarCodigoSincronizacion() {
             let bd = localStorage.getItem('dino_usuarios_secure_v2');
             const msgBox = document.getElementById('msg-sync');
-            if (!bd) { msgBox.innerText = "❌ No hay datos."; return; }
+            if (!bd) { msgBox.innerText = " No hay datos."; return; }
             const codigoUnico = btoa(bd);
             document.getElementById('txt-codigo-sync').value = codigoUnico;
             msgBox.innerText = "✅ Código listo.";
@@ -326,51 +358,110 @@
             cont.innerHTML = '';
             for (let i = 1; i <= 9; i++) {
                 const div = document.createElement('div');
-                div.className = 'refugio'; div.onclick = () => elegirRefugio(i);
+                div.className = 'refugio'; 
+                div.onclick = () => elegirRefugio(i);
                 cont.appendChild(div);
             }
         }
 
         function iniciarRonda() {
             if (apuestaPreparada <= 0) return;
-            saldoFichas -= apuestaPreparada; pozoAcumulado = apuestaPreparada; juegoActivo = true;
+            saldoFichas -= apuestaPreparada; 
+            pozoAcumulado = apuestaPreparada; 
+            juegoActivo = true;
+            esperandoResultado = false;
             actualizarPantalla();
-            document.querySelectorAll('.refugio').forEach(r => r.classList.add('activo'));
+            
+            // Resetear refugios
+            document.querySelectorAll('.refugio').forEach(r => {
+                r.className = 'refugio activo';
+            });
+            
             document.getElementById('btn-iniciar').disabled = true;
+            document.getElementById('btn-retirarse').disabled = true;
+            document.getElementById('mensaje').innerText = "¡Elige tu refugio!";
         }
 
         function elegirRefugio(id) {
             if (!juegoActivo || esperandoResultado) return;
             esperandoResultado = true;
+            
+            const refugios = document.querySelectorAll('.refugio');
+            refugios[id - 1].classList.add('seleccionado');
+            
             setTimeout(() => {
                 const destino = Math.floor(Math.random() * 9); 
+                
                 if (id === (destino + 1)) {
-                    pozoAcumulado = 0; juegoActivo = false;
-                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste.";
+                    // Perdió - mostrar meteorito en el refugio elegido
+                    pozoAcumulado = 0; 
+                    juegoActivo = false;
+                    refugios[id - 1].classList.remove('seleccionado');
+                    refugios[id - 1].classList.add('destruido');
+                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste " + apuestaPreparada + " fichas.";
                     document.getElementById('btn-iniciar').disabled = false;
                 } else {
+                    // Ganó - mostrar dino salvado
                     pozoAcumulado *= 2;
-                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado;
+                    refugios[id - 1].classList.remove('seleccionado');
+                    refugios[id - 1].classList.add('salvado');
+                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " fichas";
                     document.getElementById('btn-retirarse').disabled = false;
                 }
-                esperandoResultado = false; actualizarPantalla();
+                esperandoResultado = false; 
+                actualizarPantalla();
             }, 1000);
         }
 
         function retirarse() {
-            saldoFichas += pozoAcumulado; pozoAcumulado = 0; juegoActivo = false;
+            saldoFichas += pozoAcumulado; 
+            pozoAcumulado = 0; 
+            juegoActivo = false;
             document.getElementById('btn-retirarse').disabled = true;
             document.getElementById('btn-iniciar').disabled = false;
+            document.getElementById('mensaje').innerText = "✅ ¡Cobrado! Tus fichas: " + saldoFichas;
+            
+            // Resetear refugios
+            document.querySelectorAll('.refugio').forEach(r => {
+                r.className = 'refugio';
+            });
+            
             let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if(bd[usuarioActual]) { bd[usuarioActual].fichas = saldoFichas; localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd)); }
+            if(bd[usuarioActual]) { 
+                bd[usuarioActual].fichas = saldoFichas; 
+                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd)); 
+            }
             actualizarPantalla();
         }
 
-        function obtenerRankingGlobal() { /* Implementación simplificada */ }
+        function obtenerRankingGlobal() {
+            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+            const lista = document.getElementById('lista-ranking-global');
+            const usuarios = Object.keys(bd).map(user => ({ user: user, fichas: bd[user].fichas }));
+            usuarios.sort((a, b) => b.fichas - a.fichas);
+            
+            if (usuarios.length === 0) {
+                lista.innerHTML = '<li class="ranking-item">Sin jugadores aún</li>';
+                return;
+            }
+            
+            lista.innerHTML = usuarios.slice(0, 5).map((u, i) => `
+                <li class="ranking-item ${i === 0 ? 'top1' : ''}">
+                    <span class="ranking-pos">#${i + 1}</span>
+                    <span class="ranking-user">${u.user}</span>
+                    <span class="ranking-money">${u.fichas} fichas</span>
+                </li>
+            `).join('');
+        }
+
         function alternarFormularios(f) {
             document.getElementById('bloque-login').classList.toggle('oculto', f !== 'login');
             document.getElementById('bloque-registro').classList.toggle('oculto', f !== 'registro');
             document.getElementById('bloque-sync').classList.toggle('oculto', f !== 'sync');
+            
+            document.getElementById('pestana-login').classList.toggle('active', f === 'login');
+            document.getElementById('pestana-registro').classList.toggle('active', f === 'registro');
+            document.getElementById('pestana-sync').classList.toggle('active', f === 'sync');
         }
     </script>
 </body>
