@@ -1,23 +1,4 @@
-
-                        <!DOCTYPE html>
-                        <html lang="en">
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body {
-                  background-color: white; /* Ensure the iframe has a white background */
-                }
-
-                background-image: url('imagenes/fondo_pagina.jpg');
-
-background-image: url('imagenes/fondo_pagina23.jpg');
-
-
-              </style>
-                        </head>
-                        <body>
-                            <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -74,13 +55,6 @@ background-image: url('imagenes/fondo_pagina23.jpg');
         .auth-form textarea { font-family: monospace; font-size: 0.85rem; resize: none; height: 60px; }
 
         .main-layout { display: flex; justify-content: center; align-items: flex-start; gap: 30px; max-width: 1200px; margin: 20px auto; flex-wrap: wrap; }
-        <div class="selector-modo" style="margin: 15px 0;">
-          <label style="font-weight: bold;">Modo de Juego:</label>
-          <select id="modo-juego" style="padding: 5px; border-radius: 5px;">
-              <option value="normal">Normal (1 Meteorito)</option>
-              <option value="apocalipsis">Apocalipsis (3 Meteoritos)</option>
-          </select>
-        </div>
         .game-area { flex: 2; min-width: 320px; }
         .rules-sidebar { flex: 1; min-width: 280px; background-color: rgba(52, 73, 94, 0.95); padding: 20px; border-radius: 12px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); text-align: left; border-left: 5px solid #f1c40f; }
         .rules-sidebar h3 { margin-top: 0; color: #f1c40f; text-align: center; font-size: 1.5rem; }
@@ -112,6 +86,10 @@ background-image: url('imagenes/fondo_pagina23.jpg');
         .btn-cobrar { background: linear-gradient(135deg, #f1c40f, #f39c12); border-bottom: 4px solid #d35400; }
         .btn-salir { background: linear-gradient(135deg, #e74c3c, #c0392b); border-bottom: 4px solid #962d22; }
         .btn-accion:disabled, .deshabilitada { background: #7f8c8d !important; opacity: 0.5; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; border: none !important; }
+
+        .selector-modo { margin: 15px 0; }
+        .selector-modo label { font-weight: bold; }
+        .selector-modo select { padding: 5px; border-radius: 5px; }
 
         .refugios-container { display: grid; grid-template-columns: repeat(3, 130px); grid-gap: 15px; justify-content: center; margin: 30px auto; }
         .refugio { 
@@ -228,6 +206,13 @@ background-image: url('imagenes/fondo_pagina23.jpg');
                     <div id="chip-50" class="ficha-casino ficha-50" onclick="agregarFichas(50)">+50</div>
                     <div id="chip-100" class="ficha-casino ficha-100" onclick="agregarFichas(100)">+100</div>
                     <div id="chip-500" class="ficha-casino ficha-500" onclick="agregarFichas(500)">+500</div>
+                </div>
+                <div class="selector-modo">
+                    <label>Modo de Juego:</label>
+                    <select id="modo-juego">
+                        <option value="normal">Normal (1 Meteorito)</option>
+                        <option value="apocalipsis">Apocalipsis (3 Meteoritos)</option>
+                    </select>
                 </div>
                 <div>
                     <button id="btn-clear" class="btn-utilidad" onclick="limpiarApuesta()">Limpiar</button>
@@ -391,69 +376,69 @@ background-image: url('imagenes/fondo_pagina23.jpg');
             }
         }
 
-function iniciarRonda() {
-    if (apuestaPreparada <= 0) return;
-    saldoFichas -= apuestaPreparada; 
-    pozoAcumulado = apuestaPreparada; 
-    juegoActivo = true;
-    esperandoResultado = false;
-    actualizarPantalla();
-    
-    // Reiniciar texturas al iniciar nueva ronda
-    document.querySelectorAll('.refugio').forEach(r => {
-        r.className = 'refugio activo';
-    });
-    
-    document.getElementById('btn-iniciar').disabled = true;
-    document.getElementById('btn-retirarse').disabled = true;
-    document.getElementById('mensaje').innerText = "¡Elige tu refugio!";
-}
+        function iniciarRonda() {
+            if (apuestaPreparada <= 0) return;
+            saldoFichas -= apuestaPreparada; 
+            pozoAcumulado = apuestaPreparada; 
+            juegoActivo = true;
+            esperandoResultado = false;
+            actualizarPantalla();
+            
+            // Reiniciar texturas al iniciar nueva ronda
+            document.querySelectorAll('.refugio').forEach(r => {
+                r.className = 'refugio activo';
+            });
+            
+            document.getElementById('btn-iniciar').disabled = true;
+            document.getElementById('btn-retirarse').disabled = true;
+            document.getElementById('mensaje').innerText = "¡Elige tu refugio!";
+        }
 
-function elegirRefugio(id) {
-    if (!juegoActivo || esperandoResultado) return;
-    esperandoResultado = true;
-    
-    const modo = document.getElementById('modo-juego').value;
-    const refugios = document.querySelectorAll('.refugio');
-    refugios[id - 1].classList.add('seleccionado');
-    
-    setTimeout(() => {
-        // Generar destinos de meteoritos
-        let destinos = [];
-        if (modo === 'normal') {
-            destinos.push(Math.floor(Math.random() * 9));
-        } else {
-            // Generar 3 posiciones únicas para apocalipsis
-            while(destinos.length < 3) {
-                let r = Math.floor(Math.random() * 9);
-                if(destinos.indexOf(r) === -1) destinos.push(r);
-            }
+        function elegirRefugio(id) {
+            if (!juegoActivo || esperandoResultado) return;
+            esperandoResultado = true;
+            
+            const modo = document.getElementById('modo-juego').value;
+            const refugios = document.querySelectorAll('.refugio');
+            refugios[id - 1].classList.add('seleccionado');
+            
+            setTimeout(() => {
+                // Generar destinos de meteoritos
+                let destinos = [];
+                if (modo === 'normal') {
+                    destinos.push(Math.floor(Math.random() * 9));
+                } else {
+                    // Generar 3 posiciones únicas para apocalipsis
+                    while(destinos.length < 3) {
+                        let r = Math.floor(Math.random() * 9);
+                        if(destinos.indexOf(r) === -1) destinos.push(r);
+                    }
+                }
+                
+                const golpeado = destinos.includes(id - 1);
+                
+                // Aplicar texturas de destrucción
+                destinos.forEach(idx => {
+                    refugios[idx].classList.remove('activo', 'seleccionado');
+                    refugios[idx].classList.add('destruido');
+                });
+                
+                if (golpeado) {
+                    pozoAcumulado = 0; 
+                    juegoActivo = false;
+                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo.";
+                    document.getElementById('btn-iniciar').disabled = false;
+                } else {
+                    pozoAcumulado *= 2;
+                    refugios[id - 1].classList.remove('seleccionado');
+                    refugios[id - 1].classList.add('salvado');
+                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado;
+                    document.getElementById('btn-retirarse').disabled = false;
+                }
+                esperandoResultado = false; 
+                actualizarPantalla();
+            }, 1000);
         }
-        
-        const golpeado = destinos.includes(id - 1);
-        
-        // Aplicar texturas de destrucción
-        destinos.forEach(idx => {
-            refugios[idx].classList.remove('activo', 'seleccionado');
-            refugios[idx].classList.add('destruido');
-        });
-        
-        if (golpeado) {
-            pozoAcumulado = 0; 
-            juegoActivo = false;
-            document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo.";
-            document.getElementById('btn-iniciar').disabled = false;
-        } else {
-            pozoAcumulado *= 2;
-            refugios[id - 1].classList.remove('seleccionado');
-            refugios[id - 1].classList.add('salvado');
-            document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado;
-            document.getElementById('btn-retirarse').disabled = false;
-        }
-        esperandoResultado = false; 
-        actualizarPantalla();
-    }, 1000);
-}
 
         function retirarse() {
             saldoFichas += pozoAcumulado; 
@@ -508,12 +493,3 @@ function elegirRefugio(id) {
     </script>
 </body>
 </html>
-
-
-
-              <script>
-                              
-              </script>
-                        </body>
-                        </html>
-                    
