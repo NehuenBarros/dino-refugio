@@ -219,7 +219,7 @@
 <body>
 
     <div class="logo-container">
-        <img src="imagenes/logo_dino_refugio.png" alt="Dino Refugio Logo" class="logo-juego">
+        <img src="imagenes/logo_dino_refugio.png" alt="Dino Refugio Logo" class="logo-juego" onerror="this.src='https://placehold.co/550x200/2c3e50/f1c40f?text=Dino+Refugio'">
     </div>
 
     <div id="contenedor-inicial-wrapper">
@@ -346,6 +346,12 @@
         const divMensaje = document.getElementById('mensaje');
         const contenedorRefugios = document.getElementById('contenedor-refugios');
 
+        function actualizarPantalla() {
+            txtFichas.innerText = saldoFichas; 
+            txtAcumulado.innerText = pozoAcumulado; 
+            pantallaApuesta.innerText = apuestaPreparada;
+        }
+
         function codificarPassword(cadena) {
             let hash = 0;
             for (let i = 0; i < cadena.length; i++) {
@@ -353,6 +359,45 @@
                 hash |= 0;
             }
             return "dino_secure_" + hash;
+        }
+
+        function obtenerRankingGlobal() {
+            const listaHTML = document.getElementById('lista-ranking-global');
+            if (!db) {
+                listaHTML.innerHTML = `<li class="ranking-item text-center"><em>Firebase desconectado.</em></li>`;
+                return;
+            }
+            db.collection("ranking").orderBy("fichas", "desc").limit(5).get()
+            .then((querySnapshot) => {
+                listaHTML.innerHTML = "";
+                let posicion = 1;
+                if (querySnapshot.empty) { listaHTML.innerHTML = `<li class="ranking-item">¡Sé el primero en el podio!</li>`; return; }
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const itemClase = posicion === 1 ? "ranking-item top1" : "ranking-item";
+                    const corona = posicion === 1 ? "👑 " : "";
+                    listaHTML.innerHTML += `
+                        <li class="${itemClase}">
+                            <span class="ranking-pos">#${posicion}</span>
+                            <span class="ranking-user">${corona}${data.usuario}</span>
+                            <span class="ranking-money">${data.fichas} Fs.</span>
+                        </li>`;
+                    posicion++;
+                });
+            })
+            .catch(err => {
+                console.error("Error cargando el ranking: ", err);
+                listaHTML.innerHTML = `<li class="ranking-item">Error al conectar la tabla.</li>`;
+            });
+        }
+        
+        function codificarPassword(cadena) {
+            let hash = 0;
+        
+        function abrirJuego() {
+            saludoUsuario.innerText = `👋 ¡Hola ${usuarioActual}!`;
+            pantallaAutenticacion.classList.add('oculto'); panelRanking.classList.add('oculto');
+            seccionJuego.classList.remove('oculto'); apuestaPreparada = 0; actualizarPantalla(); crearRefugios();
         }
 
         window.onload = function() {
