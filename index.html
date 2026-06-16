@@ -213,21 +213,16 @@
         }
     </style>
 
-    <!-- LIBS DE FIREBASE PARA EL RANKING GLOBAL -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
 
-    <!-- REEMPLAZO TEXTO POR LOGO PROFESIONAL -->
     <div class="logo-container">
         <img src="imagenes/logo_dino_refugio.png" alt="Dino Refugio Logo" class="logo-juego">
     </div>
 
-    <!-- PANTALLA PRINCIPAL DE INICIO (Formularios + Ranking) -->
     <div id="contenedor-inicial-wrapper">
-        
-        <!-- Autenticación -->
         <div id="pantalla-autenticacion" class="auth-container">
             <div class="auth-tabs">
                 <button id="pestana-login" class="tab-btn active" onclick="alternarFormularios('login')">Iniciar Sesión</button>
@@ -235,7 +230,6 @@
                 <button id="pestana-sync" class="tab-btn" onclick="alternarFormularios('sync')">📲 Sincronizar</button>
             </div>
 
-            <!-- Iniciar Sesión -->
             <div id="bloque-login" class="auth-form">
                 <h2>Ingresar al Refugio</h2>
                 <input type="text" id="usr-login-input" placeholder="Nombre de usuario" maxlength="15">
@@ -245,7 +239,6 @@
                 <div id="err-login-txt" class="error-msg"></div>
             </div>
 
-            <!-- Crear Cuenta -->
             <div id="bloque-registro" class="auth-form oculto">
                 <h2>Registro de Nuevo Explorador</h2>
                 <input type="text" id="usr-reg-input" placeholder="Elige un usuario" maxlength="15">
@@ -256,7 +249,6 @@
                 <div id="err-reg-txt" class="error-msg"></div>
             </div>
 
-            <!-- Sincronizar Dispositivos -->
             <div id="bloque-sync" class="auth-form oculto">
                 <h2>Sincronizar Celular y PC</h2>
                 <p style="font-size:0.9rem; color:#bdc3c7; margin: 0 0 15px 0;">Copia este código de tu dispositivo actual y pégalo en el nuevo para pasar tus cuentas y fichas:</p>
@@ -269,53 +261,43 @@
             </div>
         </div>
 
-        <!-- TABLA DE CLASIFICACIÓN GLOBAL (RANKING) -->
         <div id="panel-ranking" class="ranking-container">
             <div class="ranking-header">🏆 Top Exploradores</div>
             <ul id="lista-ranking-global" class="ranking-lista">
                 <li class="ranking-item">Cargando clasificación...</li>
             </ul>
         </div>
-
     </div>
 
-    <!-- JUEGO PRINCIPAL -->
     <div id="seccion-juego" class="main-layout oculto">
         <div class="game-area">
             <div id="saludo-usuario" class="user-greeting"></div>
-
             <div class="scoreboard">
                 <div>Mis Fichas: <span id="txt-fichas" class="fichas">1000</span></div>
                 <div>Pozo Acumulado: <span id="txt-acumulado" class="acumulado">0</span></div>
             </div>
-
             <div class="seccion-apuesta-moderna">
                 <div class="titulo-apuesta">Monto a apostar</div>
                 <div id="pantalla-apuesta" class="pantalla-monto-apuesta">0</div>
-                
                 <div class="contenedor-fichas-casino">
                     <div id="chip-10" class="ficha-casino ficha-10" onclick="agregarFichas(10)">+10</div>
                     <div id="chip-50" class="ficha-casino ficha-50" onclick="agregarFichas(50)">+50</div>
                     <div id="chip-100" class="ficha-casino ficha-100" onclick="agregarFichas(100)">+100</div>
                     <div id="chip-500" class="ficha-casino ficha-500" onclick="agregarFichas(500)">+500</div>
                 </div>
-
                 <div>
                     <button id="btn-clear" class="btn-utilidad" onclick="limpiarApuesta()">Limpiar</button>
                     <button id="btn-allin" class="btn-utilidad btn-allin" onclick="apostarTodo()">All-In</button>
                 </div>
             </div>
-
             <div class="acciones-juego">
                 <button id="btn-iniciar" class="btn-accion btn-jugar" onclick="iniciarRonda()">Iniciar Partida</button>
                 <button id="btn-retirarse" class="btn-accion btn-cobrar" onclick="retirarse()" disabled>Cobrar y Retirarse</button>
                 <button id="btn-logout" class="btn-accion btn-salir" onclick="logout()">Cerrar Sesión</button>
             </div>
-
             <div id="mensaje">Agrega fichas a tu tablero y dale a Iniciar Partida.</div>
             <div class="refugios-container" id="contenedor-refugios"></div>
         </div>
-
         <div class="rules-sidebar">
             <h3>📜 Reglas del Juego</h3>
             <ul>
@@ -328,7 +310,6 @@
     </div>
 
     <script>
-        // === CONFIGURACIÓN DE FIREBASE (¡Listo con tus credenciales reales!) ===
         const firebaseConfig = {
             apiKey: "AIzaSyDZjGTHBqoxfiAgT8CVJX_YMK8Fr7Bi__U",
             authDomain: "dinorefugiojuego.firebaseapp.com",
@@ -338,7 +319,6 @@
             appId: "1:1058615945538:web:13fec099308db3798f80db"
         };
         
-        // Inicializar Firebase condicionalmente si se cambian los datos por unos reales
         let db = null;
         if (firebaseConfig.apiKey !== "TU_API_KEY") {
             firebase.initializeApp(firebaseConfig);
@@ -376,9 +356,7 @@
         }
 
         window.onload = function() {
-            // Cargar ranking global visual inicial
             obtenerRankingGlobal();
-
             const urlParams = new URLSearchParams(window.location.search);
             const syncCodigo = urlParams.get('sync');
             if (syncCodigo) {
@@ -392,7 +370,6 @@
                     alert("Sync: ¡Cuentas sincronizadas exitosamente mediante el enlace!");
                 } catch(e) { console.error("Error leyendo código de la URL"); }
             }
-
             const sesionActiva = localStorage.getItem('usuario_actual_sesion');
             if (sesionActiva) {
                 usuarioActual = sesionActiva;
@@ -404,9 +381,8 @@
             }
         };
 
-        // --- ENVIAR Y LEER DATOS DESDE CLOUD FIRESTORE ---
         function actualizarRankingEnNube(username, fichas) {
-            if (!db) return; // Si no está configurado Firebase, saltar silenciosamente
+            if (!db) return;
             db.collection("ranking").doc(username).set({
                 usuario: username,
                 fichas: fichas,
@@ -419,34 +395,24 @@
         function obtenerRankingGlobal() {
             const listaHTML = document.getElementById('lista-ranking-global');
             if (!db) {
-                listaHTML.innerHTML = `
-                    <li class="ranking-item text-center"><em>Firebase no conectado de forma activa. Sigue el tutorial de configuración.</em></li>
-                `;
+                listaHTML.innerHTML = `<li class="ranking-item text-center"><em>Firebase desconectado.</em></li>`;
                 return;
             }
-
             db.collection("ranking").orderBy("fichas", "desc").limit(5).get()
             .then((querySnapshot) => {
                 listaHTML.innerHTML = "";
                 let posicion = 1;
-                
-                if (querySnapshot.empty) {
-                    listaHTML.innerHTML = `<li class="ranking-item">¡Sé el primero en el podio!</li>`;
-                    return;
-                }
-
+                if (querySnapshot.empty) { listaHTML.innerHTML = `<li class="ranking-item">¡Sé el primero en el podio!</li>`; return; }
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const itemClase = posicion === 1 ? "ranking-item top1" : "ranking-item";
                     const corona = posicion === 1 ? "👑 " : "";
-
                     listaHTML.innerHTML += `
                         <li class="${itemClase}">
                             <span class="ranking-pos">#${posicion}</span>
                             <span class="ranking-user">${corona}${data.usuario}</span>
                             <span class="ranking-money">${data.fichas} Fs.</span>
-                        </li>
-                    `;
+                        </li>`;
                     posicion++;
                 });
             })
@@ -456,37 +422,29 @@
             });
         }
 
-        // --- SISTEMA DE SINCRONIZACIÓN ---
         function generarCodigoSincronizacion() {
             let bd = localStorage.getItem('dino_usuarios_secure_v2');
             const msgBox = document.getElementById('msg-sync');
-            if (!bd || bd === "{}") {
-                msgBox.className = "error-msg"; msgBox.innerText = "❌ No hay cuentas registradas."; return;
-            }
+            if (!bd || bd === "{}") { msgBox.className = "error-msg"; msgBox.innerText = "❌ No hay cuentas."; return; }
             const codigoUnico = btoa(bd);
             document.getElementById('txt-codigo-sync').value = codigoUnico;
             const enlaceCompleto = window.location.origin + window.location.pathname + "?sync=" + codigoUnico;
             msgBox.className = "success-msg";
-            msgBox.innerText = "✅ ¡Código e hito listos! Enlace directo: " + enlaceCompleto;
+            msgBox.innerText = "✅ ¡Enlace listo!";
         }
 
         function procesarCodigoImportado() {
             const codigo = document.getElementById('txt-codigo-sync').value.trim();
             const msgBox = document.getElementById('msg-sync');
-            if (codigo === "") { msgBox.className = "error-msg"; msgBox.innerText = "❌ Pega un código válido."; return; }
+            if (codigo === "") { msgBox.className = "error-msg"; msgBox.innerText = "❌ Pega un código."; return; }
             try {
                 const datosDecodificados = atob(codigo);
                 const bdImportada = JSON.parse(datosDecodificados);
                 let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
                 Object.assign(bdActual, bdImportada);
                 localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                msgBox.className = "success-msg"; msgBox.innerText = "🎉 ¡Sincronización completa!";
-                document.getElementById('txt-codigo-sync').value = "";
-                
-                // Subir las cuentas importadas al ranking
-                for (let usr in bdImportada) {
-                    actualizarRankingEnNube(usr, bdImportada[usr].fichas);
-                }
+                msgBox.className = "success-msg"; msgBox.innerText = "🎉 ¡Sincronizado!";
+                for (let usr in bdImportada) { actualizarRankingEnNube(usr, bdImportada[usr].fichas); }
             } catch (e) { msgBox.className = "error-msg"; msgBox.innerText = "❌ Código inválido."; }
         }
 
@@ -500,34 +458,19 @@
             document.getElementById('bloque-login').classList.add('oculto');
             document.getElementById('bloque-registro').classList.add('oculto');
             document.getElementById('bloque-sync').classList.add('oculto');
-            
-            if (formulario === 'login') {
-                document.getElementById('pestana-login').classList.add('active');
-                document.getElementById('bloque-login').classList.remove('oculto');
-            } else if (formulario === 'registro') {
-                document.getElementById('pestana-registro').classList.add('active');
-                document.getElementById('bloque-registro').classList.remove('oculto');
-            } else {
-                document.getElementById('pestana-sync').classList.add('active');
-                document.getElementById('bloque-sync').classList.remove('oculto');
-            }
+            if (formulario === 'login') { document.getElementById('pestana-login').classList.add('active'); document.getElementById('bloque-login').classList.remove('oculto'); }
+            else if (formulario === 'registro') { document.getElementById('pestana-registro').classList.add('active'); document.getElementById('bloque-registro').classList.remove('oculto'); }
+            else { document.getElementById('pestana-sync').classList.add('active'); document.getElementById('bloque-sync').classList.remove('oculto'); }
         }
 
         function ejecutarLogin() {
             const user = document.getElementById('usr-login-input').value.trim();
             const pass = document.getElementById('pass-login-input').value;
             const errorBox = document.getElementById('err-login-txt');
-            if (user === "" || pass === "") { errorBox.innerText = "❌ Debes completar todos los campos."; return; }
+            if (user === "" || pass === "") { errorBox.innerText = "❌ Completa los campos."; return; }
             let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-
-            if (!bd[user] || bd[user].password !== codificarPassword(pass)) {
-                errorBox.innerText = "❌ El usuario o la contraseña no coinciden."; return;
-            }
-
-            usuarioActual = user;
-            saldoFichas = bd[user].fichas;
-            localStorage.setItem('usuario_actual_sesion', usuarioActual);
-            abrirJuego();
+            if (!bd[user] || bd[user].password !== codificarPassword(pass)) { errorBox.innerText = "❌ Usuario/Pass incorrecto."; return; }
+            usuarioActual = user; saldoFichas = bd[user].fichas; localStorage.setItem('usuario_actual_sesion', usuarioActual); abrirJuego();
         }
 
         function ejecutarRegistro() {
@@ -535,53 +478,38 @@
             const pass = document.getElementById('pass-reg-input').value;
             const conf = document.getElementById('pass-conf-input').value;
             const errorBox = document.getElementById('err-reg-txt');
-
-            if (user === "" || pass === "" || conf === "") { errorBox.innerText = "❌ Por favor, llena todos los campos."; return; }
-            if (pass !== conf) { errorBox.innerText = "❌ Las contraseñas ingresadas no coinciden."; return; }
+            if (user === "" || pass === "" || conf === "") { errorBox.innerText = "❌ Completa los campos."; return; }
+            if (pass !== conf) { errorBox.innerText = "❌ Pass no coinciden."; return; }
             let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (bd[user] !== undefined) { errorBox.innerText = "❌ Este nombre de usuario ya está en uso."; return; }
-
+            if (bd[user] !== undefined) { errorBox.innerText = "❌ Usuario ya existe."; return; }
             bd[user] = { password: codificarPassword(pass), fichas: 1000 };
             localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-            
-            usuarioActual = user;
-            saldoFichas = 1000;
-            localStorage.setItem('usuario_actual_sesion', usuarioActual);
-            
-            actualizarRankingEnNube(usuarioActual, saldoFichas);
-            abrirJuego();
+            usuarioActual = user; saldoFichas = 1000; localStorage.setItem('usuario_actual_sesion', usuarioActual);
+            actualizarRankingEnNube(usuarioActual, saldoFichas); abrirJuego();
         }
 
         function abrirJuego() {
-            saludoUsuario.innerText = `👋 ¡Explorador activo: ${usuarioActual}!`;
-            pantallaAutenticacion.classList.add('oculto');
-            panelRanking.classList.add('oculto'); // Ocultamos el ranking para dar espacio al juego
-            seccionJuego.classList.remove('oculto');
-            apuestaPreparada = 0;
-            actualizarPantalla();
-            crearRefugios();
+            saludoUsuario.innerText = `👋 ¡Hola ${usuarioActual}!`;
+            pantallaAutenticacion.classList.add('oculto'); panelRanking.classList.add('oculto');
+            seccionJuego.classList.remove('oculto'); apuestaPreparada = 0; actualizarPantalla(); crearRefugios();
         }
 
         function guardarProgresoUsuario() {
             if (usuarioActual === "") return;
             let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (bd[usuarioActual]) {
-                bd[usuarioActual].fichas = saldoFichas;
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-                actualizarRankingEnNube(usuarioActual, saldoFichas);
-            }
+            if (bd[usuarioActual]) { bd[usuarioActual].fichas = saldoFichas; localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd)); actualizarRankingEnNube(usuarioActual, saldoFichas); }
         }
 
         function logout() {
-            if (juegoActivo && !confirm("Hay una partida en curso. ¿Cerrar sesión?")) return;
-            guardarProgresoUsuario();
-            localStorage.removeItem('usuario_actual_sesion');
-            usuarioActual = ""; juegoActivo = false; esperandoResultado = false; pozoAcumulado = 0; apuestaPreparada = 0;
-            seccionJuego.classList.add('oculto');
-            pantallaAutenticacion.classList.remove('oculto');
-            panelRanking.classList.remove('oculto'); // Reaparece el ranking mundial
-            alternarFormularios('login');
-            obtenerRankingGlobal();
+            if (juegoActivo && !confirm("¿Cerrar sesión con partida activa?")) return;
+            guardarProgresoUsuario(); localStorage.removeItem('usuario_actual_sesion'); usuarioActual = ""; 
+            juegoActivo = false; esperandoResultado = false; pozoAcumulado = 0; apuestaPreparada = 0;
+            seccionJuego.classList.add('oculto'); pantallaAutenticacion.classList.remove('oculto');
+            panelRanking.classList.remove('oculto'); alternarFormularios('login'); obtenerRankingGlobal();
+        }
+
+        function actualizarPantalla() {
+            txtFichas.innerText = saldoFichas; txtAcumulado.innerText = pozoAcumulado; pantallaApuesta.innerText = apuestaPreparada;
         }
 
         function agregarFichas(valor) {
@@ -621,7 +549,7 @@
 
         function elegirRefugio(idSeleccionado) {
             if (!juegoActivo || esperandoResultado) return;
-            esperandoResultado = true; divMensaje.innerText = "⏳ El meteorito está cayendo... (3s)";
+            esperandoResultado = true; divMensaje.innerText = "⏳ El meteorito cae...";
             document.querySelectorAll('.refugio').forEach(r => {
                 r.classList.remove('active');
                 if (parseInt(r.getAttribute('data-id')) === idSeleccionado) r.classList.add('seleccionado');
@@ -630,21 +558,19 @@
         }
 
         function determinarDestino(idSeleccionado) {
-            const array = new Uint32Array(1);
-            window.crypto.getRandomValues(array);
+            const array = new Uint32Array(1); window.crypto.getRandomValues(array);
             const refugioMeteorito = (array[0] % 9) + 1;
             document.querySelectorAll('.refugio').forEach(r => {
                 if (parseInt(r.getAttribute('data-id')) === refugioMeteorito) r.className = 'refugio destruido';
             });
-
             if (idSeleccionado === refugioMeteorito) {
-                divMensaje.innerText = `💥 ¡Meteorito! Perdiste ${pozoAcumulado} fichas.`;
+                divMensaje.innerText = `💥 ¡Perdiste ${pozoAcumulado} fichas!`;
                 pozoAcumulado = 0; apuestaPreparada = 0; juegoActivo = false;
                 btnIniciar.disabled = false; btnRetirarse.disabled = true; alternarFichasInteractividad(true);
                 guardarProgresoUsuario();
             } else {
                 pozoAcumulado *= 2; 
-                divMensaje.innerText = `🎉 ¡Salvado! El pozo es de ${pozoAcumulado}. ¿Arriesgas o te retiras?`;
+                divMensaje.innerText = `🎉 ¡Salvado! Pozo: ${pozoAcumulado}. ¿Arriesgas o retiras?`;
                 document.querySelectorAll('.refugio').forEach(r => {
                     if (parseInt(r.getAttribute('data-id')) === idSeleccionado) r.className = 'refugio salvado';
                     else if (parseInt(r.getAttribute('data-id')) !== refugioMeteorito) r.classList.add('activo');
@@ -654,20 +580,20 @@
             esperandoResultado = false; actualizarPantalla();
         }
 
+        // --- FIX: Función retirarse reparada (eliminado código duplicado y corregidas llaves) ---
         function retirarse() {
             if (!juegoActivo || esperandoResultado) return;
             saldoFichas += pozoAcumulado;
-            divMensaje.innerText = `💰 ¡Te retiraste! Ganaste ${pozoAcumulado} fichas.`;
-            pozoAcumulado *= 2; 
-                divMensaje.innerText = `🎉 ¡Salvado! El pozo es de ${pozoAcumulado}. ¿Arriesgas o te retiras?`;
-                document.querySelectorAll('.refugio').forEach(r => {
-                    if (!r.classList.contains('destruido')) {
-                        r.className = 'refugio activo';
-                    }
-                });
-                esperandoResultado = false;
-                btnRetirarse.disabled = false;
-            }
+            divMensaje.innerText = `💰 ¡Ganaste ${pozoAcumulado} fichas!`;
+            pozoAcumulado = 0;
+            apuestaPreparada = 0;
+            juegoActivo = false;
+            btnIniciar.disabled = false;
+            btnRetirarse.disabled = true;
+            alternarFichasInteractividad(true);
+            guardarProgresoUsuario();
+            actualizarPantalla();
+        }
     </script>
 </body>
 </html>
