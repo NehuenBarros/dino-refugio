@@ -210,8 +210,9 @@
                 <div class="selector-modo">
                     <label>Modo de Juego:</label>
                     <select id="modo-juego">
-                        <option value="normal">Normal (1 Meteorito)</option>
-                        <option value="apocalipsis">Apocalipsis (3 Meteoritos)</option>
+                        <option value="normal">☄️ Normal (1 Meteorito - 1.10x)</option>
+                        <option value="extremo">🔥 Extremo (2 Meteoritos - 1.30x)</option>
+                        <option value="extincion">💀 Extinción (3 Meteoritos - 2.0x)</option>
                     </select>
                 </div>
                 <div>
@@ -233,7 +234,8 @@
                 <li><strong>Ranking:</strong> ¡Acumula más fichas que nadie!</li>
                 <li><strong>Paso 1:</strong> Fija tu apuesta e inicia.</li>
                 <li><strong>Paso 2:</strong> Elige tu refugio.</li>
-                <li><strong>Paso 3:</strong> ¡Evita el meteorito y duplica!</li>
+                <li><strong>Paso 3:</strong> ¡Evita el meteorito y multiplica!</li>
+                <li><strong>Modos:</strong> Normal (1.10x), Extremo (1.30x), Extinción (2.0x)</li>
             </ul>
         </div>
     </div>
@@ -402,22 +404,32 @@
             const refugios = document.querySelectorAll('.refugio');
             refugios[id - 1].classList.add('seleccionado');
             
+            // Determinar número de meteoritos y multiplicador según el modo
+            let numMeteoritos = 1;
+            let multiplicador = 1.10;
+            
+            if (modo === 'normal') {
+                numMeteoritos = 1;
+                multiplicador = 1.10;
+            } else if (modo === 'extremo') {
+                numMeteoritos = 2;
+                multiplicador = 1.30;
+            } else if (modo === 'extincion') {
+                numMeteoritos = 3;
+                multiplicador = 2.0;
+            }
+            
             setTimeout(() => {
                 // Generar destinos de meteoritos
                 let destinos = [];
-                if (modo === 'normal') {
-                    destinos.push(Math.floor(Math.random() * 9));
-                } else {
-                    // Generar 3 posiciones únicas para apocalipsis
-                    while(destinos.length < 3) {
-                        let r = Math.floor(Math.random() * 9);
-                        if(destinos.indexOf(r) === -1) destinos.push(r);
-                    }
+                while(destinos.length < numMeteoritos) {
+                    let r = Math.floor(Math.random() * 9);
+                    if(destinos.indexOf(r) === -1) destinos.push(r);
                 }
                 
                 const golpeado = destinos.includes(id - 1);
                 
-                // Aplicar texturas de destrucción
+                // Mostrar todos los meteoritos que cayeron
                 destinos.forEach(idx => {
                     refugios[idx].classList.remove('activo', 'seleccionado');
                     refugios[idx].classList.add('destruido');
@@ -426,13 +438,13 @@
                 if (golpeado) {
                     pozoAcumulado = 0; 
                     juegoActivo = false;
-                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo.";
+                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
                     document.getElementById('btn-iniciar').disabled = false;
                 } else {
-                    pozoAcumulado *= 2;
+                    pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
                     refugios[id - 1].classList.remove('seleccionado');
                     refugios[id - 1].classList.add('salvado');
-                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado;
+                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
                     document.getElementById('btn-retirarse').disabled = false;
                 }
                 esperandoResultado = false; 
