@@ -27,20 +27,22 @@
             font-weight: 500;
         }
 
-        /* Contenedor del Sistema de Login */
+        /* PANTALLA INICIAL: CONTENEDOR DE INICIO DE SESIÓN */
         .login-container {
             background-color: rgba(44, 62, 80, 0.95);
-            padding: 30px;
+            padding: 40px 30px;
             border-radius: 12px;
             box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7);
             display: inline-block;
-            margin-top: 50px;
+            margin-top: 60px;
             max-width: 400px;
             width: 90%;
+            border: 2px solid #f1c40f;
         }
 
         .login-container h2 {
             margin-top: 0;
+            color: #f1c40f;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
@@ -49,12 +51,15 @@
             width: 80%;
             font-size: 1.1rem;
             border-radius: 6px;
-            border: none;
-            margin-bottom: 15px;
+            border: 2px solid #34495e;
+            margin-bottom: 20px;
             text-align: center;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            font-weight: bold;
         }
 
-        /* Estructura Principal en Dos Columnas */
+        /* DISEÑO DE LA PANTALLA DE JUEGO (DOS COLUMNAS) */
         .main-layout {
             display: flex;
             justify-content: center;
@@ -65,13 +70,13 @@
             flex-wrap: wrap;
         }
 
-        /* Columna del Juego */
+        /* Área del juego (Izquierda) */
         .game-area {
             flex: 2;
             min-width: 320px;
         }
 
-        /* Columna de Reglas (Al costado) */
+        /* Recuadro de Reglas (Derecha) */
         .rules-sidebar {
             flex: 1;
             min-width: 280px;
@@ -88,6 +93,7 @@
             color: #f1c40f;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
             text-align: center;
+            font-size: 1.5rem;
         }
 
         .rules-sidebar ul {
@@ -96,12 +102,13 @@
         }
 
         .rules-sidebar li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            font-size: 1.05rem;
         }
 
         .user-greeting {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #3498db;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
@@ -235,7 +242,7 @@
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95); 
         }
 
-        /* Clases auxiliares para alternar pantallas */
+        /* Clase CSS para ocultar elementos de la interfaz */
         .oculto {
             display: none !important;
         }
@@ -253,10 +260,10 @@
 
     <div id="seccion-login" class="login-container">
         <h2>Ingreso de Explorador</h2>
-        <p style="font-size: 1rem;">Introduce tu nombre de usuario para registrarte o continuar tu progreso.</p>
-        <input type="text" id="input-usuario" placeholder="Ej: DinoMaster99" maxlength="15">
+        <p style="font-size: 1rem; text-shadow: none; color: #bdc3c7;">Crea un usuario o ingresa uno existente para mantener tus fichas.</p>
+        <input type="text" id="input-usuario" placeholder="Nombre de usuario" maxlength="15">
         <br>
-        <button onclick="manejarLogin()">Ingresar al Refugio</button>
+        <button onclick="manejarLogin()">Ingresar al Juego</button>
         <div id="error-login" style="color: #e74c3c; font-weight: bold; margin-top: 10px; text-shadow: 1px 1px 2px #000;"></div>
     </div>
 
@@ -275,7 +282,7 @@
                 <input type="number" id="input-apuesta" value="100" min="10">
                 <button id="btn-iniciar" class="btn-apostar" onclick="iniciarRonda()">Iniciar Partida</button>
                 <button id="btn-retirarse" class="btn-retirarse" onclick="retirarse()" disabled>Cobrar y Retirarse</button>
-                <button id="btn-logout" style="background-image: none; background-color: #c0392b; border-color: #962d22;" onclick="logout()">Salir</button>
+                <button id="btn-logout" style="background-image: none; background-color: #c0392b; border-color: #962d22;" onclick="logout()">Cerrar Sesión</button>
             </div>
 
             <div id="mensaje">Introduce tu apuesta y dale a Iniciar Partida.</div>
@@ -286,19 +293,19 @@
         <div class="rules-sidebar">
             <h3>📜 Reglas del Juego</h3>
             <ul>
-                <li><strong>Paso 1:</strong> Ingresa un monto de apuesta válido y haz clic en <em>Iniciar Partida</em>.</li>
-                <li><strong>Paso 2:</strong> Selecciona uno de los 9 refugios disponibles en el mapa para ocultar a tu dinosaurio.</li>
-                <li><strong>Paso 3:</strong> Un meteorito caerá al azar en uno de los 9 cuadrantes tras 3 segundos.</li>
-                <li><strong>Si te salvas:</strong> El pozo acumulado de la ronda actual se <strong>duplicará</strong>. Puedes optar por arriesgarte de nuevo eligiendo otra casilla o hacer clic en <em>Cobrar y Retirarse</em> para asegurar tus ganancias.</li>
-                <li><strong>Si te alcanza:</strong> Perderás todo lo acumulado en esa ronda.</li>
-                <li><strong>Progreso Seguro:</strong> Tu saldo de fichas se guarda automáticamente vinculando tu usuario.</li>
+                <li><strong>Paso 1:</strong> Ingresa tu apuesta base y pulsa <em>Iniciar Partida</em>.</li>
+                <li><strong>Paso 2:</strong> Selecciona cualquiera de las 9 casillas del mapa para resguardar a tu dinosaurio.</li>
+                <li><strong>Paso 3:</strong> Espera 3 segundos a que impacte el meteorito sorpresa.</li>
+                <li><strong>¡A salvo!</strong> Si el meteorito cae en otro cuadrante, el pozo se <strong>duplica</strong>. Elige si seguir arriesgándote en la siguiente ronda o presionar <em>Cobrar y Retirarse</em>.</li>
+                <li><strong>¡Impacto directo!</strong> Si cae en tu refugio perderás el pozo de la ronda actual.</li>
+                <li><strong>Progreso Seguro:</strong> Tus fichas se auto-guardan y la sesión se mantendrá activa aunque cierres el navegador.</li>
             </ul>
         </div>
 
     </div>
 
     <script>
-        // Variables de estado del juego
+        // Variables de entorno de juego
         let usuarioActual = "";
         let saldoFichas = 1000;
         let pozoAcumulado = 0;
@@ -306,7 +313,7 @@
         let juegoActivo = false; 
         let esperandoResultado = false; 
 
-        // Elementos del DOM
+        // Captura de elementos del DOM
         const seccionLogin = document.getElementById('seccion-login');
         const seccionJuego = document.getElementById('seccion-juego');
         const inputUsuario = document.getElementById('input-usuario');
@@ -321,38 +328,51 @@
         const divMensaje = document.getElementById('mensaje');
         const contenedorRefugios = document.getElementById('contenedor-refugios');
 
-        // --- SISTEMA DE USUARIOS (LOCALSTORAGE) ---
+        // --- COMPROBACIÓN AUTOMÁTICA DE SESIÓN AL CARGAR LA PÁGINA ---
+        window.onload = function() {
+            const sesionGuardada = localStorage.getItem('usuario_actual_sesion');
+            if (sesionGuardada) {
+                // Si ya había ingresado antes, cargamos su sesión directamente sin pedir login
+                usuarioActual = sesionGuardada;
+                let usuariosBD = JSON.parse(localStorage.getItem('dino_usuarios_bd')) || {};
+                saldoFichas = usuariosBD[usuarioActual] !== undefined ? usuariosBD[usuarioActual] : 1000;
+                
+                cargarInterfazJuego();
+            }
+        };
+
+        // --- SISTEMA DE LOGUEO Y REGISTRO ---
         function manejarLogin() {
             const nombre = inputUsuario.value.trim();
             errorLogin.innerText = "";
 
             if (nombre === "") {
-                errorLogin.innerText = "❌ El nombre de usuario no puede estar vacío.";
+                errorLogin.innerText = "❌ Escribe un nombre de usuario válido.";
                 return;
             }
 
-            // Obtener base de datos local de usuarios o crear una nueva si no existe
             let usuariosBD = JSON.parse(localStorage.getItem('dino_usuarios_bd')) || {};
 
             if (usuariosBD[nombre] !== undefined) {
-                // El usuario ya existe, cargamos su progreso guardado
+                // Si el usuario existe, extrae sus fichas guardadas
                 saldoFichas = usuariosBD[nombre];
-                divMensaje.innerText = "¡Bienvenido de vuelta! Tu progreso ha sido cargado.";
             } else {
-                // El usuario es totalmente nuevo, inicia con 1000 fichas base
+                // Si no existe, lo crea con el balance base de 1000 fichas
                 saldoFichas = 1000;
                 usuariosBD[nombre] = saldoFichas;
                 localStorage.setItem('dino_usuarios_bd', JSON.stringify(usuariosBD));
-                divMensaje.innerText = "¡Registro exitoso! Introduce tu apuesta y dale a Iniciar Partida.";
             }
 
             usuarioActual = nombre;
-            saludoUsuario.innerText = `👋 ¡Hola, ${usuarioActual}!`;
+            localStorage.setItem('usuario_actual_sesion', usuarioActual); // Deja guardada la sesión en el navegador
             
-            // Alternar pantallas
+            cargarInterfazJuego();
+        }
+
+        function cargarInterfazJuego() {
+            saludoUsuario.innerText = `👋 ¡Explorador activo: ${usuarioActual}!`;
             seccionLogin.classList.add('oculto');
             seccionJuego.classList.remove('oculto');
-
             actualizarPantalla();
             crearRefugios();
         }
@@ -366,11 +386,12 @@
 
         function logout() {
             if (juegoActivo) {
-                if (!confirm("Tienes una partida en curso. Si sales ahora, perderás el pozo acumulado actual. ¿Deseas salir?")) {
+                if (!confirm("Tienes una ronda activa. Si abandonas ahora perderás el pozo acumulado de esta partida. ¿Cerrar sesión de todos modos?")) {
                     return;
                 }
             }
             guardarProgresoUsuario();
+            localStorage.removeItem('usuario_actual_sesion'); // Limpia la sesión automática
             usuarioActual = "";
             juegoActivo = false;
             esperandoResultado = false;
@@ -381,7 +402,7 @@
             seccionLogin.classList.remove('oculto');
         }
 
-        // --- LÓGICA DEL JUEGO ---
+        // --- LÓGICA DE JUEGO ---
         function crearRefugios() {
             contenedorRefugios.innerHTML = '';
             for (let i = 1; i <= 9; i++) {
@@ -411,7 +432,7 @@
             pozoAcumulado = monto; 
             juegoActivo = true;
 
-            guardarProgresoUsuario(); // Guarda el descuento de saldo de forma inmediata
+            guardarProgresoUsuario(); 
             actualizarPantalla();
             crearRefugios(); 
 
