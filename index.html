@@ -618,29 +618,44 @@
             let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
             if(bd[usuarioActual]) { 
                 bd[usuarioActual].fichas = saldoFichas; 
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd)); 
+                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
+                // Además de tu localStorage, añade esta línea:
+                db.collection("jugadores").doc(usuarioActual).set({
+                    usuario: usuarioActual,
+                    fichas: saldoFichas
+                }, { merge: true });
             }
             actualizarPantalla();
         }
 
         function obtenerRankingGlobal() {
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            const lista = document.getElementById('lista-ranking-global');
-            const usuarios = Object.keys(bd).map(user => ({ user: user, fichas: bd[user].fichas }));
-            usuarios.sort((a, b) => b.fichas - a.fichas);
+    const lista = document.getElementById('lista-ranking-global');
+    
+    // Conectamos con tu colección 'jugadores' en Firestore
+    db.collection("jugadores")
+        .orderBy("fichas", "desc") // Ordena de mayor a menor fichas
+        .limit(5)                 // Solo los 5 mejores
+        .onSnapshot((snapshot) => {
+            lista.innerHTML = ""; // Limpiamos la lista antes de dibujar
             
-            if (usuarios.length === 0) {
-                lista.innerHTML = '<li class="ranking-item">Sin jugadores aún</li>';
+            if (snapshot.empty) {
+                lista.innerHTML = '<li class="ranking-item">Aún no hay jugadores</li>';
                 return;
             }
-            
-            lista.innerHTML = usuarios.slice(0, 5).map((u, i) => `
-                <li class="ranking-item ${i === 0 ? 'top1' : ''}">
-                    <span class="ranking-pos">#${i + 1}</span>
-                    <span class="ranking-user">${u.user}</span>
-                    <span class="ranking-money">${u.fichas} fichas</span>
-                </li>
-            `).join('');
+
+            snapshot.forEach((doc, index) => {
+                const data = doc.data();
+                lista.innerHTML += `
+                    <li class="ranking-item ${index === 0 ? 'top1' : ''}">
+                        <span class="ranking-pos">#${index + 1}</span>
+                        <span class="ranking-user">${data.usuario}</span>
+                        <span class="ranking-money">${data.fichas} fichas</span>
+                    </li>
+                `;
+            });
+        }, (error) => {
+            console.error("Error al leer el ranking global: ", error);
+        });
         }
 
         function alternarFormularios(f) {
