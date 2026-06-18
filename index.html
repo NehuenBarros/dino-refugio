@@ -4,669 +4,1168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dino Refugio - Juego de Azar</title>
-    <link rel="icon" type="image/png" href="imagenes/logo_dino_refugio.png">
+
+    <!-- Firebase SDK (Compat para simplicidad en un solo archivo) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- Fuentes -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.8/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/press-start-2p@5.0.8/index.css">
+
     <style>
+        /* ========== RESET Y VARIABLES ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #ff6b35;
+            --secondary: #004e89;
+            --accent: #ffd23f;
+            --danger: #d62828;
+            --success: #2a9d8f;
+            --dark: #1a1a2e;
+            --darker: #0f0f1e;
+            --light: #f8f9fa;
+            --glass: rgba(255,255,255,0.08);
+            --glass-border: rgba(255,255,255,0.15);
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a252f;
-            background-image: url('imagenes/fondo_pagina.jpg');
-            background-size: cover; 
-            background-attachment: fixed; 
-            color: #ecf0f1;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 50%, #16213e 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .logo-container { margin: 20px auto 10px auto; max-width: 550px; width: 90%; }
-        .logo-juego { width: 100%; height: auto; filter: drop-shadow(3px 3px 10px rgba(0, 0, 0, 0.8)); }
-
-        .auth-container {
-            background-color: rgba(44, 62, 80, 0.95); padding: 0; border-radius: 12px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7); display: inline-block;
-            margin-top: 20px; max-width: 460px; width: 90%; border: 2px solid #f1c40f;
-            overflow: hidden; vertical-align: top;
-        }
-
-        .ranking-container {
-            background-color: rgba(26, 37, 48, 0.95); border: 2px solid #2ecc71;
-            border-radius: 12px; box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7);
-            display: inline-block; margin: 20px 0 0 20px; max-width: 380px; width: 90%;
-            overflow: hidden; vertical-align: top;
-        }
-
-        .ranking-header { background-color: #2ecc71; color: #1a252f; padding: 12px; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .ranking-lista { padding: 15px; margin: 0; list-style: none; text-align: left; }
-        .ranking-item { display: flex; justify-content: space-between; padding: 10px 8px; border-bottom: 1px solid rgba(236, 240, 241, 0.1); font-size: 1.05rem; }
-        .ranking-item:last-child { border-bottom: none; }
-        .ranking-pos { font-weight: bold; color: #f1c40f; margin-right: 8px; }
-        .ranking-user { flex-grow: 1; color: #ecf0f1; }
-        .ranking-money { font-weight: bold; color: #2ecc71; }
-        .ranking-item.top1 { background-color: rgba(241, 196, 15, 0.15); font-weight: bold; border-left: 4px solid #f1c40f; }
-
-        .auth-tabs { display: flex; background-color: #2c3e50; border-bottom: 2px solid #f1c40f; }
-        .tab-btn { flex: 1; padding: 12px 5px; background: none; border: none; color: #7f8c8d; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .tab-btn:hover { color: #ecf0f1; }
-        .tab-btn.active { color: #f1c40f; background-color: rgba(44, 62, 80, 0.95); border-bottom: 3px solid #f1c40f; margin-bottom: -2px; }
-
-        .auth-form { padding: 25px; }
-        .auth-form h2 { margin-top: 0; color: #f1c40f; font-size: 1.5rem; }
-        .auth-form input, .auth-form textarea { padding: 12px; width: 85%; font-size: 1rem; border-radius: 6px; border: 2px solid #34495e; margin-bottom: 15px; text-align: center; background-color: #ecf0f1; color: #2c3e50; font-weight: bold; }
-        .auth-form textarea { font-family: monospace; font-size: 0.85rem; resize: none; height: 60px; }
-
-        .main-layout { display: flex; justify-content: center; align-items: flex-start; gap: 30px; max-width: 1200px; margin: 20px auto; flex-wrap: wrap; }
-        .game-area { flex: 2; min-width: 320px; }
-        .rules-sidebar { flex: 1; min-width: 280px; background-color: rgba(52, 73, 94, 0.95); padding: 20px; border-radius: 12px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); text-align: left; border-left: 5px solid #f1c40f; }
-        .rules-sidebar h3 { margin-top: 0; color: #f1c40f; text-align: center; font-size: 1.5rem; }
-        .rules-sidebar ul { padding-left: 20px; line-height: 1.6; }
-        .user-greeting { font-size: 1.4rem; font-weight: bold; color: #3498db; text-shadow: 2px 2px 4px rgba(0,0,0,0.9); margin-bottom: 15px; }
-
-        .scoreboard { display: flex; justify-content: center; gap: 40px; margin-bottom: 20px; font-size: 1.5rem; background-color: rgba(52, 73, 94, 0.95); padding: 18px 30px; border-radius: 10px; display: inline-flex; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); }
-        .fichas { color: #f1c40f; font-weight: bold; }
-        .acumulado { color: #2ecc71; font-weight: bold; }
-
-        .seccion-apuesta-moderna { background-color: rgba(44, 62, 80, 0.9); border: 2px solid #34495e; border-radius: 14px; padding: 20px; max-width: 600px; margin: 0 auto 20px auto; box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.4); }
-        .titulo-apuesta { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; color: #bdc3c7; margin-bottom: 10px; font-weight: bold; }
-        .pantalla-monto-apuesta { background-color: #111; border: 2px solid #f1c40f; border-radius: 8px; font-size: 2rem; font-family: 'Courier New', Courier, monospace; color: #f1c40f; font-weight: bold; padding: 10px; width: 200px; margin: 0 auto 15px auto; }
-
-        .contenedor-fichas-casino { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-        .ficha-casino { width: 65px; height: 65px; border-radius: 50%; border: 4px dashed #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; color: white; cursor: pointer; box-shadow: 0px 4px 8px rgba(0,0,0,0.4); transition: 0.2s; user-select: none; }
-        .ficha-casino:hover:not(.deshabilitada) { transform: scale(1.1) rotate(15deg); filter: brightness(1.2); }
-        .ficha-10 { background-color: #2980b9; border-color: #1f618d; }
-        .ficha-50 { background-color: #27ae60; border-color: #1e8449; }
-        .ficha-100 { background-color: #9b59b6; border-color: #76448a; }
-        .ficha-500 { background-color: #e67e22; border-color: #b9651b; }
-
-        .btn-utilidad { padding: 6px 14px; font-size: 0.9rem; font-weight: bold; border-radius: 6px; border: 1px solid #7f8c8d; background: #34495e; color: #ecf0f1; cursor: pointer; margin: 0 5px; }
-        .btn-allin { border-color: #e74c3c; background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
-        .btn-allin:hover:not(:disabled) { background: #e74c3c !important; color: white !important; }
-
-        .btn-accion { padding: 14px 30px; font-size: 1.25rem; font-weight: bold; cursor: pointer; border-radius: 10px; border: none; margin: 8px; transition: 0.2s; color: white; }
-        .btn-jugar { background: linear-gradient(135deg, #2ecc71, #27ae60); border-bottom: 4px solid #1e8449; }
-        .btn-cobrar { background: linear-gradient(135deg, #f1c40f, #f39c12); border-bottom: 4px solid #d35400; }
-        .btn-salir { background: linear-gradient(135deg, #e74c3c, #c0392b); border-bottom: 4px solid #962d22; }
-        .btn-accion:disabled, .deshabilitada { background: #7f8c8d !important; opacity: 0.5; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; border: none !important; }
-
-        /* SELECTOR DE MODO MEJORADO */
-        .selector-modo {
-            margin: 20px 0 15px 0;
-        }
-        .selector-modo-label {
-            display: block;
-            font-size: 0.95rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #bdc3c7;
-            margin-bottom: 12px;
-        }
-        .modo-grid {
+        /* ========== HEADER ========== */
+        header {
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary);
+            padding: 1rem 2rem;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-shadow: 2px 2px 0 var(--primary);
+        }
+        .header-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-accent { background: var(--accent); color: var(--dark); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ========== PANTALLAS / MODALES ========== */
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .screen.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: none;
             justify-content: center;
-            gap: 10px;
+            align-items: center;
+            z-index: 200;
+            padding: 1rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: linear-gradient(145deg, #1e1e3a, #2a2a4a);
+            border: 2px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 450px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--glass-border);
+            border-radius: 10px;
+            background: var(--glass);
+            color: white;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* ========== PANTALLA DE INICIO ========== */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 80px);
+            text-align: center;
+            padding: 2rem;
+        }
+        .welcome-screen h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2rem;
+            color: var(--accent);
+            text-shadow: 3px 3px 0 var(--primary);
+            margin-bottom: 1rem;
+        }
+        .welcome-screen p { color: #aaa; margin-bottom: 2rem; font-size: 1.1rem; }
+        .welcome-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .welcome-buttons .btn { padding: 1rem 2rem; font-size: 1rem; }
+
+        /* ========== ZONA DE JUEGO ========== */
+        .game-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .stat-card .label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; }
+        .stat-card .value {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-top: 0.3rem;
+        }
+
+        /* Apuesta */
+        .bet-section {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .bet-section h3 { margin-bottom: 1rem; color: var(--accent); }
+        .bet-input-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
-        .modo-card {
+        .bet-input-row input {
             flex: 1;
-            min-width: 140px;
-            max-width: 180px;
-            padding: 12px 8px;
+            min-width: 100px;
+            padding: 0.7rem;
+            border: 2px solid var(--glass-border);
             border-radius: 10px;
-            border: 2px solid #34495e;
-            background: linear-gradient(145deg, #2c3e50, #1a252f);
+            background: var(--glass);
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+        }
+        .bet-input-row input:focus { outline: none; border-color: var(--primary); }
+        .chip-btns { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+        .chip-btn {
+            padding: 0.5rem 0.8rem;
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--accent);
             cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .chip-btn:hover { background: var(--accent); color: var(--dark); }
+
+        /* Modos de juego */
+        .modes-section {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .modes-section h3 { margin-bottom: 1rem; color: var(--accent); }
+        .mode-options { display: flex; flex-direction: column; gap: 0.7rem; }
+        .mode-option {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .mode-option:hover { border-color: var(--primary); }
+        .mode-option.selected {
+            border-color: var(--accent);
+            background: rgba(255,210,63,0.1);
+        }
+        .mode-option input[type="radio"] { display: none; }
+        .mode-icon { font-size: 1.5rem; }
+        .mode-info { flex: 1; }
+        .mode-info .name { font-weight: 600; }
+        .mode-info .desc { font-size: 0.8rem; color: #aaa; }
+        .mode-mult {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: var(--success);
+        }
+
+        /* Tablero de refugios */
+        .shelters-board {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .shelters-board h3 { margin-bottom: 1rem; color: var(--accent); }
+        .shelters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        .shelter-card {
+            aspect-ratio: 1;
+            border: 3px solid var(--glass-border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0,0,0,0.3);
             position: relative;
             overflow: hidden;
         }
-        .modo-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s;
+        .shelter-card:hover:not(.destroyed):not(.selected) {
+            border-color: var(--primary);
+            transform: scale(1.05);
         }
-        .modo-card:hover::before {
-            left: 100%;
+        .shelter-card.selected {
+            border-color: var(--success);
+            background: rgba(42,157,143,0.2);
         }
-        .modo-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.6);
+        .shelter-card.destroyed {
+            border-color: var(--danger);
+            background: rgba(214,40,40,0.2);
+            cursor: not-allowed;
         }
-        .modo-card .modo-icono {
-            font-size: 1.8rem;
-            margin-bottom: 4px;
-            display: block;
+        .shelter-card.safe {
+            border-color: var(--accent);
+            background: rgba(255,210,63,0.15);
         }
-        .modo-card .modo-nombre {
-            font-size: 0.95rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-        .modo-card .modo-detalle {
+        .shelter-card .emoji { font-size: 2.5rem; }
+        .shelter-card .shelter-label {
             font-size: 0.75rem;
-            color: #bdc3c7;
-            line-height: 1.3;
+            margin-top: 0.3rem;
+            color: #aaa;
         }
-        .modo-card .modo-multi {
-            display: inline-block;
-            margin-top: 6px;
-            padding: 2px 8px;
+
+        /* Acciones */
+        .actions-bar {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .actions-bar .btn { padding: 0.8rem 1.5rem; font-size: 0.95rem; }
+
+        /* Ranking */
+        .ranking-section {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .ranking-section h3 {
+            margin-bottom: 1rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .ranking-list { list-style: none; }
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.7rem 1rem;
             border-radius: 10px;
+            margin-bottom: 0.4rem;
+            transition: background 0.2s;
+        }
+        .ranking-item:hover { background: rgba(255,255,255,0.05); }
+        .ranking-item.me {
+            background: rgba(255,210,63,0.1);
+            border: 1px solid var(--accent);
+        }
+        .rank-pos {
+            font-family: 'Press Start 2P', cursive;
             font-size: 0.8rem;
-            font-weight: bold;
+            min-width: 2.5rem;
+            text-align: center;
+        }
+        .rank-pos.gold { color: #ffd700; }
+        .rank-pos.silver { color: #c0c0c0; }
+        .rank-pos.bronze { color: #cd7f32; }
+        .rank-name { flex: 1; font-weight: 600; }
+        .rank-chips {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            color: var(--accent);
+        }
+        .ranking-loading {
+            text-align: center;
+            padding: 2rem;
+            color: #aaa;
+        }
+        .ranking-loading .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--glass-border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 0.5rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Sincronización */
+        .sync-section {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .sync-section h3 { margin-bottom: 1rem; color: var(--accent); }
+        .sync-code {
             background: rgba(0,0,0,0.4);
+            border: 2px dashed var(--glass-border);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            word-break: break-all;
         }
 
-        /* Modo Normal - Azul/Verde */
-        .modo-normal {
-            border-color: #27ae60;
+        /* Reglas */
+        .rules-section {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
-        .modo-normal .modo-nombre { color: #2ecc71; }
-        .modo-normal .modo-multi { color: #2ecc71; border: 1px solid #27ae60; }
-        .modo-normal.activo {
-            background: linear-gradient(145deg, #27ae60, #1e8449);
-            border-color: #2ecc71;
-            box-shadow: 0px 0px 20px rgba(46, 204, 113, 0.6);
-        }
-        .modo-normal.activo .modo-nombre,
-        .modo-normal.activo .modo-detalle,
-        .modo-normal.activo .modo-multi { color: white; }
-        .modo-normal.activo .modo-multi { background: rgba(0,0,0,0.3); }
+        .rules-section h3 { margin-bottom: 1rem; color: var(--accent); }
+        .rules-section ol { padding-left: 1.5rem; }
+        .rules-section li { margin-bottom: 0.5rem; color: #ccc; }
 
-        /* Modo Extremo - Naranja */
-        .modo-extremo {
-            border-color: #e67e22;
+        /* Notificaciones */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 999;
+            animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+            max-width: 350px;
         }
-        .modo-extremo .modo-nombre { color: #f39c12; }
-        .modo-extremo .modo-multi { color: #f39c12; border: 1px solid #e67e22; }
-        .modo-extremo.activo {
-            background: linear-gradient(145deg, #e67e22, #d35400);
-            border-color: #f39c12;
-            box-shadow: 0px 0px 20px rgba(243, 156, 18, 0.6);
-        }
-        .modo-extremo.activo .modo-nombre,
-        .modo-extremo.activo .modo-detalle,
-        .modo-extremo.activo .modo-multi { color: white; }
-        .modo-extremo.activo .modo-multi { background: rgba(0,0,0,0.3); }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--secondary); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { opacity: 1; } to { opacity: 0; transform: translateX(100%); } }
 
-        /* Modo Extinción - Rojo */
-        .modo-extincion {
-            border-color: #c0392b;
+        /* Meteorito animación */
+        .meteor-animation {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 150;
+            display: none;
         }
-        .modo-extincion .modo-nombre { color: #e74c3c; }
-        .modo-extincion .modo-multi { color: #e74c3c; border: 1px solid #c0392b; }
-        .modo-extincion.activo {
-            background: linear-gradient(145deg, #e74c3c, #962d22);
-            border-color: #e74c3c;
-            box-shadow: 0px 0px 20px rgba(231, 76, 60, 0.7);
-            animation: pulsoExtincion 2s infinite;
+        .meteor-animation.active { display: block; }
+        .meteor {
+            position: absolute;
+            font-size: 3rem;
+            animation: meteorFall 1s ease-in forwards;
         }
-        .modo-extincion.activo .modo-nombre,
-        .modo-extincion.activo .modo-detalle,
-        .modo-extincion.activo .modo-multi { color: white; }
-        .modo-extincion.activo .modo-multi { background: rgba(0,0,0,0.3); }
-
-        @keyframes pulsoExtincion {
-            0%, 100% { box-shadow: 0px 0px 20px rgba(231, 76, 60, 0.7); }
-            50% { box-shadow: 0px 0px 30px rgba(231, 76, 60, 1); }
+        @keyframes meteorFall {
+            0% { transform: translate(-100px, -100px) rotate(0deg); opacity: 1; }
+            100% { transform: translate(50vw, 80vh) rotate(720deg); opacity: 0; }
         }
 
-        .refugios-container { display: grid; grid-template-columns: repeat(3, 130px); grid-gap: 15px; justify-content: center; margin: 30px auto; }
-        .refugio { 
-            width: 130px; 
-            height: 155px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 2.2rem; 
-            cursor: pointer; 
-            user-select: none; 
-            border-radius: 12px; 
-            border: 3px solid #555; 
-            background-color: #34495e; 
-            background-image: url('imagenes/refugio_normal.jpg');
-            background-size: cover; 
-            background-position: center;
-            transition: transform 0.2s;
+        /* Responsive */
+        @media (max-width: 600px) {
+            .logo { font-size: 0.8rem; }
+            .welcome-screen h1 { font-size: 1.2rem; }
+            header { padding: 0.8rem 1rem; }
+            .btn { padding: 0.5rem 0.8rem; font-size: 0.75rem; }
         }
-        .refugio.activo:hover { transform: scale(1.08); box-shadow: 0px 0px 15px #f1c40f; }
-        .refugio.seleccionado { 
-            border-color: #f39c12; 
-            border-width: 4px;
-            box-shadow: 0px 0px 20px #f39c12;
-        }
-        .refugio.salvado { 
-            background-image: url('imagenes/refugio_salvado.jpg');
-            border-color: #2ecc71; 
-            border-width: 4px;
-            box-shadow: 0px 0px 20px #2ecc71;
-        }
-        .refugio.destruido { 
-            background-image: url('imagenes/refugio_crack.jpg');
-            border-color: #e74c3c; 
-            border-width: 4px;
-            box-shadow: 0px 0px 20px #e74c3c;
-            animation: shake 0.5s ease-in-out; 
-        }
-
-        #mensaje { font-size: 1.6rem; margin-top: 25px; font-weight: bold; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95); }
-        .error-msg { color: #e74c3c; font-weight: bold; margin-top: 10px; }
-        .success-msg { color: #2ecc71; font-weight: bold; margin-top: 10px; }
-        .oculto { display: none !important; }
-
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px) rotate(-2deg); } 40%, 80% { transform: translateX(6px) rotate(2deg); } }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 </head>
 <body>
-    <div class="logo-container">
-        <img src="imagenes/logo_dino_refugio.png" alt="Dino Refugio Logo" class="logo-juego" onerror="this.src='https://placehold.co/550x200/2c3e50/f1c40f?text=Dino+Refugio'">
-    </div>
 
-    <div id="contenedor-inicial-wrapper">
-        <div id="pantalla-autenticacion" class="auth-container">
-            <div class="auth-tabs">
-                <button id="pestana-login" class="tab-btn active" onclick="alternarFormularios('login')">Iniciar Sesión</button>
-                <button id="pestana-registro" class="tab-btn" onclick="alternarFormularios('registro')">Crear Cuenta</button>
-                <button id="pestana-sync" class="tab-btn" onclick="alternarFormularios('sync')">📲 Sincronizar</button>
-            </div>
-
-            <div id="bloque-login" class="auth-form">
-                <h2>Ingresar al Refugio</h2>
-                <input type="text" id="usr-login-input" placeholder="Nombre de usuario" maxlength="15">
-                <input type="password" id="pass-login-input" placeholder="Contraseña">
-                <br>
-                <button class="btn-accion btn-jugar" style="font-size:1.1rem; padding:10px 20px;" onclick="ejecutarLogin()">Entrar a Jugar</button>
-                <div id="err-login-txt" class="error-msg"></div>
-            </div>
-
-            <div id="bloque-registro" class="auth-form oculto">
-                <h2>Registro de Nuevo Explorador</h2>
-                <input type="text" id="usr-reg-input" placeholder="Elige un usuario" maxlength="15">
-                <input type="password" id="pass-reg-input" placeholder="Contraseña nueva">
-                <input type="password" id="pass-conf-input" placeholder="Confirmar contraseña">
-                <br>
-                <button class="btn-accion btn-jugar" style="font-size:1.1rem; padding:10px 20px;" onclick="ejecutarRegistro()">Registrar Cuenta</button>
-                <div id="err-reg-txt" class="error-msg"></div>
-            </div>
-
-            <div id="bloque-sync" class="auth-form oculto">
-                <h2>Sincronizar Celular y PC</h2>
-                <p style="font-size:0.9rem; color:#bdc3c7; margin: 0 0 15px 0;">Copia este código de tu dispositivo actual y pégalo en el nuevo para pasar tus cuentas:</p>
-                <button class="btn-utilidad" onclick="generarCodigoSincronizacion()">Generar Código Actual</button>
-                <br><br>
-                <textarea id="txt-codigo-sync" placeholder="El código generado aparecerá aquí..."></textarea>
-                <br>
-                <button class="btn-accion btn-cobrar" style="font-size:1rem; padding:8px 15px;" onclick="procesarCodigoImportado()">Importar Cuentas</button>
-                <div id="msg-sync" class="error-msg"></div>
-            </div>
+    <!-- ========== HEADER ========== -->
+    <header>
+        <div class="logo">🦕 Dino Refugio</div>
+        <div class="header-buttons" id="headerButtons">
+            <!-- Se llenan dinámicamente -->
         </div>
+    </header>
 
-        <div id="panel-ranking" class="ranking-container">
-            <div class="ranking-header">🏆 Top Exploradores</div>
-            <ul id="lista-ranking-global" class="ranking-lista">
-                <li class="ranking-item">Cargando clasificación...</li>
-            </ul>
+    <!-- ========== PANTALLA DE BIENVENIDA ========== -->
+    <div class="screen active" id="welcomeScreen">
+        <div class="welcome-screen">
+            <h1>🦕 Dino Refugio</h1>
+            <p>¡Sobrevive a los meteoritos y conviértete en el explorador #1!</p>
+            <div class="welcome-buttons">
+                <button class="btn btn-primary" onclick="showModal('loginModal')">🔑 Iniciar Sesión</button>
+                <button class="btn btn-accent" onclick="showModal('registerModal')">📝 Crear Cuenta</button>
+                <button class="btn btn-secondary" onclick="showModal('syncModal')">📲 Sincronizar</button>
+            </div>
         </div>
     </div>
 
-    <div id="seccion-juego" class="main-layout oculto">
-        <div class="game-area">
-            <div id="saludo-usuario" class="user-greeting"></div>
-            <div class="scoreboard">
-                <div>Mis Fichas: <span id="txt-fichas" class="fichas">1000</span></div>
-                <div>Pozo Acumulado: <span id="txt-acumulado" class="acumulado">0</span></div>
-            </div>
-            <div class="seccion-apuesta-moderna">
-                <div class="titulo-apuesta">Monto a apostar</div>
-                <div id="pantalla-apuesta" class="pantalla-monto-apuesta">0</div>
-                <div class="contenedor-fichas-casino">
-                    <div id="chip-10" class="ficha-casino ficha-10" onclick="agregarFichas(10)">+10</div>
-                    <div id="chip-50" class="ficha-casino ficha-50" onclick="agregarFichas(50)">+50</div>
-                    <div id="chip-100" class="ficha-casino ficha-100" onclick="agregarFichas(100)">+100</div>
-                    <div id="chip-500" class="ficha-casino ficha-500" onclick="agregarFichas(500)">+500</div>
+    <!-- ========== PANTALLA DE JUEGO ========== -->
+    <div class="screen" id="gameScreen">
+        <div class="game-container">
+
+            <!-- Estadísticas -->
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="label">Mis Fichas</div>
+                    <div class="value" id="myChips">0</div>
                 </div>
-                
-                <div class="selector-modo">
-                    <span class="selector-modo-label">⚙️ Modo de Juego</span>
-                    <div class="modo-grid">
-                        <div class="modo-card modo-normal activo" data-modo="normal" onclick="seleccionarModo('normal')">
-                            <span class="modo-icono">☄️</span>
-                            <div class="modo-nombre">Normal</div>
-                            <div class="modo-detalle">1 Meteorito</div>
-                            <span class="modo-multi">x1.10</span>
-                        </div>
-                        <div class="modo-card modo-extremo" data-modo="extremo" onclick="seleccionarModo('extremo')">
-                            <span class="modo-icono">🔥</span>
-                            <div class="modo-nombre">Extremo</div>
-                            <div class="modo-detalle">2 Meteoritos</div>
-                            <span class="modo-multi">x1.30</span>
-                        </div>
-                        <div class="modo-card modo-extincion" data-modo="extincion" onclick="seleccionarModo('extincion')">
-                            <span class="modo-icono">💀</span>
-                            <div class="modo-nombre">Extinción</div>
-                            <div class="modo-detalle">3 Meteoritos</div>
-                            <span class="modo-multi">x2.00</span>
-                        </div>
+                <div class="stat-card">
+                    <div class="label">Pozo Acumulado</div>
+                    <div class="value" id="totalPot">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">Ronda Actual</div>
+                    <div class="value" id="currentRound">0</div>
+                </div>
+            </div>
+
+            <!-- Sección de Apuesta -->
+            <div class="bet-section">
+                <h3>💰 Monto a Apostar</h3>
+                <div class="bet-input-row">
+                    <input type="number" id="betAmount" value="10" min="1" placeholder="Apuesta">
+                    <div class="chip-btns">
+                        <button class="chip-btn" onclick="setBet(10)">+10</button>
+                        <button class="chip-btn" onclick="setBet(50)">+50</button>
+                        <button class="chip-btn" onclick="setBet(100)">+100</button>
+                        <button class="chip-btn" onclick="setBet(500)">+500</button>
+                        <button class="chip-btn" onclick="allIn()">ALL-IN</button>
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <button id="btn-clear" class="btn-utilidad" onclick="limpiarApuesta()">Limpiar</button>
-                    <button id="btn-allin" class="btn-utilidad btn-allin" onclick="apostarTodo()">All-In</button>
+            <!-- Modos de Juego -->
+            <div class="modes-section">
+                <h3>⚙️ Modo de Juego</h3>
+                <div class="mode-options">
+                    <label class="mode-option selected" data-mode="normal">
+                        <input type="radio" name="gameMode" value="normal" checked>
+                        <span class="mode-icon">☄️</span>
+                        <div class="mode-info">
+                            <div class="name">Normal</div>
+                            <div class="desc">1 Meteorito</div>
+                        </div>
+                        <span class="mode-mult">x1.10</span>
+                    </label>
+                    <label class="mode-option" data-mode="extreme">
+                        <input type="radio" name="gameMode" value="extreme">
+                        <span class="mode-icon">🔥</span>
+                        <div class="mode-info">
+                            <div class="name">Extremo</div>
+                            <div class="desc">2 Meteoritos</div>
+                        </div>
+                        <span class="mode-mult">x1.30</span>
+                    </label>
+                    <label class="mode-option" data-mode="extinction">
+                        <input type="radio" name="gameMode" value="extinction">
+                        <span class="mode-icon">💀</span>
+                        <div class="mode-info">
+                            <div class="name">Extinción</div>
+                            <div class="desc">3 Meteoritos</div>
+                        </div>
+                        <span class="mode-mult">x2.00</span>
+                    </label>
                 </div>
             </div>
-            <div class="acciones-juego">
-                <button id="btn-iniciar" class="btn-accion btn-jugar" onclick="iniciarRonda()">Iniciar Partida</button>
-                <button id="btn-retirarse" class="btn-accion btn-cobrar" onclick="retirarse()" disabled>Cobrar y Retirarse</button>
-                <button id="btn-logout" class="btn-accion btn-salir" onclick="logout()">Cerrar Sesión</button>
+
+            <!-- Tablero de Refugios -->
+            <div class="shelters-board">
+                <h3>🏠 Elige tu Refugio</h3>
+                <div class="shelters-grid" id="sheltersGrid">
+                    <!-- Se genera dinámicamente -->
+                </div>
             </div>
-            <div id="mensaje">Agrega fichas a tu tablero y dale a Iniciar Partida.</div>
-            <div class="refugios-container" id="contenedor-refugios"></div>
-        </div>
-        <div class="rules-sidebar">
-            <h3>📜 Reglas del Juego</h3>
-            <ul>
-                <li><strong>Ranking:</strong> ¡Acumula más fichas que nadie!</li>
-                <li><strong>Paso 1:</strong> Fija tu apuesta e inicia.</li>
-                <li><strong>Paso 2:</strong> Elige tu refugio.</li>
-                <li><strong>Paso 3:</strong> ¡Evita el meteorito y multiplica!</li>
-                <li><strong>Modos:</strong> Normal (1.10x), Extremo (1.30x), Extinción (2.0x)</li>
-            </ul>
+
+            <!-- Acciones -->
+            <div class="actions-bar">
+                <button class="btn btn-success" id="startBtn" onclick="startRound()">🚀 Iniciar Partida</button>
+                <button class="btn btn-accent" id="cashoutBtn" onclick="cashOut()" disabled>💰 Cobrar y Retirarse</button>
+                <button class="btn btn-secondary" onclick="clearBoard()">🧹 Limpiar</button>
+                <button class="btn btn-danger" onclick="logout()">🚪 Cerrar Sesión</button>
+            </div>
+
+            <!-- Ranking Global -->
+            <div class="ranking-section">
+                <h3>🏆 Top Exploradores (Global)</h3>
+                <div id="rankingContainer">
+                    <div class="ranking-loading">
+                        <div class="spinner"></div>
+                        <p>Cargando clasificación global...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reglas -->
+            <div class="rules-section">
+                <h3>📜 Reglas del Juego</h3>
+                <ol>
+                    <li><strong>Fija tu apuesta</strong> e inicia la partida.</li>
+                    <li><strong>Elige tu refugio</strong> entre las opciones disponibles.</li>
+                    <li><strong>¡Evita el meteorito</strong> y multiplica tus fichas!</li>
+                </ol>
+                <p style="margin-top:1rem; color:#aaa; font-size:0.85rem;">
+                    <strong>Modos:</strong> Normal (1.10x) · Extremo (1.30x) · Extinción (2.0x)
+                </p>
+            </div>
+
         </div>
     </div>
 
+    <!-- ========== MODAL: LOGIN ========== -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <h2>🔑 Iniciar Sesión</h2>
+            <div class="form-group">
+                <label>Nombre de usuario</label>
+                <input type="text" id="loginUser" placeholder="Tu nombre de explorador">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="loginPass" placeholder="Tu contraseña">
+            </div>
+            <div style="display:flex; gap:0.5rem; margin-top:1.5rem;">
+                <button class="btn btn-primary" style="flex:1;" onclick="login()">Entrar</button>
+                <button class="btn btn-secondary" onclick="hideModal('loginModal')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: REGISTRO ========== -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal">
+            <h2>📝 Nuevo Explorador</h2>
+            <div class="form-group">
+                <label>Nombre de usuario</label>
+                <input type="text" id="regUser" placeholder="Elige un nombre único">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="regPass" placeholder="Mínimo 4 caracteres">
+            </div>
+            <div style="display:flex; gap:0.5rem; margin-top:1.5rem;">
+                <button class="btn btn-accent" style="flex:1;" onclick="register()">Registrar</button>
+                <button class="btn btn-secondary" onclick="hideModal('registerModal')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: SINCRONIZAR ========== -->
+    <div class="modal-overlay" id="syncModal">
+        <div class="modal">
+            <h2>📲 Sincronizar Dispositivos</h2>
+            <p style="color:#aaa; font-size:0.9rem; margin-bottom:1rem;">
+                Tu progreso se guarda automáticamente en la nube de Firebase. 
+                Solo inicia sesión en cualquier dispositivo para acceder a tus fichas.
+            </p>
+            <div style="display:flex; gap:0.5rem;">
+                <button class="btn btn-primary" style="flex:1;" onclick="hideModal('syncModal')">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animación de meteorito -->
+    <div class="meteor-animation" id="meteorAnim"></div>
+
+    <!-- ========== JAVASCRIPT ========== -->
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDZjGTHBqoxfiAgT8CVJX_YMK8Fr7Bi__U",
-            authDomain: "dinorefugiojuego.firebaseapp.com",
-            projectId: "dinorefugiojuego",
-            storageBucket: "dinorefugiojuego.firebasestorage.app",
-            messagingSenderId: "1058615945538",
-            appId: "1:1058615945538:web:13fec099308db3798f80db"
-        };
+    // =============================================
+    // CONFIGURACIÓN DE FIREBASE
+    // =============================================
+    // ⚠️ REEMPLAZA estos valores con tu configuración real de Firebase
+    const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_PROYECTO.firebaseapp.com",
+        projectId: "TU_PROYECTO",
+        storageBucket: "TU_PROYECTO.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "TU_APP_ID"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // =============================================
+    // ESTADO GLOBAL DEL JUEGO
+    // =============================================
+    const GameState = {
+        currentUser: null,
+        chips: 1000,
+        bet: 10,
+        mode: 'normal',
+        round: 0,
+        gameActive: false,
+        shelters: [],
+        selectedShelter: null,
+        multiplier: 1.10,
+        meteorCount: 1,
+        totalShelters: 6,
+        rankingUnsubscribe: null
+    };
+
+    const MODES = {
+        normal:     { meteors: 1, mult: 1.10, label: 'Normal' },
+        extreme:    { meteors: 2, mult: 1.30, label: 'Extremo' },
+        extinction: { meteors: 3, mult: 2.00, label: 'Extinción' }
+    };
+
+    // =============================================
+    // UTILIDADES
+    // =============================================
+    function showToast(message, type = 'info') {
+        const existing = document.querySelectorAll('.toast');
+        existing.forEach(t => t.remove());
         
-        let db = null;
-        try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { console.warn("Firebase no disponible"); }
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
 
-        let usuarioActual = "";
-        let saldoFichas = 1000;
-        let pozoAcumulado = 0;
-        let apuestaPreparada = 0; 
-        let juegoActivo = false; 
-        let esperandoResultado = false; 
-        let modoActual = "normal";
+    function showModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
 
-        // -- FUNCIONES DE SEGURIDAD --
-        function codificarPassword(cadena) {
-            let hash = 0;
-            for (let i = 0; i < cadena.length; i++) {
-                hash = (hash << 5) - hash + cadena.charCodeAt(i);
-                hash |= 0;
-            }
-            return "dino_secure_" + hash;
+    function hideModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    // =============================================
+    // AUTENTICACIÓN (Firebase Auth con email/password)
+    // =============================================
+    async function register() {
+        const username = document.getElementById('regUser').value.trim();
+        const password = document.getElementById('regPass').value.trim();
+
+        if (!username || !password) {
+            showToast('Completa todos los campos', 'error');
+            return;
+        }
+        if (password.length < 4) {
+            showToast('La contraseña debe tener al menos 4 caracteres', 'error');
+            return;
         }
 
-        // -- GESTIÓN DE UI --
-        function actualizarPantalla() {
-            document.getElementById('txt-fichas').innerText = saldoFichas; 
-            document.getElementById('txt-acumulado').innerText = pozoAcumulado; 
-            document.getElementById('pantalla-apuesta').innerText = apuestaPreparada;
-        }
-
-        function abrirJuego() {
-            document.getElementById('saludo-usuario').innerText = `👋 ¡Hola ${usuarioActual}!`;
-            document.getElementById('pantalla-autenticacion').classList.add('oculto'); 
-            document.getElementById('panel-ranking').classList.add('oculto');
-            document.getElementById('seccion-juego').classList.remove('oculto'); 
-            apuestaPreparada = 0; actualizarPantalla(); crearRefugios();
-        }
-
-        // -- SELECTOR DE MODO --
-        function seleccionarModo(modo) {
-            if (juegoActivo) return; // No cambiar modo durante partida activa
-            modoActual = modo;
-            document.querySelectorAll('.modo-card').forEach(card => {
-                card.classList.remove('activo');
+        try {
+            // Usamos username@dinorefugio.game como email ficticio
+            const email = `${username.toLowerCase().replace(/\s/g, '_')}@dinorefugio.game`;
+            const cred = await auth.createUserWithEmailAndPassword(email, password);
+            
+            // Guardar perfil en Firestore
+            await db.collection('users').doc(cred.user.uid).set({
+                username: username,
+                chips: 1000,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
             });
-            document.querySelector(`.modo-card[data-modo="${modo}"]`).classList.add('activo');
-        }
 
-        // -- AUTENTICACIÓN Y SINCRONIZACIÓN --
-        window.onload = function() {
-            obtenerRankingGlobal();
-            const urlParams = new URLSearchParams(window.location.search);
-            const syncCodigo = urlParams.get('sync');
-            if (syncCodigo) {
-                try {
-                    const datosDecodificados = atob(syncCodigo);
-                    const bdImportada = JSON.parse(datosDecodificados);
-                    let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                    Object.assign(bdActual, bdImportada);
-                    localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                    alert("¡Sincronización exitosa!");
-                } catch(e) { console.error("Error al sincronizar"); }
-            }
-            const sesionActiva = localStorage.getItem('usuario_actual_sesion');
-            if (sesionActiva) {
-                usuarioActual = sesionActiva;
-                let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                if (bd[usuarioActual]) { saldoFichas = bd[usuarioActual].fichas; abrirJuego(); }
-            }
-        };
-
-        function generarCodigoSincronizacion() {
-            let bd = localStorage.getItem('dino_usuarios_secure_v2');
-            const msgBox = document.getElementById('msg-sync');
-            if (!bd) { msgBox.innerText = "❌ No hay datos."; return; }
-            const codigoUnico = btoa(bd);
-            document.getElementById('txt-codigo-sync').value = codigoUnico;
-            msgBox.innerText = "✅ Código listo.";
-        }
-
-        function procesarCodigoImportado() {
-            const codigo = document.getElementById('txt-codigo-sync').value.trim();
-            try {
-                const bdImportada = JSON.parse(atob(codigo));
-                let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                Object.assign(bdActual, bdImportada);
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                alert("Sincronizado correctamente.");
-            } catch (e) { alert("Código inválido"); }
-        }
-
-        function ejecutarLogin() {
-            const user = document.getElementById('usr-login-input').value.trim();
-            const pass = document.getElementById('pass-login-input').value;
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (!bd[user] || bd[user].password !== codificarPassword(pass)) { 
-                document.getElementById('err-login-txt').innerText = "❌ Usuario/Pass incorrecto."; return; 
-            }
-            usuarioActual = user; saldoFichas = bd[user].fichas; 
-            localStorage.setItem('usuario_actual_sesion', usuarioActual); abrirJuego();
-        }
-
-        function ejecutarRegistro() {
-            const user = document.getElementById('usr-reg-input').value.trim();
-            const pass = document.getElementById('pass-reg-input').value;
-            const conf = document.getElementById('pass-conf-input').value;
-            if (pass !== conf) { document.getElementById('err-reg-txt').innerText = "❌ No coinciden."; return; }
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (bd[user]) { document.getElementById('err-reg-txt').innerText = "❌ Ya existe."; return; }
-            bd[user] = { password: codificarPassword(pass), fichas: 1000 };
-            localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-            usuarioActual = user; saldoFichas = 1000;
-            localStorage.setItem('usuario_actual_sesion', usuarioActual); abrirJuego();
-        }
-
-        function logout() {
-            localStorage.removeItem('usuario_actual_sesion');
-            location.reload();
-        }
-
-        // -- LÓGICA DE JUEGO --
-        function agregarFichas(valor) {
-            if (juegoActivo) return;
-            if (apuestaPreparada + valor > saldoFichas) return;
-            apuestaPreparada += valor; actualizarPantalla();
-        }
-
-        function limpiarApuesta() { apuestaPreparada = 0; actualizarPantalla(); }
-        function apostarTodo() { apuestaPreparada = saldoFichas; actualizarPantalla(); }
-
-        function crearRefugios() {
-            const cont = document.getElementById('contenedor-refugios');
-            cont.innerHTML = '';
-            for (let i = 1; i <= 9; i++) {
-                const div = document.createElement('div');
-                div.className = 'refugio'; 
-                div.onclick = () => elegirRefugio(i);
-                cont.appendChild(div);
+            hideModal('registerModal');
+            showToast('¡Bienvenido explorador! 🦕', 'success');
+        } catch (err) {
+            console.error(err);
+            if (err.code === 'auth/email-already-in-use') {
+                showToast('Ese nombre ya existe, prueba otro', 'error');
+            } else {
+                showToast('Error: ' + err.message, 'error');
             }
         }
+    }
 
-        function iniciarRonda() {
-            if (apuestaPreparada <= 0) return;
-            saldoFichas -= apuestaPreparada; 
-            pozoAcumulado = apuestaPreparada; 
-            juegoActivo = true;
-            esperandoResultado = false;
-            actualizarPantalla();
+    async function login() {
+        const username = document.getElementById('loginUser').value.trim();
+        const password = document.getElementById('loginPass').value.trim();
+
+        if (!username || !password) {
+            showToast('Completa todos los campos', 'error');
+            return;
+        }
+
+        try {
+            const email = `${username.toLowerCase().replace(/\s/g, '_')}@dinorefugio.game`;
+            const cred = await auth.signInWithEmailAndPassword(email, password);
             
-            document.querySelectorAll('.refugio').forEach(r => {
-                r.className = 'refugio activo';
+            // Actualizar último login
+            await db.collection('users').doc(cred.user.uid).update({
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
             });
-            
-            document.getElementById('btn-iniciar').disabled = true;
-            document.getElementById('btn-retirarse').disabled = true;
-            document.getElementById('mensaje').innerText = "¡Elige tu refugio!";
-        }
 
-        function elegirRefugio(id) {
-            if (!juegoActivo || esperandoResultado) return;
-            esperandoResultado = true;
-            
-            const refugios = document.querySelectorAll('.refugio');
-            refugios[id - 1].classList.add('seleccionado');
-            
-            // Determinar número de meteoritos y multiplicador según el modo
-            let numMeteoritos = 1;
-            let multiplicador = 1.10;
-            
-            if (modoActual === 'normal') {
-                numMeteoritos = 1;
-                multiplicador = 1.10;
-            } else if (modoActual === 'extremo') {
-                numMeteoritos = 2;
-                multiplicador = 1.30;
-            } else if (modoActual === 'extincion') {
-                numMeteoritos = 3;
-                multiplicador = 2.0;
+            hideModal('loginModal');
+            showToast('¡Sesión iniciada! 🎮', 'success');
+        } catch (err) {
+            console.error(err);
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                showToast('Usuario o contraseña incorrectos', 'error');
+            } else {
+                showToast('Error: ' + err.message, 'error');
             }
-            
-            setTimeout(() => {
-                let destinos = [];
-                while(destinos.length < numMeteoritos) {
-                    let r = Math.floor(Math.random() * 9);
-                    if(destinos.indexOf(r) === -1) destinos.push(r);
-                }
-                
-                const golpeado = destinos.includes(id - 1);
-                
-                destinos.forEach(idx => {
-                    refugios[idx].classList.remove('activo', 'seleccionado');
-                    refugios[idx].classList.add('destruido');
-                });
-                
-                if (golpeado) {
-                    pozoAcumulado = 0; 
-                    juegoActivo = false;
-                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
-                    document.getElementById('btn-iniciar').disabled = false;
-                } else {
-                    pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
-                    refugios[id - 1].classList.remove('seleccionado');
-                    refugios[id - 1].classList.add('salvado');
-                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
-                    document.getElementById('btn-retirarse').disabled = false;
-                }
-                esperandoResultado = false; 
-                actualizarPantalla();
-            }, 1000);
         }
+    }
 
-        function retirarse() {
-            saldoFichas += pozoAcumulado; 
-            pozoAcumulado = 0; 
-            juegoActivo = false;
-            document.getElementById('btn-retirarse').disabled = true;
-            document.getElementById('btn-iniciar').disabled = false;
-            document.getElementById('mensaje').innerText = "✅ ¡Cobrado! Tus fichas: " + saldoFichas;
-            
-            document.querySelectorAll('.refugio').forEach(r => {
-                r.className = 'refugio';
-            });
-            
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if(bd[usuarioActual]) { 
-                bd[usuarioActual].fichas = saldoFichas; 
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-                // Además de tu localStorage, añade esta línea:
-                db.collection("jugadores").doc(usuarioActual).set({
-                    usuario: usuarioActual,
-                    fichas: saldoFichas
-                }, { merge: true });
-            }
-            actualizarPantalla();
+    function logout() {
+        if (GameState.gameActive) {
+            showToast('Termina la ronda antes de salir', 'error');
+            return;
         }
+        auth.signOut();
+        showToast('Sesión cerrada', 'info');
+    }
 
-        function obtenerRankingGlobal() {
-    const lista = document.getElementById('lista-ranking-global');
-    
-    // Conectamos con tu colección 'jugadores' en Firestore
-    db.collection("jugadores")
-        .orderBy("fichas", "desc") // Ordena de mayor a menor fichas
-        .limit(5)                 // Solo los 5 mejores
-        .onSnapshot((snapshot) => {
-            lista.innerHTML = ""; // Limpiamos la lista antes de dibujar
-            
-            if (snapshot.empty) {
-                lista.innerHTML = '<li class="ranking-item">Aún no hay jugadores</li>';
-                return;
-            }
+    // =============================================
+    // LISTENER DE AUTENTICACIÓN
+    // =============================================
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            GameState.currentUser = user;
+            await loadUserData();
+            switchScreen('gameScreen');
+            updateHeaderButtons(true);
+            subscribeToRanking();
+            generateShelters();
+        } else {
+            GameState.currentUser = null;
+            switchScreen('welcomeScreen');
+            updateHeaderButtons(false);
+            unsubscribeRanking();
+        }
+    });
 
-            snapshot.forEach((doc, index) => {
+    function updateHeaderButtons(loggedIn) {
+        const container = document.getElementById('headerButtons');
+        if (loggedIn) {
+            container.innerHTML = `
+                <span style="color:var(--accent); font-weight:600;">🦕 ${GameState.currentUser.displayName || 'Explorador'}</span>
+            `;
+        } else {
+            container.innerHTML = `
+                <button class="btn btn-primary" onclick="showModal('loginModal')">🔑 Iniciar Sesión</button>
+                <button class="btn btn-accent" onclick="showModal('registerModal')">📝 Crear Cuenta</button>
+            `;
+        }
+    }
+
+    // =============================================
+    // FIRESTORE: CARGAR / GUARDAR DATOS DEL USUARIO
+    // =============================================
+    async function loadUserData() {
+        try {
+            const doc = await db.collection('users').doc(GameState.currentUser.uid).get();
+            if (doc.exists) {
                 const data = doc.data();
-                lista.innerHTML += `
-                    <li class="ranking-item ${index === 0 ? 'top1' : ''}">
-                        <span class="ranking-pos">#${index + 1}</span>
-                        <span class="ranking-user">${data.usuario}</span>
-                        <span class="ranking-money">${data.fichas} fichas</span>
-                    </li>
-                `;
+                GameState.chips = data.chips || 1000;
+                // Actualizar header con nombre
+                const headerName = document.querySelector('#headerButtons span');
+                if (headerName) headerName.textContent = `🦕 ${data.username}`;
+            } else {
+                // Si no existe el doc, crearlo
+                await db.collection('users').doc(GameState.currentUser.uid).set({
+                    username: GameState.currentUser.email.split('@')[0],
+                    chips: 1000,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                GameState.chips = 1000;
+            }
+            updateUI();
+        } catch (err) {
+            console.error('Error cargando datos:', err);
+            showToast('Error al cargar tu progreso', 'error');
+        }
+    }
+
+    async function saveChipsToCloud() {
+        if (!GameState.currentUser) return;
+        try {
+            await db.collection('users').doc(GameState.currentUser.uid).update({
+                chips: GameState.chips,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
             });
-        }, (error) => {
-            console.error("Error al leer el ranking global: ", error);
-        });
+        } catch (err) {
+            console.error('Error guardando fichas:', err);
+        }
+    }
+
+    // =============================================
+    // RANKING GLOBAL EN TIEMPO REAL (Firestore)
+    // =============================================
+    function subscribeToRanking() {
+        unsubscribeRanking();
+        
+        const container = document.getElementById('rankingContainer');
+        container.innerHTML = `
+            <div class="ranking-loading">
+                <div class="spinner"></div>
+                <p>Cargando clasificación global...</p>
+            </div>
+        `;
+
+        // Listener en tiempo real: top 20 jugadores ordenados por fichas
+        GameState.rankingUnsubscribe = db.collection('users')
+            .orderBy('chips', 'desc')
+            .limit(20)
+            .onSnapshot((snapshot) => {
+                renderRanking(snapshot.docs);
+            }, (error) => {
+                console.error('Error en ranking:', error);
+                container.innerHTML = `<p style="color:var(--danger); text-align:center;">Error al cargar el ranking</p>`;
+            });
+    }
+
+    function unsubscribeRanking() {
+        if (GameState.rankingUnsubscribe) {
+            GameState.rankingUnsubscribe();
+            GameState.rankingUnsubscribe = null;
+        }
+    }
+
+    function renderRanking(docs) {
+        const container = document.getElementById('rankingContainer');
+        
+        if (docs.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:#aaa;">Aún no hay exploradores. ¡Sé el primero!</p>`;
+            return;
         }
 
-        function alternarFormularios(f) {
-            document.getElementById('bloque-login').classList.toggle('oculto', f !== 'login');
-            document.getElementById('bloque-registro').classList.toggle('oculto', f !== 'registro');
-            document.getElementById('bloque-sync').classList.toggle('oculto', f !== 'sync');
-            
-            document.getElementById('pestana-login').classList.toggle('active', f === 'login');
-            document.getElementById('pestana-registro').classList.toggle('active', f === 'registro');
-            document.getElementById('pestana-sync').classList.toggle('active', f === 'sync');
+        let html = '<ul class="ranking-list">';
+        let rank = 1;
+
+        docs.forEach(doc => {
+            const data = doc.data();
+            const isMe = GameState.currentUser && doc.id === GameState.currentUser.uid;
+            const posClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+            const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+
+            html += `
+                <li class="ranking-item ${isMe ? 'me' : ''}">
+                    <span class="rank-pos ${posClass}">${medal}</span>
+                    <span class="rank-name">${escapeHtml(data.username || 'Explorador')}${isMe ? ' (Tú)' : ''}</span>
+                    <span class="rank-chips">💎 ${formatNumber(data.chips || 0)}</span>
+                </li>
+            `;
+            rank++;
+        });
+
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function formatNumber(n) {
+        return n.toLocaleString('es-ES');
+    }
+
+    // =============================================
+    // LÓGICA DEL JUEGO
+    // =============================================
+    function generateShelters() {
+        const grid = document.getElementById('sheltersGrid');
+        grid.innerHTML = '';
+        GameState.shelters = [];
+        GameState.selectedShelter = null;
+
+        const emojis = ['🏠', '🏡', '🏘️', '🏰', '🛖', '🏗️', '🪨', '🌋'];
+        
+        for (let i = 0; i < GameState.totalShelters; i++) {
+            const shelter = {
+                id: i,
+                isMeteor: false,
+                selected: false,
+                revealed: false
+            };
+            GameState.shelters.push(shelter);
+
+            const card = document.createElement('div');
+            card.className = 'shelter-card';
+            card.dataset.index = i;
+            card.innerHTML = `
+                <span class="emoji">${emojis[i % emojis.length]}</span>
+                <span class="shelter-label">Refugio ${i + 1}</span>
+            `;
+            card.addEventListener('click', () => selectShelter(i));
+            grid.appendChild(card);
         }
+    }
+
+    function selectShelter(index) {
+        if (GameState.gameActive) return;
+        if (GameState.shelters[index].selected) return;
+
+        // Deseleccionar anterior
+        GameState.shelters.forEach(s => s.selected = false);
+        document.querySelectorAll('.shelter-card').forEach(c => c.classList.remove('selected'));
+
+        // Seleccionar nuevo
+        GameState.shelters[index].selected = true;
+        GameState.selectedShelter = index;
+        document.querySelectorAll('.shelter-card')[index].classList.add('selected');
+    }
+
+    function startRound() {
+        if (GameState.gameActive) return;
+
+        const bet = parseInt(document.getElementById('betAmount').value) || 0;
+        if (bet <= 0) {
+            showToast('La apuesta debe ser mayor a 0', 'error');
+            return;
+        }
+        if (bet > GameState.chips) {
+            showToast('No tienes suficientes fichas', 'error');
+            return;
+        }
+        if (GameState.selectedShelter === null) {
+            showToast('Selecciona un refugio primero', 'error');
+            return;
+        }
+
+        // Configurar modo
+        const mode = GameState.mode;
+        GameState.meteorCount = MODES[mode].meteors;
+        GameState.multiplier = MODES[mode].mult;
+        GameState.bet = bet;
+        GameState.gameActive = true;
+        GameState.round++;
+
+        // Descontar apuesta
+        GameState.chips -= bet;
+        updateUI();
+
+        // Colocar meteoritos aleatoriamente (sin repetir)
+        const meteorPositions = new Set();
+        while (meteorPositions.size < GameState.meteorCount) {
+            meteorPositions.add(Math.floor(Math.random() * GameState.totalShelters));
+        }
+        GameState.shelters.forEach(s => {
+            s.isMeteor = meteorPositions.has(s.id);
+            s.revealed = false;
+        });
+
+        // Revelar resultado
+        setTimeout(() => revealResult(), 800);
+    }
+
+    function revealResult() {
+        const cards = document.querySelectorAll('.shelter-card');
+        const selected = GameState.selectedShelter;
+        const hit = GameState.shelters[selected].isMeteor;
+
+        // Revelar todos
+        cards.forEach((card, i) => {
+            const shelter = GameState.shelters[i];
+            if (shelter.isMeteor) {
+                card.classList.add('destroyed');
+                card.querySelector('.emoji').textContent = '☄️';
+            } else if (i === selected) {
+                card.classList.add('safe');
+                card.querySelector('.emoji').textContent = '✅';
+            }
+        });
+
+        if (hit) {
+            // ¡Meteorito! Pierde la apuesta
+            showMeteorAnimation();
+            showToast(`☄️ ¡Meteorito! Perdiste ${formatNumber(GameState.bet)} fichas`, 'error');
+        } else {
+            // ¡Sobrevivió! Gana multiplicador
+            const winnings = Math.floor(GameState.bet * GameState.multiplier);
+            GameState.chips += winnings;
+            showToast(`✅ ¡Sobreviviste! Ganaste ${formatNumber(winnings)} fichas (x${GameState.multiplier})`, 'success');
+        }
+
+        updateUI();
+        saveChipsToCloud();
+
+        // Reset
+        GameState.gameActive = false;
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('cashoutBtn').disabled = true;
+    }
+
+    function cashOut() {
+        if (!GameState.gameActive) return;
+        showToast('No hay ronda activa para cobrar', 'info');
+    }
+
+    function clearBoard() {
+        if (GameState.gameActive) {
+            showToast('Termina la ronda primero', 'error');
+            return;
+        }
+        generateShelters();
+        showToast('Tablero limpiado', 'info');
+    }
+
+    function showMeteorAnimation() {
+        const container = document.getElementById('meteorAnim');
+        container.classList.add('active');
+        container.innerHTML = '';
+
+        for (let i = 0; i < 5; i++) {
+            const meteor = document.createElement('div');
+            meteor.className = 'meteor';
+            meteor.textContent = '☄️';
+            meteor.style.left = Math.random() * 80 + '%';
+            meteor.style.top = '-50px';
+            meteor.style.animationDelay = (i * 0.15) + 's';
+            container.appendChild(meteor);
+        }
+
+        setTimeout(() => {
+            container.classList.remove('active');
+            container.innerHTML = '';
+        }, 1500);
+    }
+
+    // =============================================
+    // UI HELPERS
+    // =============================================
+    function setBet(amount) {
+        const input = document.getElementById('betAmount');
+        const current = parseInt(input.value) || 0;
+        input.value = current + amount;
+    }
+
+    function allIn() {
+        document.getElementById('betAmount').value = GameState.chips;
+    }
+
+    function updateUI() {
+        document.getElementById('myChips').textContent = formatNumber(GameState.chips);
+        document.getElementById('currentRound').textContent = GameState.round;
+        // Pozo acumulado global (opcional: podrías sumar de Firestore)
+        document.getElementById('totalPot').textContent = formatNumber(GameState.chips);
+    }
+
+    // =============================================
+    // EVENT LISTENERS: MODOS DE JUEGO
+    // =============================================
+    document.querySelectorAll('.mode-option').forEach(option => {
+        option.addEventListener('click', () => {
+            document.querySelectorAll('.mode-option').forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            option.querySelector('input').checked = true;
+            GameState.mode = option.dataset.mode;
+        });
+    });
+
+    // Cerrar modales al hacer clic fuera
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.classList.remove('active');
+        });
+    });
+
+    // =============================================
+    // INICIALIZACIÓN
+    // =============================================
+    updateHeaderButtons(false);
+    console.log('🦕 Dino Refugio cargado. Conecta tu Firebase para comenzar.');
     </script>
 </body>
 </html>
+
