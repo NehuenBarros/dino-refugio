@@ -1,672 +1,1426 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dino Refugio - Juego de Azar</title>
-    <link rel="icon" type="image/png" href="imagenes/logo_dino_refugio.png">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a252f;
-            background-image: url('imagenes/fondo_pagina.jpg');
-            background-size: cover; 
-            background-attachment: fixed; 
-            color: #ecf0f1;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dino Refugio - Juego de Azar</title>
+<style>
+  :root {
+    --bg-dark: #0a0e17;
+    --bg-card: #141b2d;
+    --bg-cell: #1a2340;
+    --bg-cell-hover: #243056;
+    --accent: #f59e0b;
+    --accent-glow: #fbbf24;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --border: #2d3a5c;
+    --meteor: #ff4500;
+  }
 
-        .logo-container { margin: 20px auto 10px auto; max-width: 550px; width: 90%; }
-        .logo-juego { width: 100%; height: auto; filter: drop-shadow(3px 3px 10px rgba(0, 0, 0, 0.8)); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .auth-container {
-            background-color: rgba(44, 62, 80, 0.95); padding: 0; border-radius: 12px;
-            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7); display: inline-block;
-            margin-top: 20px; max-width: 460px; width: 90%; border: 2px solid #f1c40f;
-            overflow: hidden; vertical-align: top;
-        }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-        .ranking-container {
-            background-color: rgba(26, 37, 48, 0.95); border: 2px solid #2ecc71;
-            border-radius: 12px; box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7);
-            display: inline-block; margin: 20px 0 0 20px; max-width: 380px; width: 90%;
-            overflow: hidden; vertical-align: top;
-        }
+  /* ===== STARS BACKGROUND ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1.5px 1.5px at 50% 10%, rgba(255,255,255,0.7), transparent),
+      radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 15% 85%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 85% 15%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 45% 45%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 25% 70%, rgba(255,255,255,0.5), transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-        .ranking-header { background-color: #2ecc71; color: #1a252f; padding: 12px; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .ranking-lista { padding: 15px; margin: 0; list-style: none; text-align: left; }
-        .ranking-item { display: flex; justify-content: space-between; padding: 10px 8px; border-bottom: 1px solid rgba(236, 240, 241, 0.1); font-size: 1.05rem; }
-        .ranking-item:last-child { border-bottom: none; }
-        .ranking-pos { font-weight: bold; color: #f1c40f; margin-right: 8px; }
-        .ranking-user { flex-grow: 1; color: #ecf0f1; }
-        .ranking-money { font-weight: bold; color: #2ecc71; }
-        .ranking-item.top1 { background-color: rgba(241, 196, 15, 0.15); font-weight: bold; border-left: 4px solid #f1c40f; }
+  /* ===== AUTH SCREEN ===== */
+  #authScreen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10,14,23,0.97);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
 
-        .auth-tabs { display: flex; background-color: #2c3e50; border-bottom: 2px solid #f1c40f; }
-        .tab-btn { flex: 1; padding: 12px 5px; background: none; border: none; color: #7f8c8d; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .tab-btn:hover { color: #ecf0f1; }
-        .tab-btn.active { color: #f1c40f; background-color: rgba(44, 62, 80, 0.95); border-bottom: 3px solid #f1c40f; margin-bottom: -2px; }
+  #authScreen.hidden { display: none; }
 
-        .auth-form { padding: 25px; }
-        .auth-form h2 { margin-top: 0; color: #f1c40f; font-size: 1.5rem; }
-        .auth-form input, .auth-form textarea { padding: 12px; width: 85%; font-size: 1rem; border-radius: 6px; border: 2px solid #34495e; margin-bottom: 15px; text-align: center; background-color: #ecf0f1; color: #2c3e50; font-weight: bold; }
-        .auth-form textarea { font-family: monospace; font-size: 0.85rem; resize: none; height: 60px; }
+  .auth-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
 
-        .main-layout { display: flex; justify-content: center; align-items: flex-start; gap: 30px; max-width: 1200px; margin: 20px auto; flex-wrap: wrap; }
-        .game-area { flex: 2; min-width: 320px; }
-        .rules-sidebar { flex: 1; min-width: 280px; background-color: rgba(52, 73, 94, 0.95); padding: 20px; border-radius: 12px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); text-align: left; border-left: 5px solid #f1c40f; }
-        .rules-sidebar h3 { margin-top: 0; color: #f1c40f; text-align: center; font-size: 1.5rem; }
-        .rules-sidebar ul { padding-left: 20px; line-height: 1.6; }
-        .user-greeting { font-size: 1.4rem; font-weight: bold; color: #3498db; text-shadow: 2px 2px 4px rgba(0,0,0,0.9); margin-bottom: 15px; }
+  .auth-container h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
 
-        .scoreboard { display: flex; justify-content: center; gap: 40px; margin-bottom: 20px; font-size: 1.5rem; background-color: rgba(52, 73, 94, 0.95); padding: 18px 30px; border-radius: 10px; display: inline-flex; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); }
-        .fichas { color: #f1c40f; font-weight: bold; }
-        .acumulado { color: #2ecc71; font-weight: bold; }
+  .auth-container .subtitle {
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+  }
 
-        .seccion-apuesta-moderna { background-color: rgba(44, 62, 80, 0.9); border: 2px solid #34495e; border-radius: 14px; padding: 20px; max-width: 600px; margin: 0 auto 20px auto; box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.4); }
-        .titulo-apuesta { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; color: #bdc3c7; margin-bottom: 10px; font-weight: bold; }
-        .pantalla-monto-apuesta { background-color: #111; border: 2px solid #f1c40f; border-radius: 8px; font-size: 2rem; font-family: 'Courier New', Courier, monospace; color: #f1c40f; font-weight: bold; padding: 10px; width: 200px; margin: 0 auto 15px auto; }
+  .auth-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
 
-        .contenedor-fichas-casino { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-        .ficha-casino { width: 65px; height: 65px; border-radius: 50%; border: 4px dashed #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; color: white; cursor: pointer; box-shadow: 0px 4px 8px rgba(0,0,0,0.4); transition: 0.2s; user-select: none; }
-        .ficha-casino:hover:not(.deshabilitada) { transform: scale(1.1) rotate(15deg); filter: brightness(1.2); }
-        .ficha-10 { background-color: #2980b9; border-color: #1f618d; }
-        .ficha-50 { background-color: #27ae60; border-color: #1e8449; }
-        .ficha-100 { background-color: #9b59b6; border-color: #76448a; }
-        .ficha-500 { background-color: #e67e22; border-color: #b9651b; }
+  .auth-tab {
+    flex: 1;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
 
-        .btn-utilidad { padding: 6px 14px; font-size: 0.9rem; font-weight: bold; border-radius: 6px; border: 1px solid #7f8c8d; background: #34495e; color: #ecf0f1; cursor: pointer; margin: 0 5px; }
-        .btn-allin { border-color: #e74c3c; background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
-        .btn-allin:hover:not(:disabled) { background: #e74c3c !important; color: white !important; }
+  .auth-tab.active {
+    background: var(--accent);
+    color: #000;
+  }
 
-        .btn-accion { padding: 14px 30px; font-size: 1.25rem; font-weight: bold; cursor: pointer; border-radius: 10px; border: none; margin: 8px; transition: 0.2s; color: white; }
-        .btn-jugar { background: linear-gradient(135deg, #2ecc71, #27ae60); border-bottom: 4px solid #1e8449; }
-        .btn-cobrar { background: linear-gradient(135deg, #f1c40f, #f39c12); border-bottom: 4px solid #d35400; }
-        .btn-salir { background: linear-gradient(135deg, #e74c3c, #c0392b); border-bottom: 4px solid #962d22; }
-        .btn-accion:disabled, .deshabilitada { background: #7f8c8d !important; opacity: 0.5; cursor: not-allowed !important; box-shadow: none !important; transform: none !important; border: none !important; }
+  .auth-form { display: none; }
+  .auth-form.active { display: block; }
 
-        /* SELECTOR DE MODO MEJORADO */
-        .selector-modo {
-            margin: 20px 0 15px 0;
-        }
-        .selector-modo-label {
-            display: block;
-            font-size: 0.95rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #bdc3c7;
-            margin-bottom: 12px;
-        }
-        .modo-grid {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .modo-card {
-            flex: 1;
-            min-width: 140px;
-            max-width: 180px;
-            padding: 12px 8px;
-            border-radius: 10px;
-            border: 2px solid #34495e;
-            background: linear-gradient(145deg, #2c3e50, #1a252f);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-            position: relative;
-            overflow: hidden;
-        }
-        .modo-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s;
-        }
-        .modo-card:hover::before {
-            left: 100%;
-        }
-        .modo-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.6);
-        }
-        .modo-card .modo-icono {
-            font-size: 1.8rem;
-            margin-bottom: 4px;
-            display: block;
-        }
-        .modo-card .modo-nombre {
-            font-size: 0.95rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-        .modo-card .modo-detalle {
-            font-size: 0.75rem;
-            color: #bdc3c7;
-            line-height: 1.3;
-        }
-        .modo-card .modo-multi {
-            display: inline-block;
-            margin-top: 6px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            background: rgba(0,0,0,0.4);
-        }
+  .auth-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 1rem;
+    margin-bottom: 12px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
 
-        /* Modo Normal - Azul/Verde */
-        .modo-normal {
-            border-color: #27ae60;
-        }
-        .modo-normal .modo-nombre { color: #2ecc71; }
-        .modo-normal .modo-multi { color: #2ecc71; border: 1px solid #27ae60; }
-        .modo-normal.activo {
-            background: linear-gradient(145deg, #27ae60, #1e8449);
-            border-color: #2ecc71;
-            box-shadow: 0px 0px 20px rgba(46, 204, 113, 0.6);
-        }
-        .modo-normal.activo .modo-nombre,
-        .modo-normal.activo .modo-detalle,
-        .modo-normal.activo .modo-multi { color: white; }
-        .modo-normal.activo .modo-multi { background: rgba(0,0,0,0.3); }
+  .auth-input:focus { border-color: var(--accent); }
 
-        /* Modo Extremo - Naranja */
-        .modo-extremo {
-            border-color: #e67e22;
-        }
-        .modo-extremo .modo-nombre { color: #f39c12; }
-        .modo-extremo .modo-multi { color: #f39c12; border: 1px solid #e67e22; }
-        .modo-extremo.activo {
-            background: linear-gradient(145deg, #e67e22, #d35400);
-            border-color: #f39c12;
-            box-shadow: 0px 0px 20px rgba(243, 156, 18, 0.6);
-        }
-        .modo-extremo.activo .modo-nombre,
-        .modo-extremo.activo .modo-detalle,
-        .modo-extremo.activo .modo-multi { color: white; }
-        .modo-extremo.activo .modo-multi { background: rgba(0,0,0,0.3); }
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
-        /* Modo Extinción - Rojo */
-        .modo-extincion {
-            border-color: #c0392b;
-        }
-        .modo-extincion .modo-nombre { color: #e74c3c; }
-        .modo-extincion .modo-multi { color: #e74c3c; border: 1px solid #c0392b; }
-        .modo-extincion.activo {
-            background: linear-gradient(145deg, #e74c3c, #962d22);
-            border-color: #e74c3c;
-            box-shadow: 0px 0px 20px rgba(231, 76, 60, 0.7);
-            animation: pulsoExtincion 2s infinite;
-        }
-        .modo-extincion.activo .modo-nombre,
-        .modo-extincion.activo .modo-detalle,
-        .modo-extincion.activo .modo-multi { color: white; }
-        .modo-extincion.activo .modo-multi { background: rgba(0,0,0,0.3); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #d97706);
+    color: #000;
+    width: 100%;
+  }
 
-        @keyframes pulsoExtincion {
-            0%, 100% { box-shadow: 0px 0px 20px rgba(231, 76, 60, 0.7); }
-            50% { box-shadow: 0px 0px 30px rgba(231, 76, 60, 1); }
-        }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245,158,11,0.4);
+  }
 
-        .refugios-container { display: grid; grid-template-columns: repeat(3, 130px); grid-gap: 15px; justify-content: center; margin: 30px auto; }
-        .refugio { 
-            width: 130px; 
-            height: 155px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 2.2rem; 
-            cursor: pointer; 
-            user-select: none; 
-            border-radius: 12px; 
-            border: 3px solid #555; 
-            background-color: #34495e; 
-            background-image: url('imagenes/refugio_normal.jpg');
-            background-size: cover; 
-            background-position: center;
-            transition: transform 0.2s;
-        }
-        .refugio.activo:hover { transform: scale(1.08); box-shadow: 0px 0px 15px #f1c40f; }
-        .refugio.seleccionado { 
-            border-color: #f39c12; 
-            border-width: 4px;
-            box-shadow: 0px 0px 20px #f39c12;
-        }
-        .refugio.salvado { 
-            background-image: url('imagenes/refugio_salvado.jpg');
-            border-color: #2ecc71; 
-            border-width: 4px;
-            box-shadow: 0px 0px 20px #2ecc71;
-        }
-        .refugio.destruido { 
-            background-image: url('imagenes/refugio_crack.jpg');
-            border-color: #e74c3c; 
-            border-width: 4px;
-            box-shadow: 0px 0px 20px #e74c3c;
-            animation: shake 0.5s ease-in-out; 
-        }
+  .btn-secondary {
+    background: var(--bg-cell);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
 
-        #mensaje { font-size: 1.6rem; margin-top: 25px; font-weight: bold; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95); }
-        .error-msg { color: #e74c3c; font-weight: bold; margin-top: 10px; }
-        .success-msg { color: #2ecc71; font-weight: bold; margin-top: 10px; }
-        .oculto { display: none !important; }
+  .btn-secondary:hover {
+    background: var(--bg-cell-hover);
+    border-color: var(--accent);
+  }
 
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px) rotate(-2deg); } 40%, 80% { transform: translateX(6px) rotate(2deg); } }
-    </style>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  .btn-danger {
+    background: linear-gradient(135deg, var(--danger), #dc2626);
+    color: #fff;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), #16a34a);
+    color: #fff;
+  }
+
+  .btn-sm { padding: 8px 14px; font-size: 0.8rem; }
+
+  .sync-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .sync-code {
+    background: var(--bg-dark);
+    border: 1px dashed var(--accent);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: var(--accent);
+    word-break: break-all;
+    margin: 10px 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sync-buttons { display: flex; gap: 8px; }
+  .sync-buttons .btn { flex: 1; font-size: 0.78rem; padding: 10px 8px; }
+
+  /* ===== MAIN GAME ===== */
+  #gameScreen { display: none; position: relative; z-index: 1; }
+  #gameScreen.active { display: block; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: rgba(20,27,45,0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .top-bar h1 {
+    font-size: 1.3rem;
+    color: var(--accent);
+  }
+
+  .top-bar-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .main-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* Stats Bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-card .label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .stat-card .value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .stat-card .value.danger { color: var(--danger); }
+  .stat-card .value.success { color: var(--success); }
+
+  /* Streak display */
+  .streak-display {
+    text-align: center;
+    margin-bottom: 16px;
+    padding: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: none;
+  }
+
+  .streak-display.visible { display: block; }
+
+  .streak-display .streak-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .streak-display .streak-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .streak-display .streak-warning {
+    font-size: 0.75rem;
+    color: var(--danger);
+    margin-top: 4px;
+  }
+
+  /* Bet Controls */
+  .bet-controls {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .bet-controls .section-title {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .bet-amount-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bet-display {
+    background: var(--bg-dark);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--accent);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .bet-btn {
+    padding: 8px 14px;
+    background: var(--bg-cell);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .bet-btn:hover {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  /* Game Mode */
+  .mode-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .mode-option {
+    padding: 12px 8px;
+    background: var(--bg-cell);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .mode-option:hover { border-color: var(--accent); }
+
+  .mode-option.selected {
+    border-color: var(--accent);
+    background: rgba(245,158,11,0.1);
+    box-shadow: 0 0 15px rgba(245,158,11,0.2);
+  }
+
+  .mode-option .mode-icon { font-size: 1.5rem; }
+  .mode-option .mode-name { font-weight: 700; font-size: 0.85rem; margin: 4px 0; }
+  .mode-option .mode-info { font-size: 0.7rem; color: var(--text-dim); }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+  }
+
+  /* ===== GAME BOARD ===== */
+  .board-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .board-title {
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .game-board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .board-cell {
+    aspect-ratio: 1;
+    background: var(--bg-cell);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.85rem;
+    user-select: none;
+  }
+
+  .board-cell:hover:not(.disabled) {
+    background: var(--bg-cell-hover);
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+
+  .board-cell.has-bet {
+    border-color: var(--accent);
+    background: rgba(245,158,11,0.15);
+    box-shadow: 0 0 10px rgba(245,158,11,0.2);
+  }
+
+  .board-cell.has-bet .cell-emoji { font-size: 1.2rem; }
+  .board-cell.has-bet .cell-bet { font-weight: 800; color: var(--accent); font-size: 0.8rem; }
+
+  .board-cell.meteor-hit {
+    border-color: var(--danger);
+    background: rgba(239,68,68,0.3);
+    animation: meteorStrike 0.6s ease;
+  }
+
+  .board-cell.safe-win {
+    border-color: var(--success);
+    background: rgba(34,197,94,0.2);
+    animation: winGlow 0.8s ease;
+  }
+
+  .board-cell.disabled { cursor: not-allowed; opacity: 0.7; }
+
+  @keyframes meteorStrike {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.2); background: rgba(255,69,0,0.6); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes winGlow {
+    0% { box-shadow: 0 0 0 rgba(34,197,94,0); }
+    50% { box-shadow: 0 0 25px rgba(34,197,94,0.5); }
+    100% { box-shadow: 0 0 10px rgba(34,197,94,0.2); }
+  }
+
+  @keyframes meteorFall {
+    0% { transform: translateY(-200px) rotate(0deg); opacity: 0; }
+    60% { opacity: 1; }
+    100% { transform: translateY(0) rotate(360deg); opacity: 1; }
+  }
+
+  .meteor-animation {
+    position: absolute;
+    font-size: 2rem;
+    animation: meteorFall 0.5s ease-in forwards;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ===== RULES ===== */
+  .rules-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .rules-section h3 {
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+  }
+
+  .rules-section p, .rules-section li {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+
+  .rules-section ul { padding-left: 20px; }
+
+  .mode-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .mode-badge.normal { background: rgba(34,197,94,0.2); color: var(--success); }
+  .mode-badge.extreme { background: rgba(245,158,11,0.2); color: var(--accent); }
+  .mode-badge.extinction { background: rgba(239,68,68,0.2); color: var(--danger); }
+
+  /* ===== RANKING MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 30px;
+    width: 90%;
+    max-width: 450px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal-content h2 {
+    color: var(--accent);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .ranking-list { list-style: none; }
+
+  .ranking-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ranking-item:last-child { border-bottom: none; }
+
+  .ranking-pos {
+    font-size: 1.2rem;
+    font-weight: 900;
+    width: 36px;
+    text-align: center;
+  }
+
+  .ranking-pos.gold { color: #fbbf24; }
+  .ranking-pos.silver { color: #94a3b8; }
+  .ranking-pos.bronze { color: #cd7f32; }
+
+  .ranking-name { flex: 1; font-weight: 600; }
+  .ranking-score { color: var(--accent); font-weight: 800; }
+
+  .close-modal {
+    display: block;
+    margin: 16px auto 0;
+    padding: 10px 30px;
+  }
+
+  /* ===== TOAST NOTIFICATIONS ===== */
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toast {
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+    max-width: 320px;
+  }
+
+  .toast.success { background: var(--success); color: #fff; }
+  .toast.error { background: var(--danger); color: #fff; }
+  .toast.info { background: var(--accent); color: #000; }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-20px); }
+  }
+
+  /* ===== RESULT OVERLAY ===== */
+  .result-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+  }
+
+  .result-overlay.active { display: flex; }
+
+  .result-card {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+    animation: popIn 0.4s ease;
+  }
+
+  .result-card.win { border-color: var(--success); }
+  .result-card.lose { border-color: var(--danger); }
+
+  .result-card .result-emoji { font-size: 4rem; margin-bottom: 12px; }
+  .result-card .result-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 8px; }
+  .result-card .result-amount { font-size: 1.3rem; margin-bottom: 20px; }
+  .result-card.win .result-title { color: var(--success); }
+  .result-card.lose .result-title { color: var(--danger); }
+
+  @keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* ===== PROB INFO ===== */
+  .prob-info {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .main-content { padding: 12px; }
+    .game-board { gap: 5px; }
+    .board-cell { font-size: 0.7rem; border-radius: 8px; }
+    .mode-selector { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .top-bar { padding: 10px 12px; }
+    .top-bar h1 { font-size: 1rem; }
+    .auth-container { padding: 24px; }
+  }
+</style>
 </head>
 <body>
-    <div class="logo-container">
-        <img src="imagenes/logo_dino_refugio.png" alt="Dino Refugio Logo" class="logo-juego" onerror="this.src='https://placehold.co/550x200/2c3e50/f1c40f?text=Dino+Refugio'">
+
+<!-- ===== AUTH SCREEN ===== -->
+<div id="authScreen">
+  <div class="auth-container">
+    <h1>🦕 Dino Refugio</h1>
+    <p class="subtitle">Juego de Azar Prehistórico</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Iniciar Sesión</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Crear Cuenta</button>
     </div>
 
-    <div id="contenedor-inicial-wrapper">
-        <div id="pantalla-autenticacion" class="auth-container">
-            <div class="auth-tabs">
-                <button id="pestana-login" class="tab-btn active" onclick="alternarFormularios('login')">Iniciar Sesión</button>
-                <button id="pestana-registro" class="tab-btn" onclick="alternarFormularios('registro')">Crear Cuenta</button>
-                <button id="pestana-sync" class="tab-btn" onclick="alternarFormularios('sync')">📲 Sincronizar</button>
-            </div>
-
-            <div id="bloque-login" class="auth-form">
-                <h2>Ingresar al Refugio</h2>
-                <input type="text" id="usr-login-input" placeholder="Nombre de usuario" maxlength="15">
-                <input type="password" id="pass-login-input" placeholder="Contraseña">
-                <br>
-                <button class="btn-accion btn-jugar" style="font-size:1.1rem; padding:10px 20px;" onclick="ejecutarLogin()">Entrar a Jugar</button>
-                <div id="err-login-txt" class="error-msg"></div>
-            </div>
-
-            <div id="bloque-registro" class="auth-form oculto">
-                <h2>Registro de Nuevo Explorador</h2>
-                <input type="text" id="usr-reg-input" placeholder="Elige un usuario" maxlength="15">
-                <input type="password" id="pass-reg-input" placeholder="Contraseña nueva">
-                <input type="password" id="pass-conf-input" placeholder="Confirmar contraseña">
-                <br>
-                <button class="btn-accion btn-jugar" style="font-size:1.1rem; padding:10px 20px;" onclick="ejecutarRegistro()">Registrar Cuenta</button>
-                <div id="err-reg-txt" class="error-msg"></div>
-            </div>
-
-            <div id="bloque-sync" class="auth-form oculto">
-                <h2>Sincronizar Celular y PC</h2>
-                <p style="font-size:0.9rem; color:#bdc3c7; margin: 0 0 15px 0;">Copia este código de tu dispositivo actual y pégalo en el nuevo para pasar tus cuentas:</p>
-                <button class="btn-utilidad" onclick="generarCodigoSincronizacion()">Generar Código Actual</button>
-                <br><br>
-                <textarea id="txt-codigo-sync" placeholder="El código generado aparecerá aquí..."></textarea>
-                <br>
-                <button class="btn-accion btn-cobrar" style="font-size:1rem; padding:8px 15px;" onclick="procesarCodigoImportado()">Importar Cuentas</button>
-                <div id="msg-sync" class="error-msg"></div>
-            </div>
-        </div>
-
-        <div id="panel-ranking" class="ranking-container">
-            <div class="ranking-header">🏆 Top Exploradores</div>
-            <ul id="lista-ranking-global" class="ranking-lista">
-                <li class="ranking-item">Cargando clasificación...</li>
-            </ul>
-        </div>
+    <!-- Login Form -->
+    <div id="loginForm" class="auth-form active">
+      <input type="text" class="auth-input" id="loginUser" placeholder="🧑‍🚀 Nombre de Explorador">
+      <input type="password" class="auth-input" id="loginPass" placeholder="🔑 Contraseña">
+      <button class="btn btn-primary" onclick="login()">Ingresar al Refugio</button>
     </div>
 
-    <div id="seccion-juego" class="main-layout oculto">
-        <div class="game-area">
-            <div id="saludo-usuario" class="user-greeting"></div>
-            <div class="scoreboard">
-                <div>Mis Fichas: <span id="txt-fichas" class="fichas">1000</span></div>
-                <div>Pozo Acumulado: <span id="txt-acumulado" class="acumulado">0</span></div>
-            </div>
-            <div class="seccion-apuesta-moderna">
-                <div class="titulo-apuesta">Monto a apostar</div>
-                <div id="pantalla-apuesta" class="pantalla-monto-apuesta">0</div>
-                <div class="contenedor-fichas-casino">
-                    <div id="chip-10" class="ficha-casino ficha-10" onclick="agregarFichas(10)">+10</div>
-                    <div id="chip-50" class="ficha-casino ficha-50" onclick="agregarFichas(50)">+50</div>
-                    <div id="chip-100" class="ficha-casino ficha-100" onclick="agregarFichas(100)">+100</div>
-                    <div id="chip-500" class="ficha-casino ficha-500" onclick="agregarFichas(500)">+500</div>
-                </div>
-                
-                <div class="selector-modo">
-                    <span class="selector-modo-label">⚙️ Modo de Juego</span>
-                    <div class="modo-grid">
-                        <div class="modo-card modo-normal activo" data-modo="normal" onclick="seleccionarModo('normal')">
-                            <span class="modo-icono">☄️</span>
-                            <div class="modo-nombre">Normal</div>
-                            <div class="modo-detalle">1 Meteorito</div>
-                            <span class="modo-multi">x1.10</span>
-                        </div>
-                        <div class="modo-card modo-extremo" data-modo="extremo" onclick="seleccionarModo('extremo')">
-                            <span class="modo-icono">🔥</span>
-                            <div class="modo-nombre">Extremo</div>
-                            <div class="modo-detalle">2 Meteoritos</div>
-                            <span class="modo-multi">x1.30</span>
-                        </div>
-                        <div class="modo-card modo-extincion" data-modo="extincion" onclick="seleccionarModo('extincion')">
-                            <span class="modo-icono">💀</span>
-                            <div class="modo-nombre">Extinción</div>
-                            <div class="modo-detalle">3 Meteoritos</div>
-                            <span class="modo-multi">x2.00</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <button id="btn-clear" class="btn-utilidad" onclick="limpiarApuesta()">Limpiar</button>
-                    <button id="btn-allin" class="btn-utilidad btn-allin" onclick="apostarTodo()">All-In</button>
-                </div>
-            </div>
-            <div class="acciones-juego">
-                <button id="btn-iniciar" class="btn-accion btn-jugar" onclick="iniciarRonda()">Iniciar Partida</button>
-                <button id="btn-retirarse" class="btn-accion btn-cobrar" onclick="retirarse()" disabled>Cobrar y Retirarse</button>
-                <button id="btn-logout" class="btn-accion btn-salir" onclick="logout()">Cerrar Sesión</button>
-            </div>
-            <div id="mensaje">Agrega fichas a tu tablero y dale a Iniciar Partida.</div>
-            <div class="refugios-container" id="contenedor-refugios"></div>
-        </div>
-        <div class="rules-sidebar">
-            <h3>📜 Reglas del Juego</h3>
-            <ul>
-                <li><strong>Ranking:</strong> ¡Acumula más fichas que nadie!</li>
-                <li><strong>Paso 1:</strong> Fija tu apuesta e inicia.</li>
-                <li><strong>Paso 2:</strong> Elige tu refugio.</li>
-                <li><strong>Paso 3:</strong> ¡Evita el meteorito y multiplica!</li>
-                <li><strong>Modos:</strong> Normal (1.10x), Extremo (1.30x), Extinción (2.0x)</li>
-            </ul>
-        </div>
+    <!-- Register Form -->
+    <div id="registerForm" class="auth-form">
+      <input type="text" class="auth-input" id="regUser" placeholder="🧑‍🚀 Nombre de Explorador">
+      <input type="password" class="auth-input" id="regPass" placeholder="🔑 Contraseña">
+      <input type="password" class="auth-input" id="regPass2" placeholder="🔑 Confirmar Contraseña">
+      <button class="btn btn-primary" onclick="register()">Registrar Cuenta</button>
     </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDZjGTHBqoxfiAgT8CVJX_YMK8Fr7Bi__U",
-            authDomain: "dinorefugiojuego.firebaseapp.com",
-            projectId: "dinorefugiojuego",
-            storageBucket: "dinorefugiojuego.firebasestorage.app",
-            messagingSenderId: "1058615945538",
-            appId: "1:1058615945538:web:13fec099308db3798f80db"
-        };
-        
-        let db = null;
-        try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch(e) { console.warn("Firebase no disponible"); }
+    <!-- Sync Section -->
+    <div class="sync-section">
+      <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:8px;">📲 Sincronizar Celular y PC</p>
+      <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:10px;">Copia este código de tu dispositivo actual y pégalo en el nuevo para pasar tus cuentas:</p>
+      <div class="sync-code" id="syncCodeDisplay">—</div>
+      <div class="sync-buttons">
+        <button class="btn btn-secondary btn-sm" onclick="generateSyncCode()">Generar Código Actual</button>
+        <button class="btn btn-secondary btn-sm" onclick="promptImportSync()">Importar Cuentas</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        let usuarioActual = "";
-        let saldoFichas = 1000;
-        let pozoAcumulado = 0;
-        let apuestaPreparada = 0; 
-        let juegoActivo = false; 
-        let esperandoResultado = false; 
-        let modoActual = "normal";
+<!-- ===== GAME SCREEN ===== -->
+<div id="gameScreen">
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <h1>🦕 Dino Refugio</h1>
+    <div class="top-bar-buttons">
+      <button class="btn btn-secondary btn-sm" onclick="showRanking()">🏆 Top Exploradores</button>
+      <button class="btn btn-danger btn-sm" onclick="logout()">Cerrar Sesión</button>
+    </div>
+  </div>
 
-        // -- FUNCIONES DE SEGURIDAD --
-        function codificarPassword(cadena) {
-            let hash = 0;
-            for (let i = 0; i < cadena.length; i++) {
-                hash = (hash << 5) - hash + cadena.charCodeAt(i);
-                hash |= 0;
-            }
-            return "dino_secure_" + hash;
-        }
+  <div class="main-content">
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="label">Mis Fichas</div>
+        <div class="value" id="chipDisplay">1000</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Pozo Acumulado</div>
+        <div class="value success" id="potDisplay">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total Apostado</div>
+        <div class="value danger" id="totalBetDisplay">0</div>
+      </div>
+    </div>
 
-        // -- GESTIÓN DE UI --
-        function actualizarPantalla() {
-            document.getElementById('txt-fichas').innerText = saldoFichas; 
-            document.getElementById('txt-acumulado').innerText = pozoAcumulado; 
-            document.getElementById('pantalla-apuesta').innerText = apuestaPreparada;
-        }
+    <!-- Streak -->
+    <div class="streak-display" id="streakDisplay">
+      <div class="streak-label">🔥 Racha de Victorias Consecutivas</div>
+      <div class="streak-value" id="streakValue">0</div>
+      <div class="streak-warning" id="streakWarning"></div>
+    </div>
 
-        function abrirJuego() {
-            document.getElementById('saludo-usuario').innerText = `👋 ¡Hola ${usuarioActual}!`;
-            document.getElementById('pantalla-autenticacion').classList.add('oculto'); 
-            document.getElementById('panel-ranking').classList.add('oculto');
-            document.getElementById('seccion-juego').classList.remove('oculto'); 
-            apuestaPreparada = 0; actualizarPantalla(); crearRefugios();
-        }
+    <!-- Game Board -->
+    <div class="board-container">
+      <div class="board-title">🗺️ Elige tu Refugio — Toca las casillas para apostar</div>
+      <div class="game-board" id="gameBoard"></div>
+      <div class="prob-info" id="probInfo">
+        Distribución: Categórica (Multinoulli) con pesos dinámicos · Decaimiento de victoria: Exponencial-Logarítmico
+      </div>
+    </div>
 
-        // -- SELECTOR DE MODO --
-        function seleccionarModo(modo) {
-            if (juegoActivo) return; // No cambiar modo durante partida activa
-            modoActual = modo;
-            document.querySelectorAll('.modo-card').forEach(card => {
-                card.classList.remove('activo');
-            });
-            document.querySelector(`.modo-card[data-modo="${modo}"]`).classList.add('activo');
-        }
+    <!-- Controls -->
+    <div class="bet-controls">
+      <div class="section-title">Monto a apostar</div>
+      <div class="bet-amount-row">
+        <div class="bet-display" id="betAmountDisplay">0</div>
+        <button class="bet-btn" onclick="addToBet(10)">+10</button>
+        <button class="bet-btn" onclick="addToBet(50)">+50</button>
+        <button class="bet-btn" onclick="addToBet(100)">+100</button>
+        <button class="bet-btn" onclick="addToBet(500)">+500</button>
+      </div>
 
-        // -- AUTENTICACIÓN Y SINCRONIZACIÓN --
-        window.onload = function() {
-            obtenerRankingGlobal();
-            const urlParams = new URLSearchParams(window.location.search);
-            const syncCodigo = urlParams.get('sync');
-            if (syncCodigo) {
-                try {
-                    const datosDecodificados = atob(syncCodigo);
-                    const bdImportada = JSON.parse(datosDecodificados);
-                    let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                    Object.assign(bdActual, bdImportada);
-                    localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                    alert("¡Sincronización exitosa!");
-                } catch(e) { console.error("Error al sincronizar"); }
-            }
-            const sesionActiva = localStorage.getItem('usuario_actual_sesion');
-            if (sesionActiva) {
-                usuarioActual = sesionActiva;
-                let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                if (bd[usuarioActual]) { saldoFichas = bd[usuarioActual].fichas; abrirJuego(); }
-            }
-        };
+      <div class="section-title">⚙️ Modo de Juego</div>
+      <div class="mode-selector">
+        <div class="mode-option selected" data-mode="normal" onclick="selectMode('normal')">
+          <div class="mode-icon">☄️</div>
+          <div class="mode-name">Normal</div>
+          <div class="mode-info">1 Meteorito · x1.10</div>
+        </div>
+        <div class="mode-option" data-mode="extreme" onclick="selectMode('extreme')">
+          <div class="mode-icon">🔥</div>
+          <div class="mode-name">Extremo</div>
+          <div class="mode-info">2 Meteoritos · x1.30</div>
+        </div>
+        <div class="mode-option" data-mode="extinction" onclick="selectMode('extinction')">
+          <div class="mode-icon">💀</div>
+          <div class="mode-name">Extinción</div>
+          <div class="mode-info">3 Meteoritos · x2.00</div>
+        </div>
+      </div>
 
-        function generarCodigoSincronizacion() {
-            let bd = localStorage.getItem('dino_usuarios_secure_v2');
-            const msgBox = document.getElementById('msg-sync');
-            if (!bd) { msgBox.innerText = "❌ No hay datos."; return; }
-            const codigoUnico = btoa(bd);
-            document.getElementById('txt-codigo-sync').value = codigoUnico;
-            msgBox.innerText = "✅ Código listo.";
-        }
+      <div class="action-buttons">
+        <button class="btn btn-secondary" onclick="clearBets()">🧹 Limpiar</button>
+        <button class="btn btn-secondary" onclick="allIn()">💰 All-In</button>
+        <button class="btn btn-primary" onclick="startRound()" id="startBtn">🚀 Iniciar Partida</button>
+        <button class="btn btn-success" onclick="cashOut()">💵 Cobrar y Retirarse</button>
+      </div>
+    </div>
 
-        function procesarCodigoImportado() {
-            const codigo = document.getElementById('txt-codigo-sync').value.trim();
-            try {
-                const bdImportada = JSON.parse(atob(codigo));
-                let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                Object.assign(bdActual, bdImportada);
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                alert("Sincronizado correctamente.");
-            } catch (e) { alert("Código inválido"); }
-        }
+    <!-- Rules -->
+    <div class="rules-section">
+      <h3>📜 Reglas del Juego</h3>
+      <ul>
+        <li><strong>Ranking:</strong> ¡Acumula más fichas que nadie!</li>
+        <li><strong>Paso 1:</strong> Fija tu apuesta e inicia.</li>
+        <li><strong>Paso 2:</strong> Elige tu refugio (toca casillas para apostar).</li>
+        <li><strong>Paso 3:</strong> ¡Evita el meteorito y multiplica!</li>
+      </ul>
+      <p style="margin-top:12px;">
+        <strong>Modos:</strong>
+        <span class="mode-badge normal">Normal 1.10x</span>
+        <span class="mode-badge extreme">Extremo 1.30x</span>
+        <span class="mode-badge extinction">Extinción 2.0x</span>
+      </p>
+      <p style="margin-top:12px; font-size:0.8rem; color:var(--text-dim);">
+        📊 <em>La probabilidad de impacto usa una <strong>distribución categórica</strong> con pesos dinámicos.
+        A mayor racha de victorias consecutivas, los meteoritos son atraídos ligeramente hacia tus casillas apostadas
+        (decaimiento exponencial-logarítmico de la probabilidad de ganar).</em>
+      </p>
+    </div>
+  </div>
+</div>
 
-        function ejecutarLogin() {
-            const user = document.getElementById('usr-login-input').value.trim();
-            const pass = document.getElementById('pass-login-input').value;
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (!bd[user] || bd[user].password !== codificarPassword(pass)) { 
-                document.getElementById('err-login-txt').innerText = "❌ Usuario/Pass incorrecto."; return; 
-            }
-            usuarioActual = user; saldoFichas = bd[user].fichas; 
-            localStorage.setItem('usuario_actual_sesion', usuarioActual); abrirJuego();
-        }
+<!-- ===== RANKING MODAL ===== -->
+<div class="modal-overlay" id="rankingModal">
+  <div class="modal-content">
+    <h2>🏆 Top Exploradores</h2>
+    <ul class="ranking-list" id="rankingList">
+      <li style="text-align:center; color:var(--text-dim);">Cargando clasificación...</li>
+    </ul>
+    <button class="btn btn-secondary close-modal" onclick="closeRanking()">Cerrar</button>
+  </div>
+</div>
 
-        function ejecutarRegistro() {
-            const user = document.getElementById('usr-reg-input').value.trim();
-            const pass = document.getElementById('pass-reg-input').value;
-            const conf = document.getElementById('pass-conf-input').value;
-            if (pass !== conf) { document.getElementById('err-reg-txt').innerText = "❌ No coinciden."; return; }
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (bd[user]) { document.getElementById('err-reg-txt').innerText = "❌ Ya existe."; return; }
-            bd[user] = { password: codificarPassword(pass), fichas: 1000 };
-            localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-            usuarioActual = user; saldoFichas = 1000;
-            localStorage.setItem('usuario_actual_sesion', usuarioActual); abrirJuego();
-        }
+<!-- ===== RESULT OVERLAY ===== -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card" id="resultCard">
+    <div class="result-emoji" id="resultEmoji">🎉</div>
+    <div class="result-title" id="resultTitle">¡Victoria!</div>
+    <div class="result-amount" id="resultAmount">+500 fichas</div>
+    <button class="btn btn-primary" onclick="closeResult()">Continuar</button>
+  </div>
+</div>
 
-        function logout() {
-            localStorage.removeItem('usuario_actual_sesion');
-            location.reload();
-        }
+<!-- ===== TOAST CONTAINER ===== -->
+<div class="toast-container" id="toastContainer"></div>
 
-        // -- LÓGICA DE JUEGO --
-        function agregarFichas(valor) {
-            if (juegoActivo) return;
-            if (apuestaPreparada + valor > saldoFichas) return;
-            apuestaPreparada += valor; actualizarPantalla();
-        }
+<script>
+// =============================================
+// GAME STATE
+// =============================================
+const BOARD_SIZE = 25; // 5x5 grid
+const ALPHA = 0.8;     // Decay rate parameter for streak mechanic
 
-        function limpiarApuesta() { apuestaPreparada = 0; actualizarPantalla(); }
-        function apostarTodo() { apuestaPreparada = saldoFichas; actualizarPantalla(); }
+let state = {
+  currentUser: null,
+  chips: 1000,
+  pot: 0,
+  betAmount: 0,
+  bets: {},          // { cellIndex: betAmount }
+  mode: 'normal',
+  streak: 0,         // consecutive wins
+  isPlaying: false,
+  totalGamesPlayed: 0,
+  totalWins: 0
+};
 
-        function crearRefugios() {
-            const cont = document.getElementById('contenedor-refugios');
-            cont.innerHTML = '';
-            for (let i = 1; i <= 9; i++) {
-                const div = document.createElement('div');
-                div.className = 'refugio'; 
-                div.onclick = () => elegirRefugio(i);
-                cont.appendChild(div);
-            }
-        }
+const MODES = {
+  normal:     { meteors: 1, multiplier: 1.10, name: 'Normal',     icon: '☄️' },
+  extreme:    { meteors: 2, multiplier: 1.30, name: 'Extremo',    icon: '🔥' },
+  extinction: { meteors: 3, multiplier: 2.00, name: 'Extinción',  icon: '💀' }
+};
 
-        function iniciarRonda() {
-            if (apuestaPreparada <= 0) return;
-            saldoFichas -= apuestaPreparada; 
-            pozoAcumulado = apuestaPreparada; 
-            juegoActivo = true;
-            esperandoResultado = false;
-            actualizarPantalla();
-            
-            document.querySelectorAll('.refugio').forEach(r => {
-                r.className = 'refugio activo';
-            });
-            
-            document.getElementById('btn-iniciar').disabled = true;
-            document.getElementById('btn-retirarse').disabled = true;
-            document.getElementById('mensaje').innerText = "¡Elige tu refugio!";
-        }
+const DINO_EMOJIS = ['🦕', '🦖', '🌿', '🌋', '🪨', '🥚', '🌴', '🦴'];
 
-        function elegirRefugio(id) {
-            if (!juegoActivo || esperandoResultado) return;
-            esperandoResultado = true;
-            
-            const refugios = document.querySelectorAll('.refugio');
-            refugios[id - 1].classList.add('seleccionado');
-            
-            // Determinar número de meteoritos y multiplicador según el modo
-            let numMeteoritos = 1;
-            let multiplicador = 1.10;
-            
-            if (modoActual === 'normal') {
-                numMeteoritos = 1;
-                multiplicador = 1.10;
-            } else if (modoActual === 'extremo') {
-                numMeteoritos = 2;
-                multiplicador = 1.30;
-            } else if (modoActual === 'extincion') {
-                numMeteoritos = 3;
-                multiplicador = 2.0;
-            }
-            
-            setTimeout(() => {
-                let destinos = [];
-                while(destinos.length < numMeteoritos) {
-                    let r = Math.floor(Math.random() * 9);
-                    if(destinos.indexOf(r) === -1) destinos.push(r);
-                }
-                
-                const golpeado = destinos.includes(id - 1);
-                
-                destinos.forEach(idx => {
-                    refugios[idx].classList.remove('activo', 'seleccionado');
-                    refugios[idx].classList.add('destruido');
-                });
-                
-                if (golpeado) {
-                    pozoAcumulado = 0; 
-                    juegoActivo = false;
-                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
-                    document.getElementById('btn-iniciar').disabled = false;
-                } else {
-                    pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
-                    refugios[id - 1].classList.remove('seleccionado');
-                    refugios[id - 1].classList.add('salvado');
-                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
-                    document.getElementById('btn-retirarse').disabled = false;
-                }
-                esperandoResultado = false; 
-                actualizarPantalla();
-            }, 1000);
-        }
+// =============================================
+// AUTH SYSTEM
+// =============================================
+function getUsers() {
+  return JSON.parse(localStorage.getItem('dinoRefugio_users') || '{}');
+}
 
-        function retirarse() {
-            saldoFichas += pozoAcumulado; 
-            pozoAcumulado = 0; 
-            juegoActivo = false;
-            document.getElementById('btn-retirarse').disabled = true;
-            document.getElementById('btn-iniciar').disabled = false;
-            document.getElementById('mensaje').innerText = "✅ ¡Cobrado! Tus fichas: " + saldoFichas;
-            
-            document.querySelectorAll('.refugio').forEach(r => {
-                r.className = 'refugio';
-            });
-            
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if(bd[usuarioActual]) { 
-                bd[usuarioActual].fichas = saldoFichas; 
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-                // Además de tu localStorage, añade esta línea:
-                db.collection("jugadores").doc(usuarioActual).set({
-                    usuario: usuarioActual,
-                    fichas: saldoFichas
-                }, { merge: true });
-            }
-            actualizarPantalla();
-        }
+function saveUsers(users) {
+  localStorage.setItem('dinoRefugio_users', JSON.stringify(users));
+}
 
-        function obtenerRankingGlobal() {
-    const lista = document.getElementById('lista-ranking-global');
-    
-    // Conectamos con tu colección 'jugadores' en Firestore
-    db.collection("jugadores")
-        .orderBy("fichas", "desc") // Ordena de mayor a menor fichas
-        .limit(5)                 // Solo los 5 mejores
-        .onSnapshot((snapshot) => {
-            lista.innerHTML = ""; // Limpiamos la lista antes de dibujar
-            
-            if (snapshot.empty) {
-                lista.innerHTML = '<li class="ranking-item">Aún no hay jugadores</li>';
-                return;
-            }
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  if (tab === 'login') {
+    document.querySelectorAll('.auth-tab')[0].classList.add('active');
+    document.getElementById('loginForm').classList.add('active');
+  } else {
+    document.querySelectorAll('.auth-tab')[1].classList.add('active');
+    document.getElementById('registerForm').classList.add('active');
+  }
+}
 
-            snapshot.forEach((doc, index) => {
-                const data = doc.data();
-                lista.innerHTML += `
-                    <li class="ranking-item ${index === 0 ? 'top1' : ''}">
-                        <span class="ranking-pos">#${index + 1}</span>
-                        <span class="ranking-user">${data.usuario}</span>
-                        <span class="ranking-money">${data.fichas} fichas</span>
-                    </li>
-                `;
-            });
-        }, (error) => {
-            console.error("Error al leer el ranking global: ", error);
-        });
-        }
+function login() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if (!user || !pass) return showToast('Completa todos los campos', 'error');
 
-        function alternarFormularios(f) {
-            document.getElementById('bloque-login').classList.toggle('oculto', f !== 'login');
-            document.getElementById('bloque-registro').classList.toggle('oculto', f !== 'registro');
-            document.getElementById('bloque-sync').classList.toggle('oculto', f !== 'sync');
-            
-            document.getElementById('pestana-login').classList.toggle('active', f === 'login');
-            document.getElementById('pestana-registro').classList.toggle('active', f === 'registro');
-            document.getElementById('pestana-sync').classList.toggle('active', f === 'sync');
-        }
-    </script>
+  const users = getUsers();
+  if (!users[user] || users[user].password !== pass) {
+    return showToast('Usuario o contraseña incorrectos', 'error');
+  }
+
+  state.currentUser = user;
+  state.chips = users[user].chips || 1000;
+  state.pot = users[user].pot || 0;
+  state.streak = users[user].streak || 0;
+  state.totalGamesPlayed = users[user].totalGamesPlayed || 0;
+  state.totalWins = users[user].totalWins || 0;
+
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.add('active');
+  updateUI();
+  showToast(`¡Bienvenido, ${user}! 🦕`, 'success');
+}
+
+function register() {
+  const user = document.getElementById('regUser').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const pass2 = document.getElementById('regPass2').value;
+
+  if (!user || !pass) return showToast('Completa todos los campos', 'error');
+  if (pass !== pass2) return showToast('Las contraseñas no coinciden', 'error');
+  if (user.length < 3) return showToast('Nombre muy corto (mín. 3 caracteres)', 'error');
+
+  const users = getUsers();
+  if (users[user]) return showToast('Ese nombre ya existe', 'error');
+
+  users[user] = { password: pass, chips: 1000, pot: 0, streak: 0, totalGamesPlayed: 0, totalWins: 0 };
+  saveUsers(users);
+  showToast('¡Cuenta creada! Inicia sesión.', 'success');
+  switchAuthTab('login');
+  document.getElementById('loginUser').value = user;
+}
+
+function logout() {
+  saveCurrentUserData();
+  state.currentUser = null;
+  state.chips = 1000;
+  state.pot = 0;
+  state.bets = {};
+  state.betAmount = 0;
+  state.streak = 0;
+  state.isPlaying = false;
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  initBoard();
+}
+
+function saveCurrentUserData() {
+  if (!state.currentUser) return;
+  const users = getUsers();
+  if (users[state.currentUser]) {
+    users[state.currentUser].chips = state.chips;
+    users[state.currentUser].pot = state.pot;
+    users[state.currentUser].streak = state.streak;
+    users[state.currentUser].totalGamesPlayed = state.totalGamesPlayed;
+    users[state.currentUser].totalWins = state.totalWins;
+    saveUsers(users);
+  }
+}
+
+// =============================================
+// SYNC SYSTEM
+// =============================================
+function generateSyncCode() {
+  const users = getUsers();
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(users))));
+  document.getElementById('syncCodeDisplay').textContent = code.substring(0, 80) + (code.length > 80 ? '...' : '');
+  navigator.clipboard.writeText(code).then(() => {
+    showToast('Código copiado al portapapeles', 'info');
+  }).catch(() => {
+    showToast('Código generado (cópialo manualmente)', 'info');
+  });
+}
+
+function promptImportSync() {
+  const code = prompt('Pega el código de sincronización:');
+  if (!code) return;
+  try {
+    const users = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    saveUsers(users);
+    showToast('Cuentas importadas correctamente', 'success');
+  } catch (e) {
+    showToast('Código inválido', 'error');
+  }
+}
+
+// =============================================
+// UI UPDATES
+// =============================================
+function updateUI() {
+  document.getElementById('chipDisplay').textContent = state.chips.toLocaleString();
+  document.getElementById('potDisplay').textContent = state.pot.toLocaleString();
+
+  const totalBets = Object.values(state.bets).reduce((a, b) => a + b, 0);
+  document.getElementById('totalBetDisplay').textContent = totalBets.toLocaleString();
+  document.getElementById('betAmountDisplay').textContent = state.betAmount.toLocaleString();
+
+  // Streak display
+  const streakEl = document.getElementById('streakDisplay');
+  if (state.streak > 0) {
+    streakEl.classList.add('visible');
+    document.getElementById('streakValue').textContent = state.streak;
+    const warn = document.getElementById('streakWarning');
+    if (state.streak >= 3) {
+      warn.textContent = '⚠️ Los meteoritos están detectando tu posición...';
+    } else if (state.streak >= 6) {
+      warn.textContent = '🔥 ¡Los meteoritos convergen hacia ti!';
+    } else if (state.streak >= 10) {
+      warn.textContent = '💀 ¡EXTINCIÓN INMINENTE! Retírate ahora.';
+    } else {
+      warn.textContent = '';
+    }
+  } else {
+    streakEl.classList.remove('visible');
+  }
+}
+
+// =============================================
+// GAME BOARD
+// =============================================
+function initBoard() {
+  const board = document.getElementById('gameBoard');
+  board.innerHTML = '';
+  state.bets = {};
+
+  for (let i = 0; i < BOARD_SIZE; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'board-cell';
+    cell.dataset.index = i;
+    cell.innerHTML = `<span class="cell-emoji">${DINO_EMOJIS[i % DINO_EMOJIS.length]}</span><span class="cell-bet"></span>`;
+    cell.addEventListener('click', () => toggleBet(i));
+    board.appendChild(cell);
+  }
+}
+
+function toggleBet(index) {
+  if (state.isPlaying) return;
+
+  const cells = document.querySelectorAll('.board-cell');
+  const cell = cells[index];
+
+  if (state.bets[index]) {
+    // Remove bet
+    state.chips += state.bets[index];
+    delete state.bets[index];
+    cell.classList.remove('has-bet');
+    cell.querySelector('.cell-bet').textContent = '';
+    cell.querySelector('.cell-emoji').textContent = DINO_EMOJIS[index % DINO_EMOJIS.length];
+  } else {
+    // Place bet
+    if (state.betAmount <= 0) return showToast('Fija un monto de apuesta primero', 'error');
+    if (state.betAmount > state.chips) return showToast('Fichas insuficientes', 'error');
+
+    state.chips -= state.betAmount;
+    state.bets[index] = state.betAmount;
+    cell.classList.add('has-bet');
+    cell.querySelector('.cell-emoji').textContent = '🛡️';
+    cell.querySelector('.cell-bet').textContent = state.betAmount;
+  }
+
+  updateUI();
+}
+
+function addToBet(amount) {
+  state.betAmount += amount;
+  updateUI();
+}
+
+function clearBets() {
+  if (state.isPlaying) return;
+  const totalBets = Object.values(state.bets).reduce((a, b) => a + b, 0);
+  state.chips += totalBets;
+  state.bets = {};
+  initBoard();
+  // Restore bet display but bets array is cleared, re-init already handles it
+  updateUI();
+}
+
+function allIn() {
+  if (state.isPlaying) return;
+  // Remove existing bets first
+  const existingBets = Object.values(state.bets).reduce((a, b) => a + b, 0);
+  state.chips += existingBets;
+  state.bets = {};
+
+  if (state.chips <= 0) return showToast('No tienes fichas', 'error');
+
+  // Place all chips on a random empty cell
+  const randomCell = Math.floor(Math.random() * BOARD_SIZE);
+  state.betAmount = state.chips;
+  state.chips = 0;
+  state.bets[randomCell] = state.betAmount;
+
+  // Update board visuals
+  const cells = document.querySelectorAll('.board-cell');
+  cells.forEach((cell, i) => {
+    cell.classList.remove('has-bet');
+    cell.querySelector('.cell-bet').textContent = '';
+    cell.querySelector('.cell-emoji').textContent = DINO_EMOJIS[i % DINO_EMOJIS.length];
+  });
+
+  const targetCell = cells[randomCell];
+  targetCell.classList.add('has-bet');
+  targetCell.querySelector('.cell-emoji').textContent = '🛡️';
+  targetCell.querySelector('.cell-bet').textContent = state.betAmount;
+
+  updateUI();
+  showToast(`All-In: ${state.betAmount} fichas en casilla ${randomCell + 1}`, 'info');
+}
+
+function selectMode(mode) {
+  if (state.isPlaying) return;
+  state.mode = mode;
+  document.querySelectorAll('.mode-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.mode === mode);
+  });
+}
+
+// =============================================
+// CORE PROBABILITY ENGINE
+// =============================================
+
+/**
+ * DISTRIBUCIÓN CATEGÓRICA (Multinoulli) con pesos dinámicos.
+ *
+ * Cada casilla i tiene un peso w_i:
+ *   - Casilla SIN apuesta: w_i = 1
+ *   - Casilla CON apuesta: w_i = 1 + α · ln(1 + racha)
+ *
+ * La probabilidad de que un meteorito caiga en la casilla i es:
+ *   P(i) = w_i / Σ(w_j)
+ *
+ * Esto hace que a mayor racha de victorias, las casillas apostadas
+ * sean progresivamente más probables de ser impactadas.
+ *
+ * El muestreo se realiza por el método de la CDF inversa.
+ */
+function sampleCategorical(weights) {
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  let random = Math.random() * totalWeight;
+  for (let i = 0; i < weights.length; i++) {
+    random -= weights[i];
+    if (random <= 0) return i;
+  }
+  return weights.length - 1;
+}
+
+function getWeights(excludeIndices = []) {
+  const weights = [];
+  const betCells = Object.keys(state.bets).map(Number);
+
+  for (let i = 0; i < BOARD_SIZE; i++) {
+    if (excludeIndices.includes(i)) {
+      weights.push(0); // Already hit, exclude
+    } else if (betCells.includes(i)) {
+      // Categorical weight with logarithmic streak modifier
+      weights.push(1 + ALPHA * Math.log(1 + state.streak));
+    } else {
+      weights.push(1);
+    }
+  }
+  return weights;
+}
+
+/**
+ * Calculate the theoretical win probability for the current round
+ * given the current streak and bet configuration.
+ */
+function calculateWinProbability() {
+  const betCells = Object.keys(state.bets).map(Number);
+  if (betCells.length === 0) return 0;
+
+  const mode = MODES[state.mode];
+  const numMeteors = mode.meteors;
+  const betWeight = 1 + ALPHA * Math.log(1 + state.streak);
+  const totalWeight = (BOARD_SIZE - betCells.length) * 1 + betCells.length * betWeight;
+
+  // Probability that ALL meteorites miss ALL bet cells (simplified independent approx)
+  let pAllSafe = 1;
+  for (let m = 0; m < numMeteors; m++) {
+    const safeWeight = (BOARD_SIZE - betCells.length - m) * 1; // approximate, ignoring depletion
+    const currentTotal = totalWeight - m; // approximate
+    pAllSafe *= Math.max(0, safeWeight / currentTotal);
+  }
+
+  return pAllSafe;
+}
+
+// =============================================
+// GAME ROUND
+// =============================================
+async function startRound() {
+  if (state.isPlaying) return;
+
+  const betCells = Object.keys(state.bets).map(Number);
+  if (betCells.length === 0) return showToast('Aposta en al menos una casilla', 'error');
+
+  state.isPlaying = true;
+  document.getElementById('startBtn').disabled = true;
+
+  const cells = document.querySelectorAll('.board-cell');
+  cells.forEach(c => c.classList.add('disabled'));
+
+  const mode = MODES[state.mode];
+  const hitCells = [];
+
+  // Place meteorites using Categorical Distribution
+  for (let m = 0; m < mode.meteors; m++) {
+    const weights = getWeights(hitCells);
+    const hitIndex = sampleCategorical(weights);
+    hitCells.push(hitIndex);
+
+    // Animate meteorite
+    await animateMeteorite(cells[hitIndex], m * 400);
+    await sleep(300);
+  }
+
+  // Calculate results
+  let totalPayout = 0;
+  let totalBetThisRound = 0;
+  const winCells = [];
+  const loseCells = [];
+
+  betCells.forEach(index => {
+    totalBetThisRound += state.bets[index];
+    if (hitCells.includes(index)) {
+      loseCells.push(index);
+      cells[index].classList.add('meteor-hit');
+      cells[index].querySelector('.cell-emoji').textContent = '💥';
+      cells[index].querySelector('.cell-bet').textContent = 'PERDIDO';
+    } else {
+      const payout = Math.floor(state.bets[index] * mode.multiplier);
+      totalPayout += payout;
+      winCells.push(index);
+      cells[index].classList.add('safe-win');
+      cells[index].querySelector('.cell-emoji').textContent = '🎉';
+      cells[index].querySelector('.cell-bet').textContent = `+${payout}`;
+    }
+  });
+
+  // Add winnings to pot
+  state.pot += totalPayout;
+  state.totalGamesPlayed++;
+
+  const netResult = totalPayout - totalBetThisRound;
+
+  // Update streak using exponential decay logic
+  if (netResult > 0) {
+    state.streak++;
+    state.totalWins++;
+  } else {
+    state.streak = 0;
+  }
+
+  state.bets = {};
+  updateUI();
+
+  await sleep(600);
+
+  // Show result
+  showResult(netResult, totalPayout, totalBetThisRound);
+
+  saveCurrentUserData();
+}
+
+function animateMeteorite(cell, delay) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const meteor = document.createElement('div');
+      meteor.className = 'meteor-animation';
+      meteor.textContent = '☄️';
+      cell.appendChild(meteor);
+
+      setTimeout(() => {
+        cell.classList.add('meteor-hit');
+        cell.querySelector('.cell-emoji').textContent = '💥';
+        cell.querySelector('.cell-bet').textContent = '💀';
+        meteor.remove();
+        resolve();
+      }, 500);
+    }, delay);
+  });
+}
+
+function showResult(netResult, totalPayout, totalBet) {
+  const overlay = document.getElementById('resultOverlay');
+  const card = document.getElementById('resultCard');
+  const emoji = document.getElementById('resultEmoji');
+  const title = document.getElementById('resultTitle');
+  const amount = document.getElementById('resultAmount');
+
+  if (netResult > 0) {
+    card.className = 'result-card win';
+    emoji.textContent = '🎉';
+    title.textContent = '¡Sobreviviste!';
+    amount.innerHTML = `Ganaste <strong>+${totalPayout}</strong> fichas<br><small>Apuesta: ${totalBet} · Neto: +${netResult}</small><br><small>🔥 Racha: ${state.streak}</small>`;
+  } else if (netResult === 0) {
+    card.className = 'result-card';
+    emoji.textContent = '😐';
+    title.textContent = 'Tablas';
+    amount.innerHTML = `Recuperaste tu apuesta<br><small>🔥 Racha: ${state.streak}</small>`;
+  } else {
+    card.className = 'result-card lose';
+    emoji.textContent = '💀';
+    title.textContent = '¡Impacto!';
+    amount.innerHTML = `Perdiste <strong>${totalBet}</strong> fichas<br><small>Racha reiniciada: 0</small>`;
+  }
+
+  overlay.classList.add('active');
+}
+
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('active');
+  state.isPlaying = false;
+  document.getElementById('startBtn').disabled = false;
+  document.querySelectorAll('.board-cell').forEach(c => {
+    c.classList.remove('disabled', 'meteor-hit', 'safe-win', 'has-bet');
+  });
+  initBoard();
+  updateUI();
+}
+
+// =============================================
+// CASH OUT
+// =============================================
+function cashOut() {
+  if (state.isPlaying) return;
+  if (state.pot <= 0) return showToast('No hay fichas en el pozo', 'error');
+
+  state.chips += state.pot;
+  showToast(`Retiraste ${state.pot} fichas al saldo`, 'success');
+  state.pot = 0;
+  state.streak = 0;
+  updateUI();
+  saveCurrentUserData();
+}
+
+// =============================================
+// RANKING
+// =============================================
+function showRanking() {
+  const users = getUsers();
+  const entries = Object.entries(users).map(([name, data]) => ({
+    name,
+    score: (data.chips || 0) + (data.pot || 0)
+  }));
+
+  entries.sort((a, b) => b.score - a.score);
+
+  const list = document.getElementById('rankingList');
+  if (entries.length === 0) {
+    list.innerHTML = '<li style="text-align:center; color:var(--text-dim);">No hay exploradores aún.</li>';
+  } else {
+    list.innerHTML = entries.slice(0, 20).map((entry, i) => {
+      const posClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+      const highlight = entry.name === state.currentUser ? 'style="background:rgba(245,158,11,0.1); border-radius:8px;"' : '';
+      return `
+        <li class="ranking-item" ${highlight}>
+          <span class="ranking-pos ${posClass}">${medal}</span>
+          <span class="ranking-name">${entry.name}</span>
+          <span class="ranking-score">${entry.score.toLocaleString()} 🪙</span>
+        </li>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('rankingModal').classList.add('active');
+}
+
+function closeRanking() {
+  document.getElementById('rankingModal').classList.remove('active');
+}
+
+// =============================================
+// UTILITIES
+// =============================================
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// =============================================
+// INIT
+// =============================================
+document.addEventListener('DOMContentLoaded', () => {
+  initBoard();
+  updateUI();
+
+  // Auto-login check
+  const lastUser = localStorage.getItem('dinoRefugio_lastUser');
+  if (lastUser) {
+    document.getElementById('loginUser').value = lastUser;
+  }
+});
+
+// Save last user on login
+const origLogin = login;
+login = function() {
+  const user = document.getElementById('loginUser').value.trim();
+  if (user) localStorage.setItem('dinoRefugio_lastUser', user);
+  origLogin();
+};
+</script>
 </body>
 </html>
