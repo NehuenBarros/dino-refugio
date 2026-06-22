@@ -653,17 +653,6 @@
     to { transform: scale(1); opacity: 1; }
   }
 
-  /* ===== PROB INFO ===== */
-  .prob-info {
-    text-align: center;
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    margin-top: 8px;
-    padding: 8px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 8px;
-  }
-
   /* ===== RESPONSIVE ===== */
   @media (max-width: 600px) {
     .main-content { padding: 12px; }
@@ -757,9 +746,6 @@
     <div class="board-container">
       <div class="board-title">🗺️ Elige tu Refugio — Toca las casillas para apostar</div>
       <div class="game-board" id="gameBoard"></div>
-      <div class="prob-info" id="probInfo">
-        Distribución: Categórica (Multinoulli) con pesos dinámicos · Decaimiento de victoria: Exponencial-Logarítmico
-      </div>
     </div>
 
     <!-- Controls -->
@@ -814,11 +800,6 @@
         <span class="mode-badge normal">Normal 1.10x</span>
         <span class="mode-badge extreme">Extremo 1.30x</span>
         <span class="mode-badge extinction">Extinción 2.0x</span>
-      </p>
-      <p style="margin-top:12px; font-size:0.8rem; color:var(--text-dim);">
-        📊 <em>La probabilidad de impacto usa una <strong>distribución categórica</strong> con pesos dinámicos.
-        A mayor racha de victorias consecutivas, los meteoritos son atraídos ligeramente hacia tus casillas apostadas
-        (decaimiento exponencial-logarítmico de la probabilidad de ganar).</em>
       </p>
     </div>
   </div>
@@ -1084,7 +1065,6 @@ function clearBets() {
   state.chips += totalBets;
   state.bets = {};
   initBoard();
-  // Restore bet display but bets array is cleared, re-init already handles it
   updateUI();
 }
 
@@ -1141,11 +1121,6 @@ function selectMode(mode) {
  *
  * La probabilidad de que un meteorito caiga en la casilla i es:
  *   P(i) = w_i / Σ(w_j)
- *
- * Esto hace que a mayor racha de victorias, las casillas apostadas
- * sean progresivamente más probables de ser impactadas.
- *
- * El muestreo se realiza por el método de la CDF inversa.
  */
 function sampleCategorical(weights) {
   const totalWeight = weights.reduce((a, b) => a + b, 0);
@@ -1163,39 +1138,14 @@ function getWeights(excludeIndices = []) {
 
   for (let i = 0; i < BOARD_SIZE; i++) {
     if (excludeIndices.includes(i)) {
-      weights.push(0); // Already hit, exclude
+      weights.push(0);
     } else if (betCells.includes(i)) {
-      // Categorical weight with logarithmic streak modifier
       weights.push(1 + ALPHA * Math.log(1 + state.streak));
     } else {
       weights.push(1);
     }
   }
   return weights;
-}
-
-/**
- * Calculate the theoretical win probability for the current round
- * given the current streak and bet configuration.
- */
-function calculateWinProbability() {
-  const betCells = Object.keys(state.bets).map(Number);
-  if (betCells.length === 0) return 0;
-
-  const mode = MODES[state.mode];
-  const numMeteors = mode.meteors;
-  const betWeight = 1 + ALPHA * Math.log(1 + state.streak);
-  const totalWeight = (BOARD_SIZE - betCells.length) * 1 + betCells.length * betWeight;
-
-  // Probability that ALL meteorites miss ALL bet cells (simplified independent approx)
-  let pAllSafe = 1;
-  for (let m = 0; m < numMeteors; m++) {
-    const safeWeight = (BOARD_SIZE - betCells.length - m) * 1; // approximate, ignoring depletion
-    const currentTotal = totalWeight - m; // approximate
-    pAllSafe *= Math.max(0, safeWeight / currentTotal);
-  }
-
-  return pAllSafe;
 }
 
 // =============================================
@@ -1256,7 +1206,7 @@ async function startRound() {
 
   const netResult = totalPayout - totalBetThisRound;
 
-  // Update streak using exponential decay logic
+  // Update streak
   if (netResult > 0) {
     state.streak++;
     state.totalWins++;
