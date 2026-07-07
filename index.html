@@ -588,62 +588,68 @@
             return weights;
         }
 
-        function elegirRefugio(id) {
-            if (!juegoActivo || esperandoResultado) return;
-            esperandoResultado = true;
-            
-            const refugios = document.querySelectorAll('.refugio');
-            refugios[id - 1].classList.add('seleccionado');
-            
-            // Determinar número de meteoritos y multiplicador según el modo
-            let numMeteoritos = 1;
-            let multiplicador = 1.10;
-            
-            if (modoActual === 'normal') {
-                numMeteoritos = 1;
-                multiplicador = 1.10;
-            } else if (modoActual === 'extremo') {
-                numMeteoritos = 2;
-                multiplicador = 1.30;
-            } else if (modoActual === 'extincion') {
-                numMeteoritos = 3;
-                multiplicador = 2.0;
-            }
-            
-            setTimeout(() => {
-                let destinos = [];
-                
-                // NUEVO: Usar distribución categórica con pesos dinámicos
-                for (let m = 0; m < numMeteoritos; m++) {
-                    const weights = getWeights(id, destinos);
-                    const hitIndex = sampleCategorical(weights);
-                    destinos.push(hitIndex);
-                }
-                
-                const golpeado = destinos.includes(id - 1);
-                
-                destinos.forEach(idx => {
-                    refugios[idx].classList.remove('activo', 'seleccionado');
-                    refugios[idx].classList.add('destruido');
-                });
-                
-                if (golpeado) {
-                    pozoAcumulado = 0; 
-                    juegoActivo = false;
-                    rachaVictorias = 0; // NUEVO: Resetear racha al perder
-                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
-                    document.getElementById('btn-iniciar').disabled = false;
-                } else {
-                    pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
-                    refugios[id - 1].classList.remove('seleccionado');
-                    refugios[id - 1].classList.add('salvado');
-                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
-                    document.getElementById('btn-retirarse').disabled = false;
-                }
-                esperandoResultado = false; 
-                actualizarPantalla();
-            }, 1000);
+function elegirRefugio(id) {
+    if (!juegoActivo || esperandoResultado) return;
+    esperandoResultado = true;
+    
+    const refugios = document.querySelectorAll('.refugio');
+    
+    // NUEVO: Resetear todas las casillas al estado base antes de procesar
+    refugios.forEach(r => {
+        r.className = 'refugio activo';
+    });
+    
+    refugios[id - 1].classList.add('seleccionado');
+    
+    // Determinar número de meteoritos y multiplicador según el modo
+    let numMeteoritos = 1;
+    let multiplicador = 1.10;
+    
+    if (modoActual === 'normal') {
+        numMeteoritos = 1;
+        multiplicador = 1.10;
+    } else if (modoActual === 'extremo') {
+        numMeteoritos = 2;
+        multiplicador = 1.30;
+    } else if (modoActual === 'extincion') {
+        numMeteoritos = 3;
+        multiplicador = 2.0;
+    }
+    
+    setTimeout(() => {
+        let destinos = [];
+        
+        // NUEVO: Usar distribución categórica con pesos dinámicos
+        for (let m = 0; m < numMeteoritos; m++) {
+            const weights = getWeights(id, destinos);
+            const hitIndex = sampleCategorical(weights);
+            destinos.push(hitIndex);
         }
+        
+        const golpeado = destinos.includes(id - 1);
+        
+        destinos.forEach(idx => {
+            refugios[idx].classList.remove('activo', 'seleccionado');
+            refugios[idx].classList.add('destruido');
+        });
+        
+        if (golpeado) {
+            pozoAcumulado = 0; 
+            juegoActivo = false;
+            rachaVictorias = 0; // NUEVO: Resetear racha al perder
+            document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
+            document.getElementById('btn-iniciar').disabled = false;
+        } else {
+            pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
+            refugios[id - 1].classList.remove('seleccionado');
+            refugios[id - 1].classList.add('salvado');
+            document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
+            document.getElementById('btn-retirarse').disabled = false;
+        }
+        esperandoResultado = false; 
+        actualizarPantalla();
+    }, 1000);
+}
 
         function retirarse() {
             saldoFichas += pozoAcumulado; 
