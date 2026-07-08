@@ -443,29 +443,37 @@
         }
 
         // -- AUTENTICACIÓN Y SINCRONIZACIÓN --
-        window.onload = function() {
-            obtenerRankingGlobal();
-            const urlParams = new URLSearchParams(window.location.search);
-            const syncCodigo = urlParams.get('sync');
-            if (syncCodigo) {
-                try {
-                    const datosDecodificados = atob(syncCodigo);
-                    const bdImportada = JSON.parse(datosDecodificados);
-                    let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                    Object.assign(bdActual, bdImportada);
-                    localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                    alert("¡Sincronización exitosa!");
-                } catch(e) { console.error("Error al sincronizar"); }
+        window.onload = function obtenerRankingGlobal() {
+    const lista = document.getElementById('lista-ranking-global');
+    
+    db.collection("jugadores")
+        .orderBy("fichas", "desc")
+        .limit(5)
+        .onSnapshot((snapshot) => {
+            lista.innerHTML = "";
+            
+            if (snapshot.empty) {
+                lista.innerHTML = '<li class="ranking-item">Aún no hay jugadores</li>';
+                return;
             }
-            const sesionActiva = localStorage.getItem('usuario_actual_sesion');
-            if (sesionActiva) {
-                usuarioActual = sesionActiva;
-                let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                if (bd[usuarioActual]) { 
-                    saldoFichas = bd[usuarioActual].fichas; 
-                    rachaVictorias = bd[usuarioActual].racha || 0; // NUEVO: Cargar racha
-                    abrirJuego(); 
-                }
+
+            // SOLUCIÓN: Usar un contador manual
+            let posicion = 1;
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                lista.innerHTML += `
+                    <li class="ranking-item ${posicion === 1 ? 'top1' : ''}">
+                        <span class="ranking-pos">#${posicion}</span>
+                        <span class="ranking-user">${data.usuario}</span>
+                        <span class="ranking-money">${data.fichas} fichas</span>
+                    </li>
+                `;
+                posicion++; // Incrementar el contador
+            });
+        }, (error) => {
+            console.error("Error al leer el ranking global: ", error);
+        });
+}
             }
         };
 
