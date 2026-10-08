@@ -517,7 +517,7 @@
                 limboLives = 2;
             }
 
-            const enProgreso = (saldoFichas <= 0 && ahora >= limboCooldownEnd && (limboWins > 0 || limboLives < 2));
+            const enProgreso = (saldoFichas <= 0 && ahora >= limboCooldownEnd && (limboWins > 0 || limboLives < 3));
             document.querySelectorAll('.modo-normal, .modo-extremo, .modo-extincion').forEach(card => {
                 if (enProgreso) {
                     card.classList.add('modo-bloqueado-por-limbo');
@@ -534,11 +534,12 @@
 
         function aplicarCastigoLimbo() {
             limboFailCount++;
-            const horasCastigo = Math.min(limboFailCount, 12);
-            limboCooldownEnd = Date.now() + (horasCastigo * 60 * 60 * 1000);
+            // Empieza en 10 minutos, suma 10 por cada fallo, tope de 60 minutos (1 hora)
+            const minutosCastigo = Math.min(limboFailCount * 10, 60); 
+            limboCooldownEnd = Date.now() + (minutosCastigo * 60 * 1000);
             
             limboWins = 0;
-            limboLives = 2;
+            limboLives = 3;
             modoActual = "normal";
             juegoActivo = false;
             apuestaPreparada = 0;
@@ -547,7 +548,8 @@
             guardarEstadoUsuario();
             verificarEstadoLimbo();
             
-            document.getElementById('mensaje').innerText = `💀 Has caído en el Limbo. Debes esperar ${horasCastigo} hora(s) para intentarlo de nuevo.`;
+            const textoTiempo = minutosCastigo === 60 ? "1 hora" : `${minutosCastigo} minutos`;
+            document.getElementById('mensaje').innerText = `💀 Has caído en el Limbo. Debes esperar ${textoTiempo} para intentarlo de nuevo.`;
             document.getElementById('btn-iniciar').disabled = false;
             document.querySelectorAll('.refugio').forEach(r => r.className = 'refugio');
         }
@@ -555,7 +557,7 @@
         function completarExitoLimbo() {
             saldoFichas = 500;
             limboWins = 0;
-            limboLives = 2;
+            limboLives = 3;
             limboFailCount = 0;
             limboCooldownEnd = 0;
             modoActual = "normal";
@@ -589,7 +591,7 @@
 
         // ==================== SELECTOR DE MODO ====================
         function seleccionarModo(modo) {
-            if (limboWins > 0 || limboLives < 2) {
+            if (limboWins > 0 || limboLives < 3) {
                 if (modo !== 'limbo') {
                     alert("⚠️ Debes completar o fallar el desafío del Limbo antes de jugar otro modo.");
                     return;
@@ -846,7 +848,7 @@
                     if (listaSidebar) listaSidebar.innerHTML = contenidoHTML;
                     
                     if (miPosicion && usuarioActual) {
-                        const textoPosicion = `🎯 Tu posición: #${miPosicion} con ${misFichas} fichas`;
+                        const textoPosicion = `Tu posición: #${miPosicion} con ${misFichas} fichas`;
                         if (miPosicionIndicador) {
                             miPosicionIndicador.innerText = textoPosicion;
                             miPosicionIndicador.classList.remove('oculto');
@@ -1016,7 +1018,7 @@
                             aplicarCastigoLimbo();
                         } else {
                             juegoActivo = false;
-                            document.getElementById('mensaje').innerText = `💥 ¡Meteorito! Te queda ${limboLives} vida(s).`;
+                            document.getElementById('mensaje').innerText = `¡Meteorito! Te queda ${limboLives} vida(s).`;
                             document.getElementById('btn-iniciar').disabled = false;
                             guardarEstadoUsuario();
                         }
@@ -1024,7 +1026,7 @@
                         pozoAcumulado = 0; 
                         juegoActivo = false;
                         rachaVictorias = 0;
-                        document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
+                        document.getElementById('mensaje').innerText = "¡Meteorito! Perdiste todo lo apostado.";
                         document.getElementById('btn-iniciar').disabled = false;
                         guardarEstadoUsuario();
                         verificarEstadoLimbo();
@@ -1063,7 +1065,7 @@
             rachaVictorias++;
             document.getElementById('btn-retirarse').disabled = true;
             document.getElementById('btn-iniciar').disabled = false;
-            document.getElementById('mensaje').innerText = "✅ ¡Cobrado! Tus fichas: " + saldoFichas + " | Racha: " + rachaVictorias;
+            document.getElementById('mensaje').innerText = "¡Cobrado! Tus fichas: " + saldoFichas + " | Racha: " + rachaVictorias;
             
             document.querySelectorAll('.refugio').forEach(r => {
                 r.className = 'refugio';
