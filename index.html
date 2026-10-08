@@ -128,6 +128,51 @@
         .modo-extincion.activo .modo-nombre, .modo-extincion.activo .modo-detalle, .modo-extincion.activo .modo-multi { color: white; }
         .modo-extincion.activo .modo-multi { background: rgba(0,0,0,0.3); }
 
+        /* ESTILOS MODO LIMBO */
+        .modo-limbo { border-color: #7f8c8d; filter: grayscale(100%); opacity: 0.7; }
+        .modo-limbo .modo-nombre { color: #95a5a6; }
+        .modo-limbo::after {
+            content: '⛓️'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 2.5rem; opacity: 0.8; text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+        .modo-limbo.desbloqueado {
+            filter: none; opacity: 1; border-color: #9b59b6; 
+            background: linear-gradient(145deg, #4a235a, #1a252f);
+            animation: pulsoLimbo 2s infinite;
+        }
+        .modo-limbo.desbloqueado .modo-nombre { color: #d2b4de; }
+        .modo-limbo.desbloqueado::after { content: '💀'; font-size: 2rem; }
+        .modo-limbo.activo { 
+            background: linear-gradient(145deg, #8e44ad, #4a235a); border-color: #d2b4de; 
+            box-shadow: 0px 0px 25px rgba(155, 89, 182, 0.8); 
+        }
+        .modo-limbo.activo .modo-nombre, .modo-limbo.activo .modo-detalle, .modo-limbo.activo .modo-multi { color: white; }
+
+        @keyframes pulsoLimbo {
+            0%, 100% { box-shadow: 0px 0px 15px rgba(155, 89, 182, 0.5); }
+            50% { box-shadow: 0px 0px 30px rgba(155, 89, 182, 0.9); }
+        }
+
+        .modo-bloqueado-por-limbo {
+            animation: parpadeoRojo 1.2s infinite !important;
+            pointer-events: none !important;
+            opacity: 0.5 !important;
+            filter: grayscale(80%) !important;
+        }
+        @keyframes parpadeoRojo {
+            0%, 100% { border-color: #34495e; box-shadow: none; }
+            50% { border-color: #e74c3c; box-shadow: 0 0 15px rgba(231, 76, 60, 0.8); }
+        }
+
+        .limbo-status {
+            margin-top: 15px; padding: 12px; background: rgba(142, 68, 173, 0.15); 
+            border: 1px solid #9b59b6; border-radius: 8px; font-size: 0.95rem;
+            display: flex; flex-direction: column; gap: 5px;
+        }
+        .limbo-status .progreso { font-weight: bold; color: #d2b4de; }
+        .limbo-status .vidas { color: #e74c3c; font-weight: bold; }
+        .limbo-status .timer { color: #f1c40f; font-weight: bold; margin-top: 5px; }
+
         @keyframes pulsoExtincion {
             0%, 100% { box-shadow: 0px 0px 20px rgba(231, 76, 60, 0.7); }
             50% { box-shadow: 0px 0px 30px rgba(231, 76, 60, 1); }
@@ -228,7 +273,7 @@
                 <div class="selector-modo">
                     <span class="selector-modo-label">⚙️ Modo de Juego</span>
                     <div class="modo-grid">
-                        <div class="modo-card modo-normal activo" data-modo="normal" onclick="seleccionarModo('normal')">
+                        <div class="modo-card modo-normal" data-modo="normal" onclick="seleccionarModo('normal')">
                             <span class="modo-icono">☄️</span>
                             <div class="modo-nombre">Normal</div>
                             <div class="modo-detalle">1 Meteorito</div>
@@ -246,7 +291,21 @@
                             <div class="modo-detalle">3 Meteoritos</div>
                             <span class="modo-multi">x2.00</span>
                         </div>
+                        <!-- NUEVO: Modo Limbo -->
+                        <div class="modo-card modo-limbo" id="card-limbo" data-modo="limbo" onclick="seleccionarModo('limbo')">
+                            <span class="modo-icono">⛓️</span>
+                            <div class="modo-nombre">LIMBO</div>
+                            <div class="modo-detalle">4 Meteoritos</div>
+                            <span class="modo-multi">Desafío</span>
+                        </div>
                     </div>
+                </div>
+
+                <!-- NUEVO: Panel de estado del Limbo -->
+                <div id="limbo-info" class="limbo-status oculto">
+                    <div class="progreso">🎯 Aciertos para escapar: <span id="limbo-wins">0</span>/2</div>
+                    <div class="vidas">❤️ Vidas restantes: <span id="limbo-lives">2</span></div>
+                    <div id="limbo-timer" class="timer"></div>
                 </div>
 
                 <div>
@@ -273,9 +332,9 @@
                 <li><strong>Normal:</strong> 10% de ganancia por acierto</li>
                 <li><strong>Extremo:</strong> 30% de ganancia por acierto</li>
                 <li><strong>Extinción:</strong> Duplica la ganancia por acierto</li>
+                <li><strong>LIMBO:</strong> Si llegas a 0 fichas, enfrenta 4 meteoritos. Consigue 2 aciertos antes de perder 2 vidas para recibir 500 fichas de rescate.</li>
             </ul>
             
-            <!-- NUEVO: Tabla de Ranking Global añadida debajo de las reglas -->
             <div style="margin-top: 25px; border-top: 2px solid rgba(241, 196, 15, 0.3); padding-top: 15px;">
                 <div class="ranking-header" style="font-size: 1rem; padding: 8px; text-align: center; border-radius: 6px;">🏆 Top Exploradores</div>
                 <ul id="lista-ranking-global-sidebar" class="ranking-lista" style="padding: 10px;">
@@ -310,6 +369,12 @@
         let rachaVictorias = 0;
         const ALPHA = 0.8;
 
+        // Variables del Modo Limbo
+        let limboWins = 0;
+        let limboLives = 2;
+        let limboFailCount = 0;
+        let limboCooldownEnd = 0;
+
         // ==================== FUNCIONES DE SEGURIDAD ====================
         function codificarPassword(cadena) {
             let hash = 0;
@@ -335,16 +400,154 @@
             apuestaPreparada = 0; 
             actualizarPantalla(); 
             crearRefugios();
+            verificarEstadoLimbo(); // Verificar si se desbloquea el Limbo al entrar
+        }
+
+        // ==================== LÓGICA DEL MODO LIMBO ====================
+        function verificarEstadoLimbo() {
+            const cardLimbo = document.getElementById('card-limbo');
+            const limboInfo = document.getElementById('limbo-info');
+            const ahora = Date.now();
+
+            // Actualizar UI del timer si está en castigo
+            if (ahora < limboCooldownEnd) {
+                const resto = limboCooldownEnd - ahora;
+                const h = Math.floor(resto / (1000 * 60 * 60));
+                const m = Math.floor((resto % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('limbo-timer').innerText = `⏳ Castigo activo: ${h}h ${m}m restantes`;
+                
+                cardLimbo.classList.remove('desbloqueado', 'activo');
+                cardLimbo.classList.add('deshabilitada');
+                limboInfo.classList.remove('oculto');
+                return;
+            } else {
+                document.getElementById('limbo-timer').innerText = "";
+            }
+
+            // Si el saldo es <= 0, se desbloquea el Limbo
+            if (saldoFichas <= 0) {
+                cardLimbo.classList.remove('deshabilitada');
+                cardLimbo.classList.add('desbloqueado');
+                limboInfo.classList.remove('oculto');
+                actualizarUIProgresoLimbo();
+            } else {
+                // Si tiene saldo, se bloquea y se resetea el progreso si estaba activo
+                cardLimbo.classList.remove('desbloqueado', 'activo');
+                cardLimbo.classList.add('deshabilitada');
+                limboInfo.classList.add('oculto');
+                if (modoActual === 'limbo') {
+                    seleccionarModo('normal'); // Forzar salida del limbo si recupera fichas
+                }
+                limboWins = 0;
+                limboLives = 2;
+            }
+
+            // Si el limbo está EN PROGRESO, bloquear los otros modos
+            const enProgreso = (saldoFichas <= 0 && ahora >= limboCooldownEnd && (limboWins > 0 || limboLives < 2));
+            document.querySelectorAll('.modo-normal, .modo-extremo, .modo-extincion').forEach(card => {
+                if (enProgreso) {
+                    card.classList.add('modo-bloqueado-por-limbo');
+                } else {
+                    card.classList.remove('modo-bloqueado-por-limbo');
+                }
+            });
+        }
+
+        function actualizarUIProgresoLimbo() {
+            document.getElementById('limbo-wins').innerText = limboWins;
+            document.getElementById('limbo-lives').innerText = limboLives;
+        }
+
+        function aplicarCastigoLimbo() {
+            limboFailCount++;
+            const horasCastigo = Math.min(limboFailCount, 12); // Tope de 12 horas
+            limboCooldownEnd = Date.now() + (horasCastigo * 60 * 60 * 1000);
+            
+            // Resetear estado del desafío
+            limboWins = 0;
+            limboLives = 2;
+            modoActual = "normal";
+            juegoActivo = false;
+            apuestaPreparada = 0;
+            saldoFichas = 0; // Asegurar que quede en 0
+
+            guardarEstadoUsuario();
+            verificarEstadoLimbo();
+            
+            document.getElementById('mensaje').innerText = `💀 Has caído en el Limbo. Debes esperar ${horasCastigo} hora(s) para intentarlo de nuevo.`;
+            document.getElementById('btn-iniciar').disabled = false;
+            document.querySelectorAll('.refugio').forEach(r => r.className = 'refugio');
+        }
+
+        function completarExitoLimbo() {
+            saldoFichas = 500; // Recompensa de rescate
+            limboWins = 0;
+            limboLives = 2;
+            limboFailCount = 0; // Resetear castigos al tener éxito
+            limboCooldownEnd = 0;
+            modoActual = "normal";
+            juegoActivo = false;
+            apuestaPreparada = 0;
+
+            guardarEstadoUsuario();
+            verificarEstadoLimbo();
+            actualizarPantalla();
+            
+            document.getElementById('mensaje').innerText = "🎉 ¡HAS ESCAPADO DEL LIMBO! Has recibido 500 fichas de rescate.";
+            document.getElementById('btn-iniciar').disabled = false;
+            document.querySelectorAll('.refugio').forEach(r => r.className = 'refugio');
+            alert("🎉 ¡FELICIDADES! Has superado el desafío del Limbo y recibido 500 fichas para volver a jugar.");
+        }
+
+        function guardarEstadoUsuario() {
+            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+            if(bd[usuarioActual]) { 
+                bd[usuarioActual].fichas = saldoFichas;
+                bd[usuarioActual].racha = rachaVictorias;
+                bd[usuarioActual].limboWins = limboWins;
+                bd[usuarioActual].limboLives = limboLives;
+                bd[usuarioActual].limboFailCount = limboFailCount;
+                bd[usuarioActual].limboCooldownEnd = limboCooldownEnd;
+                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
+                
+                if (db) {
+                    db.collection("jugadores").doc(usuarioActual).set({
+                        usuario: usuarioActual,
+                        fichas: saldoFichas
+                    }, { merge: true });
+                }
+            }
         }
 
         // ==================== SELECTOR DE MODO ====================
         function seleccionarModo(modo) {
-            if (juegoActivo) return;
+            // No permitir cambiar de modo si el Limbo está en progreso
+            if (limboWins > 0 || limboLives < 2) {
+                if (modo !== 'limbo') {
+                    alert("⚠️ Debes completar o fallar el desafío del Limbo antes de jugar otro modo.");
+                    return;
+                }
+            }
+
+            // No permitir seleccionar Limbo si está bloqueado (saldo > 0 o en castigo)
+            if (modo === 'limbo') {
+                const ahora = Date.now();
+                if (saldoFichas > 0 || ahora < limboCooldownEnd) {
+                    return; // El CSS ya lo muestra deshabilitado, pero por seguridad
+                }
+            }
+
             modoActual = modo;
             document.querySelectorAll('.modo-card').forEach(card => {
                 card.classList.remove('activo');
             });
-            document.querySelector(`.modo-card[data-modo="${modo}"]`).classList.add('activo');
+            
+            const cardSeleccionada = document.querySelector(`.modo-card[data-modo="${modo}"]`);
+            cardSeleccionada.classList.add('activo');
+            
+            if (modo === 'limbo') {
+                cardSeleccionada.classList.add('activo'); // Sobreescribe estilos para el estado activo
+            }
         }
 
         // ==================== AUTENTICACIÓN Y SINCRONIZACIÓN ====================
@@ -371,6 +574,11 @@
                 if (bd[usuarioActual]) { 
                     saldoFichas = bd[usuarioActual].fichas; 
                     rachaVictorias = bd[usuarioActual].racha || 0;
+                    // Cargar estado del Limbo
+                    limboWins = bd[usuarioActual].limboWins || 0;
+                    limboLives = bd[usuarioActual].limboLives || 2;
+                    limboFailCount = bd[usuarioActual].limboFailCount || 0;
+                    limboCooldownEnd = bd[usuarioActual].limboCooldownEnd || 0;
                     abrirJuego(); 
                 }
             }
@@ -407,6 +615,10 @@
             usuarioActual = user; 
             saldoFichas = bd[user].fichas;
             rachaVictorias = bd[user].racha || 0;
+            limboWins = bd[user].limboWins || 0;
+            limboLives = bd[user].limboLives || 2;
+            limboFailCount = bd[user].limboFailCount || 0;
+            limboCooldownEnd = bd[user].limboCooldownEnd || 0;
             localStorage.setItem('usuario_actual_sesion', usuarioActual); 
             abrirJuego();
         }
@@ -424,16 +636,18 @@
                 document.getElementById('err-reg-txt').innerText = "❌ Ya existe."; 
                 return; 
             }
-            bd[user] = { password: codificarPassword(pass), fichas: 1000, racha: 0 };
+            bd[user] = { password: codificarPassword(pass), fichas: 1000, racha: 0, limboWins: 0, limboLives: 2, limboFailCount: 0, limboCooldownEnd: 0 };
             localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
             usuarioActual = user; 
             saldoFichas = 1000;
             rachaVictorias = 0;
+            limboWins = 0; limboLives = 2; limboFailCount = 0; limboCooldownEnd = 0;
             localStorage.setItem('usuario_actual_sesion', usuarioActual); 
             abrirJuego();
         }
 
         function logout() {
+            guardarEstadoUsuario();
             localStorage.removeItem('usuario_actual_sesion');
             location.reload();
         }
@@ -466,7 +680,6 @@
                         });
                     }
                     
-                    // Actualizar ambas tablas si existen en el DOM
                     if (lista) lista.innerHTML = contenidoHTML;
                     if (listaSidebar) listaSidebar.innerHTML = contenidoHTML;
                 }, (error) => {
@@ -477,17 +690,20 @@
         // ==================== LÓGICA DE JUEGO ====================
         function agregarFichas(valor) {
             if (juegoActivo) return;
+            if (modoActual === 'limbo') return; // No permitir añadir fichas en Limbo
             if (apuestaPreparada + valor > saldoFichas) return;
             apuestaPreparada += valor; 
             actualizarPantalla();
         }
 
         function limpiarApuesta() { 
+            if (modoActual === 'limbo') return;
             apuestaPreparada = 0; 
             actualizarPantalla(); 
         }
 
         function apostarTodo() { 
+            if (modoActual === 'limbo') return;
             apuestaPreparada = saldoFichas; 
             actualizarPantalla(); 
         }
@@ -504,6 +720,24 @@
         }
 
         function iniciarRonda() {
+            if (modoActual === 'limbo') {
+                // En Limbo, la apuesta es simbólica o 0, y se ignora el saldo negativo
+                apuestaPreparada = 0;
+                pozoAcumulado = 0;
+                juegoActivo = true;
+                esperandoResultado = false;
+                actualizarPantalla();
+                
+                document.querySelectorAll('.refugio').forEach(r => {
+                    r.className = 'refugio activo';
+                });
+                
+                document.getElementById('btn-iniciar').disabled = true;
+                document.getElementById('btn-retirarse').disabled = true;
+                document.getElementById('mensaje').innerText = "¡Desafío Limbo! Elige tu refugio (4 Meteoritos).";
+                return;
+            }
+
             if (apuestaPreparada <= 0) return;
             saldoFichas -= apuestaPreparada; 
             pozoAcumulado = apuestaPreparada; 
@@ -537,7 +771,9 @@
                 if (excludeIndices.includes(i)) {
                     weights.push(0);
                 } else if (i === refugioElegido - 1) {
-                    weights.push(1 + ALPHA * Math.log(1 + rachaVictorias));
+                    // Si es Limbo, simular una racha de 2 aciertos para dar un poco más de peso
+                    const rachaEfectiva = modoActual === 'limbo' ? rachaVictorias + 2 : rachaVictorias;
+                    weights.push(1 + ALPHA * Math.log(1 + rachaEfectiva));
                 } else {
                     weights.push(1);
                 }
@@ -551,7 +787,6 @@
             
             const refugios = document.querySelectorAll('.refugio');
             
-            // Resetear todas las casillas al estado base antes de procesar
             refugios.forEach(r => {
                 r.className = 'refugio activo';
             });
@@ -570,6 +805,9 @@
             } else if (modoActual === 'extincion') {
                 numMeteoritos = 3;
                 multiplicador = 2.0;
+            } else if (modoActual === 'limbo') {
+                numMeteoritos = 4; // 4 meteoritos en Limbo
+                multiplicador = 1.0; // No importa, el premio es fijo al completar el desafío
             }
             
             setTimeout(() => {
@@ -589,17 +827,43 @@
                 });
                 
                 if (golpeado) {
-                    pozoAcumulado = 0; 
-                    juegoActivo = false;
-                    rachaVictorias = 0;
-                    document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
-                    document.getElementById('btn-iniciar').disabled = false;
+                    if (modoActual === 'limbo') {
+                        limboLives--;
+                        actualizarUIProgresoLimbo();
+                        if (limboLives <= 0) {
+                            aplicarCastigoLimbo();
+                        } else {
+                            juegoActivo = false;
+                            document.getElementById('mensaje').innerText = `💥 ¡Meteorito! Te queda ${limboLives} vida(s).`;
+                            document.getElementById('btn-iniciar').disabled = false;
+                        }
+                    } else {
+                        pozoAcumulado = 0; 
+                        juegoActivo = false;
+                        rachaVictorias = 0;
+                        document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
+                        document.getElementById('btn-iniciar').disabled = false;
+                        guardarEstadoUsuario(); // Guardar la pérdida
+                        verificarEstadoLimbo(); // Verificar si ahora se activa el Limbo
+                    }
                 } else {
-                    pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
-                    refugios[id - 1].classList.remove('seleccionado');
-                    refugios[id - 1].classList.add('salvado');
-                    document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
-                    document.getElementById('btn-retirarse').disabled = false;
+                    if (modoActual === 'limbo') {
+                        limboWins++;
+                        actualizarUIProgresoLimbo();
+                        if (limboWins >= 2) {
+                            completarExitoLimbo();
+                        } else {
+                            juegoActivo = false;
+                            document.getElementById('mensaje').innerText = `🎉 ¡Salvado! Llevas ${limboWins}/2 aciertos. ¡Sigue así!`;
+                            document.getElementById('btn-iniciar').disabled = false;
+                        }
+                    } else {
+                        pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
+                        refugios[id - 1].classList.remove('seleccionado');
+                        refugios[id - 1].classList.add('salvado');
+                        document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
+                        document.getElementById('btn-retirarse').disabled = false;
+                    }
                 }
                 esperandoResultado = false; 
                 actualizarPantalla();
@@ -607,6 +871,8 @@
         }
 
         function retirarse() {
+            if (modoActual === 'limbo') return; // No se puede cobrar en medio del desafío Limbo
+            
             saldoFichas += pozoAcumulado; 
             pozoAcumulado = 0; 
             juegoActivo = false;
@@ -619,16 +885,8 @@
                 r.className = 'refugio';
             });
             
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if(bd[usuarioActual]) { 
-                bd[usuarioActual].fichas = saldoFichas;
-                bd[usuarioActual].racha = rachaVictorias;
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-                db.collection("jugadores").doc(usuarioActual).set({
-                    usuario: usuarioActual,
-                    fichas: saldoFichas
-                }, { merge: true });
-            }
+            guardarEstadoUsuario();
+            verificarEstadoLimbo();
             actualizarPantalla();
         }
 
