@@ -219,54 +219,17 @@
         }
 
         .refugios-container { display: grid; grid-template-columns: repeat(3, 130px); grid-gap: 15px; justify-content: center; margin: 30px auto; }
-.refugio { 
-    width: 130px; 
-    height: 155px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 2.2rem; 
-    cursor: pointer; 
-    user-select: none; 
-    border: none; /* Elimina el borde rectangular */
-    background-color: transparent; /* Fondo transparente */
-    background-image: url('imagenes/refugio_normal.jpg'); 
-    background-size: contain; /* Ajusta la imagen al contenedor */
-    background-repeat: no-repeat; 
-    background-position: center;
-    transition: transform 0.2s;
-    /* Opcional: si quieres que solo la imagen sea clickeable */
-    overflow: visible;
-}
-
-.refugio img {
-    /* Si usas etiquetas <img> en lugar de background */
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* Estados del refugio - Ajusta las imágenes según corresponda */
-.refugio.activo:hover { 
-    transform: scale(1.08); 
-    filter: brightness(1.1); /* Efecto hover sin fondo */
-}
-
-.refugio.seleccionado { 
-    filter: drop-shadow(0 0 15px #f39c12); /* Sombra en lugar de borde */
-    transform: scale(1.1);
-}
-
-.refugio.salvado { 
-    background-image: url('imagenes/refugio_salvado.jpg'); 
-    filter: drop-shadow(0 0 15px #2ecc71);
-}
-
-.refugio.destruido { 
-    background-image: url('imagenes/refugio_crack.jpg'); 
-    filter: drop-shadow(0 0 15px #e74c3c);
-    animation: shake 0.5s ease-in-out;
-}
+        .refugio { 
+            width: 130px; height: 155px; display: flex; align-items: center; justify-content: center; 
+            font-size: 2.2rem; cursor: pointer; user-select: none; border-radius: 12px; 
+            border: 3px solid #555; background-color: #34495e; 
+            background-image: url('imagenes/refugio_normal.jpg'); background-size: cover; background-position: center;
+            transition: transform 0.2s;
+        }
+        .refugio.activo:hover { transform: scale(1.08); box-shadow: 0px 0px 15px #f1c40f; }
+        .refugio.seleccionado { border-color: #f39c12; border-width: 4px; box-shadow: 0px 0px 20px #f39c12; }
+        .refugio.salvado { background-image: url('imagenes/refugio_salvado.jpg'); border-color: #2ecc71; border-width: 4px; box-shadow: 0px 0px 20px #2ecc71; }
+        .refugio.destruido { background-image: url('imagenes/refugio_crack.jpg'); border-color: #e74c3c; border-width: 4px; box-shadow: 0px 0px 20px #e74c3c; animation: shake 0.5s ease-in-out; }
 
         #mensaje { font-size: 1.6rem; margin-top: 25px; font-weight: bold; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.95); }
         .error-msg { color: #e74c3c; font-weight: bold; margin-top: 10px; }
