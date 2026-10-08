@@ -657,7 +657,7 @@
             const errBox = document.getElementById('err-login-txt');
             
             if (!db) {
-                errBox.innerText = " Error de conexión a la base de datos.";
+                errBox.innerText = "❌ Error de conexión a la base de datos.";
                 return;
             }
 
@@ -668,20 +668,16 @@
                     const data = doc.data();
                     const passwordIngresada = codificarPassword(pass);
                     
-                    // Verificar si la contraseña coincide
                     if (data.password === passwordIngresada) {
-                        // Login exitoso con Firebase
                         usuarioActual = user;
                         localStorage.setItem('usuario_actual_sesion', usuarioActual);
                         errBox.innerText = "";
                         abrirJuego();
                         escucharDatosUsuario();
                     } else {
-                        // La contraseña no coincide, verificar localStorage
                         let bdLocal = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
                         if (bdLocal[user] && bdLocal[user].password === passwordIngresada) {
-                            // La contraseña es correcta en localStorage, actualizar Firebase
-                            errBox.innerText = " Corrigiendo contraseña en la nube...";
+                            errBox.innerText = "🔄 Corrigiendo contraseña en la nube...";
                             db.collection("jugadores").doc(user).update({
                                 password: passwordIngresada
                             }).then(() => {
@@ -702,10 +698,8 @@
                         }
                     }
                 } else {
-                    // Usuario no existe en Firebase, verificar localStorage
                     let bdLocal = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
                     if (bdLocal[user] && bdLocal[user].password === codificarPassword(pass)) {
-                        // Migrar cuenta completa desde localStorage
                         errBox.innerText = "🔄 Migrando cuenta a la nube...";
                         const datosMigrados = {
                             usuario: user,
@@ -792,7 +786,7 @@
             location.reload();
         }
 
-        // ==================== RANKING GLOBAL ====================
+        // ==================== RANKING GLOBAL (TOP 5 + TU POSICIÓN) ====================
         function obtenerRankingGlobal() {
             const lista = document.getElementById('lista-ranking-global');
             const listaSidebar = document.getElementById('lista-ranking-global-sidebar');
@@ -807,6 +801,7 @@
                     let contenidoHTML = "";
                     let miPosicion = null;
                     let misFichas = 0;
+                    let miUsuario = "";
                     
                     if (snapshot.empty) {
                         contenidoHTML = '<li class="ranking-item">Aún no hay jugadores</li>';
@@ -819,24 +814,39 @@
                             if (esMiPosicion) {
                                 miPosicion = posicion;
                                 misFichas = data.fichas;
+                                miUsuario = data.usuario;
                             }
                             
-                            contenidoHTML += `
-                                <li class="ranking-item ${esMiPosicion ? 'mi-posicion' : ''} ${posicion === 1 ? 'top1' : ''}">
-                                    <span class="ranking-pos">#${posicion}</span>
-                                    <span class="ranking-user">${data.usuario} ${esMiPosicion ? '(Tú)' : ''}</span>
-                                    <span class="ranking-money">${data.fichas} fichas</span>
-                                </li>
-                            `;
+                            // Solo agregar al HTML si está en el Top 5
+                            if (posicion <= 5) {
+                                contenidoHTML += `
+                                    <li class="ranking-item ${esMiPosicion ? 'mi-posicion' : ''} ${posicion === 1 ? 'top1' : ''}">
+                                        <span class="ranking-pos">#${posicion}</span>
+                                        <span class="ranking-user">${data.usuario} ${esMiPosicion ? '(Tú)' : ''}</span>
+                                        <span class="ranking-money">${data.fichas} fichas</span>
+                                    </li>
+                                `;
+                            }
                             posicion++;
                         });
+
+                        // Si el jugador está fuera del Top 5, mostrar su posición real debajo con separador
+                        if (miPosicion && miPosicion > 5) {
+                            contenidoHTML += `
+                                <li class="ranking-item mi-posicion" style="margin-top: 8px; border-top: 1px dashed rgba(236, 240, 241, 0.3); padding-top: 10px;">
+                                    <span class="ranking-pos">#${miPosicion}</span>
+                                    <span class="ranking-user">${miUsuario} (Tú)</span>
+                                    <span class="ranking-money">${misFichas} fichas</span>
+                                </li>
+                            `;
+                        }
                     }
                     
                     if (lista) lista.innerHTML = contenidoHTML;
                     if (listaSidebar) listaSidebar.innerHTML = contenidoHTML;
                     
                     if (miPosicion && usuarioActual) {
-                        const textoPosicion = ` Tu posición: #${miPosicion} con ${misFichas} fichas`;
+                        const textoPosicion = `🎯 Tu posición: #${miPosicion} con ${misFichas} fichas`;
                         if (miPosicionIndicador) {
                             miPosicionIndicador.innerText = textoPosicion;
                             miPosicionIndicador.classList.remove('oculto');
@@ -1035,7 +1045,7 @@
                         pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
                         refugios[id - 1].classList.remove('seleccionado');
                         refugios[id - 1].classList.add('salvado');
-                        document.getElementById('mensaje').innerText = " ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
+                        document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
                         document.getElementById('btn-retirarse').disabled = false;
                     }
                 }
