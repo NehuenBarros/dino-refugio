@@ -616,7 +616,7 @@
             }
         }
 
-        // ==================== AUTENTICACIÓN Y MIGRACIÓN ====================
+        // ==================== AUTENTICACIÓN MEJORADA ====================
         window.onload = function() {
             obtenerRankingGlobal();
             
@@ -629,26 +629,7 @@
                             abrirJuego();
                             escucharDatosUsuario();
                         } else {
-                            // Fallback en onload: migrar cuenta antigua si existe en localStorage
-                            let bdLocal = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                            if (bdLocal[usuarioActual]) {
-                                const datosMigrados = {
-                                    usuario: usuarioActual,
-                                    password: bdLocal[usuarioActual].password,
-                                    fichas: bdLocal[usuarioActual].fichas || 1000,
-                                    racha: bdLocal[usuarioActual].racha || 0,
-                                    limboWins: bdLocal[usuarioActual].limboWins || 0,
-                                    limboLives: bdLocal[usuarioActual].limboLives || 2,
-                                    limboFailCount: bdLocal[usuarioActual].limboFailCount || 0,
-                                    limboCooldownEnd: bdLocal[usuarioActual].limboCooldownEnd || 0
-                                };
-                                db.collection("jugadores").doc(usuarioActual).set(datosMigrados).then(() => {
-                                    abrirJuego();
-                                    escucharDatosUsuario();
-                                });
-                            } else {
-                                localStorage.removeItem('usuario_actual_sesion');
-                            }
+                            localStorage.removeItem('usuario_actual_sesion');
                         }
                     }).catch(err => {
                         console.error("Error al verificar sesión:", err);
@@ -673,27 +654,59 @@
         function ejecutarLogin() {
             const user = document.getElementById('usr-login-input').value.trim();
             const pass = document.getElementById('pass-login-input').value;
+            const errBox = document.getElementById('err-login-txt');
             
             if (!db) {
-                document.getElementById('err-login-txt').innerText = "❌ Error de conexión a la base de datos.";
+                errBox.innerText = " Error de conexión a la base de datos.";
                 return;
             }
+
+            errBox.innerText = "⏳ Verificando credenciales...";
 
             db.collection("jugadores").doc(user).get().then((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
-                    if (data.password === codificarPassword(pass)) {
+                    const passwordIngresada = codificarPassword(pass);
+                    
+                    // Verificar si la contraseña coincide
+                    if (data.password === passwordIngresada) {
+                        // Login exitoso con Firebase
                         usuarioActual = user;
                         localStorage.setItem('usuario_actual_sesion', usuarioActual);
+                        errBox.innerText = "";
                         abrirJuego();
                         escucharDatosUsuario();
                     } else {
-                        document.getElementById('err-login-txt').innerText = "❌ Usuario/Pass incorrecto.";
+                        // La contraseña no coincide, verificar localStorage
+                        let bdLocal = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+                        if (bdLocal[user] && bdLocal[user].password === passwordIngresada) {
+                            // La contraseña es correcta en localStorage, actualizar Firebase
+                            errBox.innerText = " Corrigiendo contraseña en la nube...";
+                            db.collection("jugadores").doc(user).update({
+                                password: passwordIngresada
+                            }).then(() => {
+                                usuarioActual = user;
+                                localStorage.setItem('usuario_actual_sesion', usuarioActual);
+                                errBox.innerText = "✅ Contraseña corregida. ¡Bienvenido!";
+                                setTimeout(() => {
+                                    errBox.innerText = "";
+                                    abrirJuego();
+                                    escucharDatosUsuario();
+                                }, 1000);
+                            }).catch((err) => {
+                                console.error("Error al actualizar contraseña: ", err);
+                                errBox.innerText = "❌ Error al corregir contraseña.";
+                            });
+                        } else {
+                            errBox.innerText = "❌ Usuario/Pass incorrecto.";
+                        }
                     }
                 } else {
-                    // MIGRACIÓN AUTOMÁTICA: Si no está en Firebase, buscar en localStorage
+                    // Usuario no existe en Firebase, verificar localStorage
                     let bdLocal = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
                     if (bdLocal[user] && bdLocal[user].password === codificarPassword(pass)) {
+                        // Migrar cuenta completa desde localStorage
+                        errBox.innerText = "🔄 Migrando cuenta a la nube...";
                         const datosMigrados = {
                             usuario: user,
                             password: bdLocal[user].password,
@@ -708,20 +721,23 @@
                         db.collection("jugadores").doc(user).set(datosMigrados).then(() => {
                             usuarioActual = user;
                             localStorage.setItem('usuario_actual_sesion', usuarioActual);
-                            alert("✅ Cuenta antigua migrada exitosamente a la nube. ¡Ya puedes jugar!");
-                            abrirJuego();
-                            escucharDatosUsuario();
+                            errBox.innerText = "✅ Cuenta migrada exitosamente.";
+                            setTimeout(() => {
+                                errBox.innerText = "";
+                                abrirJuego();
+                                escucharDatosUsuario();
+                            }, 1000);
                         }).catch((err) => {
                             console.error("Error al migrar: ", err);
-                            document.getElementById('err-login-txt').innerText = "❌ Error al migrar cuenta antigua.";
+                            errBox.innerText = "❌ Error al migrar cuenta.";
                         });
                     } else {
-                        document.getElementById('err-login-txt').innerText = "❌ Usuario no encontrado.";
+                        errBox.innerText = "❌ Usuario no encontrado.";
                     }
                 }
             }).catch((error) => {
                 console.error("Error al iniciar sesión: ", error);
-                document.getElementById('err-login-txt').innerText = "❌ Error de conexión.";
+                errBox.innerText = "❌ Error de conexión.";
             });
         }
 
@@ -820,7 +836,7 @@
                     if (listaSidebar) listaSidebar.innerHTML = contenidoHTML;
                     
                     if (miPosicion && usuarioActual) {
-                        const textoPosicion = `🎯 Tu posición: #${miPosicion} con ${misFichas} fichas`;
+                        const textoPosicion = ` Tu posición: #${miPosicion} con ${misFichas} fichas`;
                         if (miPosicionIndicador) {
                             miPosicionIndicador.innerText = textoPosicion;
                             miPosicionIndicador.classList.remove('oculto');
@@ -1019,7 +1035,7 @@
                         pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
                         refugios[id - 1].classList.remove('seleccionado');
                         refugios[id - 1].classList.add('salvado');
-                        document.getElementById('mensaje').innerText = "🎉 ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
+                        document.getElementById('mensaje').innerText = " ¡Salvado! Pozo: " + pozoAcumulado + " (x" + multiplicador + ")";
                         document.getElementById('btn-retirarse').disabled = false;
                     }
                 }
