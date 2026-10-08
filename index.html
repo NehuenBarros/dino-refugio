@@ -342,7 +342,7 @@
                 </div>
 
                 <div id="limbo-info" class="limbo-status oculto">
-                    <div class="progreso">🎯 Aciertos para escapar: <span id="limbo-wins">0</span>/2</div>
+                    <div class="progreso">🎯 Aciertos para escapar: <span id="limbo-wins">0</span>/1</div>
                     <div class="vidas">❤️ Vidas restantes: <span id="limbo-lives">3</span></div>
                     <div id="limbo-timer" class="timer"></div>
                 </div>
@@ -371,7 +371,7 @@
                 <li><strong>Normal:</strong> 10% de ganancia por acierto</li>
                 <li><strong>Extremo:</strong> 30% de ganancia por acierto</li>
                 <li><strong>Extinción:</strong> Duplica la ganancia por acierto</li>
-                <li><strong>LIMBO:</strong> Si llegas a 0 fichas, enfrenta 4 meteoritos. Consigue 2 aciertos antes de perder 3 vidas para recibir 500 fichas de rescate.</li>
+                <li><strong>LIMBO:</strong> Si llegas a 0 fichas, enfrenta 4 meteoritos. Consigue 1 acierto antes de perder 3 vidas para recibir 500 fichas de rescate.</li>
             </ul>
             
             <div style="margin-top: 25px; border-top: 2px solid rgba(241, 196, 15, 0.3); padding-top: 15px;">
@@ -411,7 +411,7 @@
 
         // Variables del Modo Limbo
         let limboWins = 0;
-        let limboLives = 3; // Unificado a 3 vidas
+        let limboLives = 3;
         let limboFailCount = 0;
         let limboCooldownEnd = 0;
 
@@ -486,7 +486,7 @@
                     limboFailCount = 0;
                     limboWins = 0;
                     limboLives = 3;
-                    guardarEstadoUsuario(); // Guardar el reseteo en la base de datos inmediatamente
+                    guardarEstadoUsuario();
                 }
                 
                 modoNormal.classList.remove('modo-oculto');
@@ -543,7 +543,6 @@
 
         function aplicarCastigoLimbo() {
             limboFailCount++;
-            // Empieza en 10 minutos, suma 10 por cada fallo, tope de 60 minutos (1 hora)
             const minutosCastigo = Math.min(limboFailCount * 10, 60); 
             limboCooldownEnd = Date.now() + (minutosCastigo * 60 * 1000);
             
@@ -828,7 +827,6 @@
                                 miUsuario = data.usuario;
                             }
                             
-                            // Solo agregar al HTML si está en el Top 5
                             if (posicion <= 5) {
                                 contenidoHTML += `
                                     <li class="ranking-item ${esMiPosicion ? 'mi-posicion' : ''} ${posicion === 1 ? 'top1' : ''}">
@@ -841,7 +839,6 @@
                             posicion++;
                         });
 
-                        // Si el jugador está fuera del Top 5, mostrar su posición real debajo con separador
                         if (miPosicion && miPosicion > 5) {
                             contenidoHTML += `
                                 <li class="ranking-item mi-posicion" style="margin-top: 8px; border-top: 1px dashed rgba(236, 240, 241, 0.3); padding-top: 10px;">
@@ -1044,11 +1041,11 @@
                     if (modoActual === 'limbo') {
                         limboWins++;
                         actualizarUIProgresoLimbo();
-                        if (limboWins >= 2) {
+                        if (limboWins >= 1) {
                             completarExitoLimbo();
                         } else {
                             juegoActivo = false;
-                            document.getElementById('mensaje').innerText = `🎉 ¡Salvado! Llevas ${limboWins}/2 aciertos. ¡Sigue así!`;
+                            document.getElementById('mensaje').innerText = `🎉 ¡Salvado! Llevas ${limboWins}/1 aciertos. ¡Sigue así!`;
                             document.getElementById('btn-iniciar').disabled = false;
                             guardarEstadoUsuario();
                         }
