@@ -286,7 +286,7 @@
         </div>
 
         <div id="panel-ranking" class="ranking-container">
-            <div class="ranking-header"> Top Exploradores</div>
+            <div class="ranking-header">🏆 Top Exploradores</div>
             <ul id="lista-ranking-global" class="ranking-lista">
                 <li class="ranking-item">Cargando clasificación...</li>
             </ul>
@@ -433,7 +433,7 @@
         }
 
         function abrirJuego() {
-            document.getElementById('saludo-usuario').innerText = ` ¡Hola ${usuarioActual}!`;
+            document.getElementById('saludo-usuario').innerText = `👋 ¡Hola ${usuarioActual}!`;
             document.getElementById('pantalla-autenticacion').classList.add('oculto'); 
             document.getElementById('panel-ranking').classList.add('oculto');
             document.getElementById('seccion-juego').classList.remove('oculto'); 
@@ -483,7 +483,7 @@
                 const resto = limboCooldownEnd - ahora;
                 const h = Math.floor(resto / (1000 * 60 * 60));
                 const m = Math.floor((resto % (1000 * 60 * 60)) / (1000 * 60));
-                document.getElementById('limbo-timer').innerText = ` Castigo activo: ${h}h ${m}m restantes`;
+                document.getElementById('limbo-timer').innerText = `⏳ Castigo activo: ${h}h ${m}m restantes`;
                 
                 cardLimbo.classList.remove('desbloqueado', 'activo');
                 cardLimbo.classList.add('deshabilitada');
@@ -494,18 +494,15 @@
             }
 
             if (saldoFichas <= 0) {
-                // OCULTAR los otros modos cuando el jugador tiene 0 fichas
                 modoNormal.classList.add('modo-oculto');
                 modoExtremo.classList.add('modo-oculto');
                 modoExtincion.classList.add('modo-oculto');
                 
-                // Mostrar solo Limbo con animación de latido
                 cardLimbo.classList.remove('deshabilitada');
                 cardLimbo.classList.add('desbloqueado');
                 limboInfo.classList.remove('oculto');
                 actualizarUIProgresoLimbo();
             } else {
-                // MOSTRAR los otros modos cuando tiene fichas
                 modoNormal.classList.remove('modo-oculto');
                 modoExtremo.classList.remove('modo-oculto');
                 modoExtincion.classList.remove('modo-oculto');
@@ -572,7 +569,7 @@
             document.getElementById('mensaje').innerText = "🎉 ¡HAS ESCAPADO DEL LIMBO! Has recibido 500 fichas de rescate.";
             document.getElementById('btn-iniciar').disabled = false;
             document.querySelectorAll('.refugio').forEach(r => r.className = 'refugio');
-            alert(" ¡FELICIDADES! Has superado el desafío del Limbo y recibido 500 fichas para volver a jugar.");
+            alert("🎉 ¡FELICIDADES! Has superado el desafío del Limbo y recibido 500 fichas para volver a jugar.");
         }
 
         function guardarEstadoUsuario() {
@@ -619,7 +616,7 @@
             }
         }
 
-        // ==================== AUTENTICACIÓN ====================
+        // ==================== AUTENTICACIÓN Y MIGRACIÓN ====================
         window.onload = function() {
             obtenerRankingGlobal();
             
@@ -632,7 +629,26 @@
                             abrirJuego();
                             escucharDatosUsuario();
                         } else {
-                            localStorage.removeItem('usuario_actual_sesion');
+                            // Fallback en onload: migrar cuenta antigua si existe en localStorage
+                            let bdLocal = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+                            if (bdLocal[usuarioActual]) {
+                                const datosMigrados = {
+                                    usuario: usuarioActual,
+                                    password: bdLocal[usuarioActual].password,
+                                    fichas: bdLocal[usuarioActual].fichas || 1000,
+                                    racha: bdLocal[usuarioActual].racha || 0,
+                                    limboWins: bdLocal[usuarioActual].limboWins || 0,
+                                    limboLives: bdLocal[usuarioActual].limboLives || 2,
+                                    limboFailCount: bdLocal[usuarioActual].limboFailCount || 0,
+                                    limboCooldownEnd: bdLocal[usuarioActual].limboCooldownEnd || 0
+                                };
+                                db.collection("jugadores").doc(usuarioActual).set(datosMigrados).then(() => {
+                                    abrirJuego();
+                                    escucharDatosUsuario();
+                                });
+                            } else {
+                                localStorage.removeItem('usuario_actual_sesion');
+                            }
                         }
                     }).catch(err => {
                         console.error("Error al verificar sesión:", err);
@@ -675,7 +691,33 @@
                         document.getElementById('err-login-txt').innerText = "❌ Usuario/Pass incorrecto.";
                     }
                 } else {
-                    document.getElementById('err-login-txt').innerText = " Usuario no encontrado.";
+                    // MIGRACIÓN AUTOMÁTICA: Si no está en Firebase, buscar en localStorage
+                    let bdLocal = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
+                    if (bdLocal[user] && bdLocal[user].password === codificarPassword(pass)) {
+                        const datosMigrados = {
+                            usuario: user,
+                            password: bdLocal[user].password,
+                            fichas: bdLocal[user].fichas || 1000,
+                            racha: bdLocal[user].racha || 0,
+                            limboWins: bdLocal[user].limboWins || 0,
+                            limboLives: bdLocal[user].limboLives || 2,
+                            limboFailCount: bdLocal[user].limboFailCount || 0,
+                            limboCooldownEnd: bdLocal[user].limboCooldownEnd || 0
+                        };
+                        
+                        db.collection("jugadores").doc(user).set(datosMigrados).then(() => {
+                            usuarioActual = user;
+                            localStorage.setItem('usuario_actual_sesion', usuarioActual);
+                            alert("✅ Cuenta antigua migrada exitosamente a la nube. ¡Ya puedes jugar!");
+                            abrirJuego();
+                            escucharDatosUsuario();
+                        }).catch((err) => {
+                            console.error("Error al migrar: ", err);
+                            document.getElementById('err-login-txt').innerText = "❌ Error al migrar cuenta antigua.";
+                        });
+                    } else {
+                        document.getElementById('err-login-txt').innerText = "❌ Usuario no encontrado.";
+                    }
                 }
             }).catch((error) => {
                 console.error("Error al iniciar sesión: ", error);
@@ -703,6 +745,7 @@
                     document.getElementById('err-reg-txt').innerText = "❌ Ya existe.";
                 } else {
                     const nuevoUsuario = {
+                        usuario: user,
                         password: codificarPassword(pass),
                         fichas: 1000,
                         racha: 0,
@@ -776,9 +819,8 @@
                     if (lista) lista.innerHTML = contenidoHTML;
                     if (listaSidebar) listaSidebar.innerHTML = contenidoHTML;
                     
-                    // Mostrar indicador de mi posición
                     if (miPosicion && usuarioActual) {
-                        const textoPosicion = ` Tu posición: #${miPosicion} con ${misFichas} fichas`;
+                        const textoPosicion = `🎯 Tu posición: #${miPosicion} con ${misFichas} fichas`;
                         if (miPosicionIndicador) {
                             miPosicionIndicador.innerText = textoPosicion;
                             miPosicionIndicador.classList.remove('oculto');
@@ -848,7 +890,7 @@
 
             if (apuestaPreparada <= 0) return;
             if (apuestaPreparada > saldoFichas) {
-                document.getElementById('mensaje').innerText = " No tienes suficientes fichas.";
+                document.getElementById('mensaje').innerText = "❌ No tienes suficientes fichas.";
                 return;
             }
 
