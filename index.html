@@ -274,6 +274,14 @@
                 <li><strong>Extremo:</strong> 30% de ganancia por acierto</li>
                 <li><strong>Extinción:</strong> Duplica la ganancia por acierto</li>
             </ul>
+            
+            <!-- NUEVO: Tabla de Ranking Global añadida debajo de las reglas -->
+            <div style="margin-top: 25px; border-top: 2px solid rgba(241, 196, 15, 0.3); padding-top: 15px;">
+                <div class="ranking-header" style="font-size: 1rem; padding: 8px; text-align: center; border-radius: 6px;">🏆 Top Exploradores</div>
+                <ul id="lista-ranking-global-sidebar" class="ranking-lista" style="padding: 10px;">
+                    <li class="ranking-item">Cargando clasificación...</li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -433,30 +441,34 @@
         // ==================== RANKING GLOBAL ====================
         function obtenerRankingGlobal() {
             const lista = document.getElementById('lista-ranking-global');
+            const listaSidebar = document.getElementById('lista-ranking-global-sidebar');
             
             db.collection("jugadores")
                 .orderBy("fichas", "desc")
                 .limit(5)
                 .onSnapshot((snapshot) => {
-                    lista.innerHTML = "";
+                    let contenidoHTML = "";
                     
                     if (snapshot.empty) {
-                        lista.innerHTML = '<li class="ranking-item">Aún no hay jugadores</li>';
-                        return;
+                        contenidoHTML = '<li class="ranking-item">Aún no hay jugadores</li>';
+                    } else {
+                        let posicion = 1;
+                        snapshot.forEach((doc) => {
+                            const data = doc.data();
+                            contenidoHTML += `
+                                <li class="ranking-item ${posicion === 1 ? 'top1' : ''}">
+                                    <span class="ranking-pos">#${posicion}</span>
+                                    <span class="ranking-user">${data.usuario}</span>
+                                    <span class="ranking-money">${data.fichas} fichas</span>
+                                </li>
+                            `;
+                            posicion++;
+                        });
                     }
-
-                    let posicion = 1;
-                    snapshot.forEach((doc) => {
-                        const data = doc.data();
-                        lista.innerHTML += `
-                            <li class="ranking-item ${posicion === 1 ? 'top1' : ''}">
-                                <span class="ranking-pos">#${posicion}</span>
-                                <span class="ranking-user">${data.usuario}</span>
-                                <span class="ranking-money">${data.fichas} fichas</span>
-                            </li>
-                        `;
-                        posicion++;
-                    });
+                    
+                    // Actualizar ambas tablas si existen en el DOM
+                    if (lista) lista.innerHTML = contenidoHTML;
+                    if (listaSidebar) listaSidebar.innerHTML = contenidoHTML;
                 }, (error) => {
                     console.error("Error al leer el ranking global: ", error);
                 });
