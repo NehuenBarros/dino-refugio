@@ -286,7 +286,7 @@
         </div>
 
         <div id="panel-ranking" class="ranking-container">
-            <div class="ranking-header">🏆 Top Exploradores</div>
+            <div class="ranking-header">Top Exploradores</div>
             <ul id="lista-ranking-global" class="ranking-lista">
                 <li class="ranking-item">Cargando clasificación...</li>
             </ul>
@@ -333,7 +333,7 @@
                             <span class="modo-multi">x2.00</span>
                         </div>
                         <div class="modo-card modo-limbo" id="card-limbo" data-modo="limbo" onclick="seleccionarModo('limbo')">
-                            <span class="modo-icono">⛓️</span>
+                            <span class="modo-icono"></span>
                             <div class="modo-nombre">LIMBO</div>
                             <div class="modo-detalle">4 Meteoritos</div>
                             <span class="modo-multi">Desafío</span>
@@ -375,7 +375,7 @@
             </ul>
             
             <div style="margin-top: 25px; border-top: 2px solid rgba(241, 196, 15, 0.3); padding-top: 15px;">
-                <div class="ranking-header" style="font-size: 1rem; padding: 8px; text-align: center; border-radius: 6px;">🏆 Top Exploradores</div>
+                <div class="ranking-header" style="font-size: 1rem; padding: 8px; text-align: center; border-radius: 6px;">Top Exploradores</div>
                 <ul id="lista-ranking-global-sidebar" class="ranking-lista" style="padding: 10px;">
                     <li class="ranking-item">Cargando clasificación...</li>
                 </ul>
@@ -857,7 +857,7 @@
                     if (listaSidebar) listaSidebar.innerHTML = contenidoHTML;
                     
                     if (miPosicion && usuarioActual) {
-                        const textoPosicion = `🎯 Tu posición: #${miPosicion} con ${misFichas} fichas`;
+                        const textoPosicion = `Tu posición: #${miPosicion} con ${misFichas} fichas`;
                         if (miPosicionIndicador) {
                             miPosicionIndicador.innerText = textoPosicion;
                             miPosicionIndicador.classList.remove('oculto');
