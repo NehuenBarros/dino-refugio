@@ -411,7 +411,7 @@
 
         // Variables del Modo Limbo
         let limboWins = 0;
-        let limboLives = 2;
+        let limboLives = 3; // Unificado a 3 vidas
         let limboFailCount = 0;
         let limboCooldownEnd = 0;
 
@@ -479,6 +479,30 @@
             const modoExtremo = document.querySelector('.modo-extremo');
             const modoExtincion = document.querySelector('.modo-extincion');
 
+            // Si el jugador tiene fichas, se cancela y resetea cualquier castigo del Limbo
+            if (saldoFichas > 0) {
+                if (limboCooldownEnd > 0 || limboFailCount > 0) {
+                    limboCooldownEnd = 0;
+                    limboFailCount = 0;
+                    limboWins = 0;
+                    limboLives = 3;
+                    guardarEstadoUsuario(); // Guardar el reseteo en la base de datos inmediatamente
+                }
+                
+                modoNormal.classList.remove('modo-oculto');
+                modoExtremo.classList.remove('modo-oculto');
+                modoExtincion.classList.remove('modo-oculto');
+                
+                cardLimbo.classList.remove('desbloqueado', 'activo');
+                cardLimbo.classList.add('deshabilitada');
+                limboInfo.classList.add('oculto');
+                if (modoActual === 'limbo') {
+                    seleccionarModo('normal');
+                }
+                return;
+            }
+
+            // Si el jugador tiene 0 fichas o menos, aplicamos la lógica del Limbo
             if (ahora < limboCooldownEnd) {
                 const resto = limboCooldownEnd - ahora;
                 const h = Math.floor(resto / (1000 * 60 * 60));
@@ -493,31 +517,16 @@
                 document.getElementById('limbo-timer').innerText = "";
             }
 
-            if (saldoFichas <= 0) {
-                modoNormal.classList.add('modo-oculto');
-                modoExtremo.classList.add('modo-oculto');
-                modoExtincion.classList.add('modo-oculto');
-                
-                cardLimbo.classList.remove('deshabilitada');
-                cardLimbo.classList.add('desbloqueado');
-                limboInfo.classList.remove('oculto');
-                actualizarUIProgresoLimbo();
-            } else {
-                modoNormal.classList.remove('modo-oculto');
-                modoExtremo.classList.remove('modo-oculto');
-                modoExtincion.classList.remove('modo-oculto');
-                
-                cardLimbo.classList.remove('desbloqueado', 'activo');
-                cardLimbo.classList.add('deshabilitada');
-                limboInfo.classList.add('oculto');
-                if (modoActual === 'limbo') {
-                    seleccionarModo('normal');
-                }
-                limboWins = 0;
-                limboLives = 2;
-            }
+            modoNormal.classList.add('modo-oculto');
+            modoExtremo.classList.add('modo-oculto');
+            modoExtincion.classList.add('modo-oculto');
+            
+            cardLimbo.classList.remove('deshabilitada');
+            cardLimbo.classList.add('desbloqueado');
+            limboInfo.classList.remove('oculto');
+            actualizarUIProgresoLimbo();
 
-            const enProgreso = (saldoFichas <= 0 && ahora >= limboCooldownEnd && (limboWins > 0 || limboLives < 3));
+            const enProgreso = (limboWins > 0 || limboLives < 3);
             document.querySelectorAll('.modo-normal, .modo-extremo, .modo-extincion').forEach(card => {
                 if (enProgreso) {
                     card.classList.add('modo-bloqueado-por-limbo');
@@ -709,7 +718,7 @@
                             fichas: bdLocal[user].fichas || 1000,
                             racha: bdLocal[user].racha || 0,
                             limboWins: bdLocal[user].limboWins || 0,
-                            limboLives: bdLocal[user].limboLives || 2,
+                            limboLives: bdLocal[user].limboLives || 3,
                             limboFailCount: bdLocal[user].limboFailCount || 0,
                             limboCooldownEnd: bdLocal[user].limboCooldownEnd || 0
                         };
@@ -762,7 +771,7 @@
                         fichas: 1000,
                         racha: 0,
                         limboWins: 0,
-                        limboLives: 2,
+                        limboLives: 3,
                         limboFailCount: 0,
                         limboCooldownEnd: 0
                     };
@@ -848,7 +857,7 @@
                     if (listaSidebar) listaSidebar.innerHTML = contenidoHTML;
                     
                     if (miPosicion && usuarioActual) {
-                        const textoPosicion = `Tu posición: #${miPosicion} con ${misFichas} fichas`;
+                        const textoPosicion = `🎯 Tu posición: #${miPosicion} con ${misFichas} fichas`;
                         if (miPosicionIndicador) {
                             miPosicionIndicador.innerText = textoPosicion;
                             miPosicionIndicador.classList.remove('oculto');
@@ -1018,7 +1027,7 @@
                             aplicarCastigoLimbo();
                         } else {
                             juegoActivo = false;
-                            document.getElementById('mensaje').innerText = `¡Meteorito! Te queda ${limboLives} vida(s).`;
+                            document.getElementById('mensaje').innerText = `💥 ¡Meteorito! Te queda ${limboLives} vida(s).`;
                             document.getElementById('btn-iniciar').disabled = false;
                             guardarEstadoUsuario();
                         }
@@ -1026,7 +1035,7 @@
                         pozoAcumulado = 0; 
                         juegoActivo = false;
                         rachaVictorias = 0;
-                        document.getElementById('mensaje').innerText = "¡Meteorito! Perdiste todo lo apostado.";
+                        document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
                         document.getElementById('btn-iniciar').disabled = false;
                         guardarEstadoUsuario();
                         verificarEstadoLimbo();
@@ -1065,7 +1074,7 @@
             rachaVictorias++;
             document.getElementById('btn-retirarse').disabled = true;
             document.getElementById('btn-iniciar').disabled = false;
-            document.getElementById('mensaje').innerText = "¡Cobrado! Tus fichas: " + saldoFichas + " | Racha: " + rachaVictorias;
+            document.getElementById('mensaje').innerText = "✅ ¡Cobrado! Tus fichas: " + saldoFichas + " | Racha: " + rachaVictorias;
             
             document.querySelectorAll('.refugio').forEach(r => {
                 r.className = 'refugio';
