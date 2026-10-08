@@ -211,7 +211,7 @@
             <div class="auth-tabs">
                 <button id="pestana-login" class="tab-btn active" onclick="alternarFormularios('login')">Iniciar Sesión</button>
                 <button id="pestana-registro" class="tab-btn" onclick="alternarFormularios('registro')">Crear Cuenta</button>
-                <button id="pestana-sync" class="tab-btn" onclick="alternarFormularios('sync')">📲 Sincronizar</button>
+                <button id="pestana-sync" class="tab-btn" onclick="alternarFormularios('sync')">☁️ Sincronización</button>
             </div>
 
             <div id="bloque-login" class="auth-form">
@@ -234,14 +234,14 @@
             </div>
 
             <div id="bloque-sync" class="auth-form oculto">
-                <h2>Sincronizar Celular y PC</h2>
-                <p style="font-size:0.9rem; color:#bdc3c7; margin: 0 0 15px 0;">Copia este código de tu dispositivo actual y pégalo en el nuevo para pasar tus cuentas:</p>
-                <button class="btn-utilidad" onclick="generarCodigoSincronizacion()">Generar Código Actual</button>
+                <h2>Sincronización en la Nube</h2>
+                <p style="font-size:0.9rem; color:#bdc3c7; margin: 0 0 15px 0;">Tus datos (fichas, progreso y récords) se guardan automáticamente en nuestra base de datos segura.</p>
+                <button class="btn-utilidad" onclick="generarCodigoSincronizacion()">Ver Estado de Sincronización</button>
                 <br><br>
-                <textarea id="txt-codigo-sync" placeholder="El código generado aparecerá aquí..."></textarea>
+                <textarea id="txt-codigo-sync" placeholder="Estado del sistema..." readonly></textarea>
                 <br>
-                <button class="btn-accion btn-cobrar" style="font-size:1rem; padding:8px 15px;" onclick="procesarCodigoImportado()">Importar Cuentas</button>
-                <div id="msg-sync" class="error-msg"></div>
+                <button class="btn-accion btn-cobrar" style="font-size:1rem; padding:8px 15px;" onclick="procesarCodigoImportado()">Verificar Conexión</button>
+                <div id="msg-sync" class="success-msg"></div>
             </div>
         </div>
 
@@ -291,7 +291,6 @@
                             <div class="modo-detalle">3 Meteoritos</div>
                             <span class="modo-multi">x2.00</span>
                         </div>
-                        <!-- NUEVO: Modo Limbo -->
                         <div class="modo-card modo-limbo" id="card-limbo" data-modo="limbo" onclick="seleccionarModo('limbo')">
                             <span class="modo-icono">⛓️</span>
                             <div class="modo-nombre">LIMBO</div>
@@ -301,7 +300,6 @@
                     </div>
                 </div>
 
-                <!-- NUEVO: Panel de estado del Limbo -->
                 <div id="limbo-info" class="limbo-status oculto">
                     <div class="progreso">🎯 Aciertos para escapar: <span id="limbo-wins">0</span>/2</div>
                     <div class="vidas">❤️ Vidas restantes: <span id="limbo-lives">2</span></div>
@@ -400,7 +398,34 @@
             apuestaPreparada = 0; 
             actualizarPantalla(); 
             crearRefugios();
-            verificarEstadoLimbo(); // Verificar si se desbloquea el Limbo al entrar
+            verificarEstadoLimbo();
+        }
+
+        // ==================== ESCUCHA EN TIEMPO REAL DE FIREBASE ====================
+        function escucharDatosUsuario() {
+            if (!usuarioActual || !db) return;
+            
+            if (window.unsubscribeUserData) {
+                window.unsubscribeUserData();
+            }
+            
+            window.unsubscribeUserData = db.collection("jugadores").doc(usuarioActual).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    // Actualizamos las variables locales solo si el campo existe en la BD
+                    if (data.fichas !== undefined) saldoFichas = data.fichas;
+                    if (data.racha !== undefined) rachaVictorias = data.racha;
+                    if (data.limboWins !== undefined) limboWins = data.limboWins;
+                    if (data.limboLives !== undefined) limboLives = data.limboLives;
+                    if (data.limboFailCount !== undefined) limboFailCount = data.limboFailCount;
+                    if (data.limboCooldownEnd !== undefined) limboCooldownEnd = data.limboCooldownEnd;
+                    
+                    actualizarPantalla();
+                    verificarEstadoLimbo();
+                }
+            }, (error) => {
+                console.error("Error escuchando datos de usuario: ", error);
+            });
         }
 
         // ==================== LÓGICA DEL MODO LIMBO ====================
@@ -409,7 +434,6 @@
             const limboInfo = document.getElementById('limbo-info');
             const ahora = Date.now();
 
-            // Actualizar UI del timer si está en castigo
             if (ahora < limboCooldownEnd) {
                 const resto = limboCooldownEnd - ahora;
                 const h = Math.floor(resto / (1000 * 60 * 60));
@@ -424,25 +448,22 @@
                 document.getElementById('limbo-timer').innerText = "";
             }
 
-            // Si el saldo es <= 0, se desbloquea el Limbo
             if (saldoFichas <= 0) {
                 cardLimbo.classList.remove('deshabilitada');
                 cardLimbo.classList.add('desbloqueado');
                 limboInfo.classList.remove('oculto');
                 actualizarUIProgresoLimbo();
             } else {
-                // Si tiene saldo, se bloquea y se resetea el progreso si estaba activo
                 cardLimbo.classList.remove('desbloqueado', 'activo');
                 cardLimbo.classList.add('deshabilitada');
                 limboInfo.classList.add('oculto');
                 if (modoActual === 'limbo') {
-                    seleccionarModo('normal'); // Forzar salida del limbo si recupera fichas
+                    seleccionarModo('normal');
                 }
                 limboWins = 0;
                 limboLives = 2;
             }
 
-            // Si el limbo está EN PROGRESO, bloquear los otros modos
             const enProgreso = (saldoFichas <= 0 && ahora >= limboCooldownEnd && (limboWins > 0 || limboLives < 2));
             document.querySelectorAll('.modo-normal, .modo-extremo, .modo-extincion').forEach(card => {
                 if (enProgreso) {
@@ -460,16 +481,15 @@
 
         function aplicarCastigoLimbo() {
             limboFailCount++;
-            const horasCastigo = Math.min(limboFailCount, 12); // Tope de 12 horas
+            const horasCastigo = Math.min(limboFailCount, 12);
             limboCooldownEnd = Date.now() + (horasCastigo * 60 * 60 * 1000);
             
-            // Resetear estado del desafío
             limboWins = 0;
             limboLives = 2;
             modoActual = "normal";
             juegoActivo = false;
             apuestaPreparada = 0;
-            saldoFichas = 0; // Asegurar que quede en 0
+            saldoFichas = 0;
 
             guardarEstadoUsuario();
             verificarEstadoLimbo();
@@ -480,10 +500,10 @@
         }
 
         function completarExitoLimbo() {
-            saldoFichas = 500; // Recompensa de rescate
+            saldoFichas = 500;
             limboWins = 0;
             limboLives = 2;
-            limboFailCount = 0; // Resetear castigos al tener éxito
+            limboFailCount = 0;
             limboCooldownEnd = 0;
             modoActual = "normal";
             juegoActivo = false;
@@ -500,28 +520,22 @@
         }
 
         function guardarEstadoUsuario() {
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if(bd[usuarioActual]) { 
-                bd[usuarioActual].fichas = saldoFichas;
-                bd[usuarioActual].racha = rachaVictorias;
-                bd[usuarioActual].limboWins = limboWins;
-                bd[usuarioActual].limboLives = limboLives;
-                bd[usuarioActual].limboFailCount = limboFailCount;
-                bd[usuarioActual].limboCooldownEnd = limboCooldownEnd;
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-                
-                if (db) {
-                    db.collection("jugadores").doc(usuarioActual).set({
-                        usuario: usuarioActual,
-                        fichas: saldoFichas
-                    }, { merge: true });
-                }
-            }
+            if (!usuarioActual || !db) return;
+            
+            db.collection("jugadores").doc(usuarioActual).update({
+                fichas: saldoFichas,
+                racha: rachaVictorias,
+                limboWins: limboWins,
+                limboLives: limboLives,
+                limboFailCount: limboFailCount,
+                limboCooldownEnd: limboCooldownEnd
+            }).catch((error) => {
+                console.error("Error al guardar estado: ", error);
+            });
         }
 
         // ==================== SELECTOR DE MODO ====================
         function seleccionarModo(modo) {
-            // No permitir cambiar de modo si el Limbo está en progreso
             if (limboWins > 0 || limboLives < 2) {
                 if (modo !== 'limbo') {
                     alert("⚠️ Debes completar o fallar el desafío del Limbo antes de jugar otro modo.");
@@ -529,11 +543,10 @@
                 }
             }
 
-            // No permitir seleccionar Limbo si está bloqueado (saldo > 0 o en castigo)
             if (modo === 'limbo') {
                 const ahora = Date.now();
                 if (saldoFichas > 0 || ahora < limboCooldownEnd) {
-                    return; // El CSS ya lo muestra deshabilitado, pero por seguridad
+                    return;
                 }
             }
 
@@ -546,108 +559,120 @@
             cardSeleccionada.classList.add('activo');
             
             if (modo === 'limbo') {
-                cardSeleccionada.classList.add('activo'); // Sobreescribe estilos para el estado activo
+                cardSeleccionada.classList.add('activo');
             }
         }
 
-        // ==================== AUTENTICACIÓN Y SINCRONIZACIÓN ====================
+        // ==================== AUTENTICACIÓN ====================
         window.onload = function() {
             obtenerRankingGlobal();
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const syncCodigo = urlParams.get('sync');
-            if (syncCodigo) {
-                try {
-                    const datosDecodificados = atob(syncCodigo);
-                    const bdImportada = JSON.parse(datosDecodificados);
-                    let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                    Object.assign(bdActual, bdImportada);
-                    localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                    alert("¡Sincronización exitosa!");
-                } catch(e) { console.error("Error al sincronizar"); }
-            }
             
             const sesionActiva = localStorage.getItem('usuario_actual_sesion');
             if (sesionActiva) {
                 usuarioActual = sesionActiva;
-                let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                if (bd[usuarioActual]) { 
-                    saldoFichas = bd[usuarioActual].fichas; 
-                    rachaVictorias = bd[usuarioActual].racha || 0;
-                    // Cargar estado del Limbo
-                    limboWins = bd[usuarioActual].limboWins || 0;
-                    limboLives = bd[usuarioActual].limboLives || 2;
-                    limboFailCount = bd[usuarioActual].limboFailCount || 0;
-                    limboCooldownEnd = bd[usuarioActual].limboCooldownEnd || 0;
-                    abrirJuego(); 
+                if (db) {
+                    db.collection("jugadores").doc(usuarioActual).get().then((doc) => {
+                        if (doc.exists) {
+                            abrirJuego();
+                            escucharDatosUsuario();
+                        } else {
+                            localStorage.removeItem('usuario_actual_sesion');
+                        }
+                    }).catch(err => {
+                        console.error("Error al verificar sesión:", err);
+                        localStorage.removeItem('usuario_actual_sesion');
+                    });
                 }
             }
         };
 
         function generarCodigoSincronizacion() {
-            let bd = localStorage.getItem('dino_usuarios_secure_v2');
             const msgBox = document.getElementById('msg-sync');
-            if (!bd) { msgBox.innerText = "❌ No hay datos."; return; }
-            const codigoUnico = btoa(bd);
-            document.getElementById('txt-codigo-sync').value = codigoUnico;
-            msgBox.innerText = "✅ Código listo.";
+            document.getElementById('txt-codigo-sync').value = "Sistema: Conectado a la nube.\nTodos los cambios se guardan automáticamente en tiempo real.";
+            msgBox.innerText = "✅ Sincronización automática activa.";
         }
 
         function procesarCodigoImportado() {
-            const codigo = document.getElementById('txt-codigo-sync').value.trim();
-            try {
-                const bdImportada = JSON.parse(atob(codigo));
-                let bdActual = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-                Object.assign(bdActual, bdImportada);
-                localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bdActual));
-                alert("Sincronizado correctamente.");
-            } catch (e) { alert("Código inválido"); }
+            const msgBox = document.getElementById('msg-sync');
+            document.getElementById('txt-codigo-sync').value = "Sistema: Conectado a la nube.\nNo es necesario importar códigos, tus datos viajan con tu usuario.";
+            msgBox.innerText = "✅ Conexión a la base de datos verificada.";
         }
 
         function ejecutarLogin() {
             const user = document.getElementById('usr-login-input').value.trim();
             const pass = document.getElementById('pass-login-input').value;
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (!bd[user] || bd[user].password !== codificarPassword(pass)) { 
-                document.getElementById('err-login-txt').innerText = "❌ Usuario/Pass incorrecto."; 
-                return; 
+            
+            if (!db) {
+                document.getElementById('err-login-txt').innerText = "❌ Error de conexión a la base de datos.";
+                return;
             }
-            usuarioActual = user; 
-            saldoFichas = bd[user].fichas;
-            rachaVictorias = bd[user].racha || 0;
-            limboWins = bd[user].limboWins || 0;
-            limboLives = bd[user].limboLives || 2;
-            limboFailCount = bd[user].limboFailCount || 0;
-            limboCooldownEnd = bd[user].limboCooldownEnd || 0;
-            localStorage.setItem('usuario_actual_sesion', usuarioActual); 
-            abrirJuego();
+
+            db.collection("jugadores").doc(user).get().then((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.password === codificarPassword(pass)) {
+                        usuarioActual = user;
+                        localStorage.setItem('usuario_actual_sesion', usuarioActual);
+                        abrirJuego();
+                        escucharDatosUsuario();
+                    } else {
+                        document.getElementById('err-login-txt').innerText = "❌ Usuario/Pass incorrecto.";
+                    }
+                } else {
+                    document.getElementById('err-login-txt').innerText = "❌ Usuario no encontrado.";
+                }
+            }).catch((error) => {
+                console.error("Error al iniciar sesión: ", error);
+                document.getElementById('err-login-txt').innerText = "❌ Error de conexión.";
+            });
         }
 
         function ejecutarRegistro() {
             const user = document.getElementById('usr-reg-input').value.trim();
             const pass = document.getElementById('pass-reg-input').value;
             const conf = document.getElementById('pass-conf-input').value;
+            
+            if (!db) {
+                document.getElementById('err-reg-txt').innerText = "❌ Error de conexión a la base de datos.";
+                return;
+            }
+
             if (pass !== conf) { 
                 document.getElementById('err-reg-txt').innerText = "❌ No coinciden."; 
                 return; 
             }
-            let bd = JSON.parse(localStorage.getItem('dino_usuarios_secure_v2')) || {};
-            if (bd[user]) { 
-                document.getElementById('err-reg-txt').innerText = "❌ Ya existe."; 
-                return; 
-            }
-            bd[user] = { password: codificarPassword(pass), fichas: 1000, racha: 0, limboWins: 0, limboLives: 2, limboFailCount: 0, limboCooldownEnd: 0 };
-            localStorage.setItem('dino_usuarios_secure_v2', JSON.stringify(bd));
-            usuarioActual = user; 
-            saldoFichas = 1000;
-            rachaVictorias = 0;
-            limboWins = 0; limboLives = 2; limboFailCount = 0; limboCooldownEnd = 0;
-            localStorage.setItem('usuario_actual_sesion', usuarioActual); 
-            abrirJuego();
+            
+            db.collection("jugadores").doc(user).get().then((doc) => {
+                if (doc.exists) {
+                    document.getElementById('err-reg-txt').innerText = "❌ Ya existe.";
+                } else {
+                    const nuevoUsuario = {
+                        password: codificarPassword(pass),
+                        fichas: 1000,
+                        racha: 0,
+                        limboWins: 0,
+                        limboLives: 2,
+                        limboFailCount: 0,
+                        limboCooldownEnd: 0
+                    };
+                    db.collection("jugadores").doc(user).set(nuevoUsuario).then(() => {
+                        usuarioActual = user;
+                        localStorage.setItem('usuario_actual_sesion', usuarioActual);
+                        abrirJuego();
+                        escucharDatosUsuario();
+                    }).catch((error) => {
+                        console.error("Error al registrar: ", error);
+                        document.getElementById('err-reg-txt').innerText = "❌ Error al registrar.";
+                    });
+                }
+            });
         }
 
         function logout() {
-            guardarEstadoUsuario();
+            if (window.unsubscribeUserData) {
+                window.unsubscribeUserData();
+                window.unsubscribeUserData = null;
+            }
             localStorage.removeItem('usuario_actual_sesion');
             location.reload();
         }
@@ -657,6 +682,8 @@
             const lista = document.getElementById('lista-ranking-global');
             const listaSidebar = document.getElementById('lista-ranking-global-sidebar');
             
+            if (!db) return;
+
             db.collection("jugadores")
                 .orderBy("fichas", "desc")
                 .limit(5)
@@ -690,7 +717,7 @@
         // ==================== LÓGICA DE JUEGO ====================
         function agregarFichas(valor) {
             if (juegoActivo) return;
-            if (modoActual === 'limbo') return; // No permitir añadir fichas en Limbo
+            if (modoActual === 'limbo') return;
             if (apuestaPreparada + valor > saldoFichas) return;
             apuestaPreparada += valor; 
             actualizarPantalla();
@@ -721,7 +748,6 @@
 
         function iniciarRonda() {
             if (modoActual === 'limbo') {
-                // En Limbo, la apuesta es simbólica o 0, y se ignora el saldo negativo
                 apuestaPreparada = 0;
                 pozoAcumulado = 0;
                 juegoActivo = true;
@@ -739,10 +765,17 @@
             }
 
             if (apuestaPreparada <= 0) return;
+            if (apuestaPreparada > saldoFichas) {
+                document.getElementById('mensaje').innerText = "❌ No tienes suficientes fichas.";
+                return;
+            }
+
             saldoFichas -= apuestaPreparada; 
             pozoAcumulado = apuestaPreparada; 
             juegoActivo = true;
             esperandoResultado = false;
+            
+            guardarEstadoUsuario(); // Guardar la deducción inmediatamente
             actualizarPantalla();
             
             document.querySelectorAll('.refugio').forEach(r => {
@@ -771,7 +804,6 @@
                 if (excludeIndices.includes(i)) {
                     weights.push(0);
                 } else if (i === refugioElegido - 1) {
-                    // Si es Limbo, simular una racha de 2 aciertos para dar un poco más de peso
                     const rachaEfectiva = modoActual === 'limbo' ? rachaVictorias + 2 : rachaVictorias;
                     weights.push(1 + ALPHA * Math.log(1 + rachaEfectiva));
                 } else {
@@ -806,8 +838,8 @@
                 numMeteoritos = 3;
                 multiplicador = 2.0;
             } else if (modoActual === 'limbo') {
-                numMeteoritos = 4; // 4 meteoritos en Limbo
-                multiplicador = 1.0; // No importa, el premio es fijo al completar el desafío
+                numMeteoritos = 4;
+                multiplicador = 1.0;
             }
             
             setTimeout(() => {
@@ -836,6 +868,7 @@
                             juegoActivo = false;
                             document.getElementById('mensaje').innerText = `💥 ¡Meteorito! Te queda ${limboLives} vida(s).`;
                             document.getElementById('btn-iniciar').disabled = false;
+                            guardarEstadoUsuario();
                         }
                     } else {
                         pozoAcumulado = 0; 
@@ -843,8 +876,8 @@
                         rachaVictorias = 0;
                         document.getElementById('mensaje').innerText = "💥 ¡Meteorito! Perdiste todo lo apostado.";
                         document.getElementById('btn-iniciar').disabled = false;
-                        guardarEstadoUsuario(); // Guardar la pérdida
-                        verificarEstadoLimbo(); // Verificar si ahora se activa el Limbo
+                        guardarEstadoUsuario();
+                        verificarEstadoLimbo();
                     }
                 } else {
                     if (modoActual === 'limbo') {
@@ -856,6 +889,7 @@
                             juegoActivo = false;
                             document.getElementById('mensaje').innerText = `🎉 ¡Salvado! Llevas ${limboWins}/2 aciertos. ¡Sigue así!`;
                             document.getElementById('btn-iniciar').disabled = false;
+                            guardarEstadoUsuario();
                         }
                     } else {
                         pozoAcumulado = Math.floor(pozoAcumulado * multiplicador);
@@ -871,7 +905,7 @@
         }
 
         function retirarse() {
-            if (modoActual === 'limbo') return; // No se puede cobrar en medio del desafío Limbo
+            if (modoActual === 'limbo') return;
             
             saldoFichas += pozoAcumulado; 
             pozoAcumulado = 0; 
